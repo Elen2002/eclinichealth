@@ -1,0 +1,19 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}{{ 'Medical Dashboard'|trans }}{% endblock %}
+
+{% block body %}
+<!-- Dashboard Header -->
+    <div id="doctor-dashboard-root"
+         data-doctor="{{ doctor|serialize('json', { groups: 'doctor:read' })|e('html_attr') }}"
+         data-hospital="{{ hospital|serialize('json', { groups: 'hospital:read' })|e('html_attr') }}"
+         data-department="{{ department|serialize('json', { groups: 'department:read' })|e('html_attr') }}"
+         data-total-patients="{{ total_patients }}"
+         data-pending-consultations="{{ pending_consultations }}"
+         data-doctor-patients="{{ doctor_patients|serialize('json', { groups: 'patient:read' })|e('html_attr') }}"
+         data-recent-consultations="{{ recent_consultations|serialize('json', { groups: 'consultation:read' })|e('html_attr') }}"
+         data-chart-labels="{{ chart_labels|e('html_attr') }}"
+         data-chart-data="{{ chart_data|e('html_attr') }}"
+         data-url-patterns="{{ { 'doctorConsultations': path('app_doctor_consultations'), 'consultationProcess': path('app_consultation_process', {'id': '__ID__'}), 'consultationDetails': path('app_consultation_details', {'id': '__ID__'}), 'profileEdit': path('app_profile_edit'), 'logout': path('app_logout') }|json_encode|e('html_attr') }}"
+    ></div>
+{% endblock %}

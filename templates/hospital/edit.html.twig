@@ -1,0 +1,26 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block title %}{{ 'Edit Hospital'|trans }} - {{ hospital.name }}{% endblock %}
+{% block dashboard_title %}{{ 'Edit Hospital'|trans }}{% endblock %}
+{% block dashboard_subtitle %}{{ 'Modify clinic branch details'|trans }}{% endblock %}
+
+{% block dashboard_nav %}
+    <li>
+        <a href="{{ path('app_super_admin_dashboard') }}" class="nav-item-link">
+            <i class="bi bi-arrow-left"></i>
+            <span>{{ 'Back to Network'|trans }}</span>
+        </a>
+    </li>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="medical-card">
+            <h5 class="fw-bold mb-4">{{ 'Hospital Configuration'|trans }}</h5>
+            {{ include('hospital/_form.html.twig', {'button_label': 'Save Changes'|trans}) }}
+            
+        </div>
+    </div>
+</div>
+{% endblock %}

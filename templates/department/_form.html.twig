@@ -1,0 +1,24 @@
+{{ form_start(form) }}
+    <div class="row g-4">
+        <div class="col-12 text-start">
+            <label class="form-label-premium">{{ 'Name'|trans }}</label>
+            {{ form_widget(form.name, {'attr': {'class': 'form-control medical-input'}}) }}
+        </div>
+        <div class="col-12 text-start">
+            <label class="form-label-premium">{{ 'Description'|trans }}</label>
+            {{ form_widget(form.description, {'attr': {'class': 'form-control medical-input', 'rows': 4}}) }}
+        </div>
+        <div class="col-12 text-start">
+            <label class="form-label-premium">{{ 'Image'|trans }}</label>
+            <div class="bg-light p-3 rounded-4 border border-white">
+                {{ form_widget(form.image, {'attr': {'class': 'form-control medical-input'}}) }}
+            </div>
+        </div>
+        
+        <div class="col-12 text-end pt-4">
+            <button class="btn-premium-gradient px-5 shadow">
+                <i class="bi bi-check2-circle me-2"></i> {{ button_label|default('Save'|trans)|trans }}
+            </button>
+        </div>
+    </div>
+{{ form_end(form) }}

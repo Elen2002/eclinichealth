@@ -1,0 +1,105 @@
+{% block stylesheets %}
+    {{ encore_entry_link_tags('map') }}
+{% endblock %}
+<div class="map-container">
+
+    <style>
+
+        #results {
+            position: absolute;
+            top: 40px;
+            left: 10px;
+            z-index: 1000;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            background: white;
+            border: 1px solid #ccc;
+            width: 250px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        #search-box {
+            position: absolute;
+            top: 10px;
+            left: 47px;
+            z-index: 1000;
+            background: white;
+            padding: 3px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        #address-input {
+            width: 250px;
+            padding: 2px;
+        }
+        .map-container{
+            position: relative;
+        }
+        #results li {
+            padding: 6px;
+            cursor: pointer;
+        }
+
+        #results li:hover {
+            background-color: #eee;
+        }
+    </style>
+
+    <p class="text-danger" id="error-txt"></p>
+
+    <div id="map"
+            {% if circle %}
+                class='map'
+            {% elseif size is defined and size is not null and size|split('x')|length > 1 %}
+                style="width: {{ size|split('x')[0] }}px; height: {{ size|split('x')[1] }}px"
+            {% else %}
+                style="width: 800px; height: 600px"
+            {% endif %}
+    ></div>
+    {% if mode != 'view' %}
+        <div id="search-box">
+            <input type="text" name="location" id="address-input" placeholder="Enter address or city...">
+            <button type="button" id="search-button" class="btn btn-secondary">Search</button>
+            <ul id="results"></ul>
+        </div>
+    {% endif %}
+</div>
+
+
+{% if mode is defined and mode is not null and mode != 'view' and mode != 'view-my-tree' and mode != 'search' %}
+    <div class="text-center m-2">
+        <button type="button" id="undo" class="btn btn-warning">
+            <i class='map-icon bi bi-arrow-counterclockwise'></i>
+        </button>
+        <button type="button" id="clear" class="btn btn-danger">
+            <i class='map-icon bi bi-trash3'></i>
+        </button>
+    </div>
+{% endif %}
+{% if mode == 'add-row' %}
+    <input name="clicked_bounds" id="clicked_bounds_input">
+{% endif %}
+
+<input id="coordinates" name="coordinates" class="d-none"/>
+<input id="locationAddress" name="locations" class="d-none"/>
+<script>
+    const MAP_MODE = '{{ mode }}';
+    const MAP_TYPE = '{{ mapType }}';
+    const ENABLE_POLYGON = {{ enablePolygon ? 'true' : 'false' }};
+    const ENABLE_MARKER = {{ enableMarker ? 'true' : 'false' }};
+    const GEO_POINTS = {{ geoPoints|json_encode|raw }};
+    const GEO_POLYGONS = {{ geoPolygons|json_encode|raw }};
+    const GEO_POLYGONS_PARENT = {{ geoPolygonsParent|json_encode|raw }};
+    const GEO_POINTS_PARENT = {{ geoPointsParent|json_encode|raw }};
+    const ICON = '/markers/marker-icon.png';
+    const ICONY = '{{ asset('build/images-garden/marker-icon-yellow.png') }}';
+    const ICONB = '{{ asset('build/images-garden/marker-icon-blue.png') }}';
+    const MINZOOM = {{ minZoom }};
+    const MAXZOOM = {{ maxZoom }};
+</script>
+
+
+{% block javascripts %}
+    {{ encore_entry_script_tags('map') }}
+{% endblock %}

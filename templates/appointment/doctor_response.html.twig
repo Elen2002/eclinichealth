@@ -1,0 +1,37 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}Manage Appointment{% endblock %}
+
+{% block body %}
+    <section class="section container">
+        <h2>Manage Appointment #{{ consultation.id }}</h2>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Patient Request</h5>
+                <p><strong>Patient:</strong> {{ consultation.patientEmail }}</p>
+                <p><strong>Requested Date:</strong> {{ consultation.requestedDate|date('Y-m-d H:i') }}</p>
+                <p><strong>Message:</strong> {{ consultation.message }}</p>
+            </div>
+        </div>
+
+        <form method="post">
+            <div class="mb-3">
+                <label class="form-label">Proposed Date (if different)</label>
+                <input type="datetime-local" name="proposed_date" class="form-control" value="{{ consultation.doctorProposedDate ? consultation.doctorProposedDate|date('Y-m-d\\TH:i') : '' }}">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Prescription / Advice</label>
+                <textarea name="prescription" class="form-control" rows="4">{{ consultation.prescription }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Required Medical Tests</label>
+                <textarea name="medical_tests" class="form-control" rows="4">{{ consultation.medicalTests }}</textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success">Send Response</button>
+        </form>
+    </section>
+{% endblock %}

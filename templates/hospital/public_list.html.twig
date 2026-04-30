@@ -1,0 +1,399 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}{{ 'Medical Network'|trans }} | eClinic{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .page-header-premium {
+            background: url('{{ asset('img/hero-medical.png') }}') no-repeat center center;
+            background-size: cover;
+            position: relative;
+            padding: 100px 0 140px;
+            margin-top: 70px;
+            overflow: hidden;
+        }
+        .page-header-premium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.7) 100%);
+            z-index: 1;
+        }
+        .hero-glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 30px;
+            position: relative;
+            z-index: 2;
+        }
+        .filter-sidebar {
+            position: sticky;
+            top: 100px;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+        .filter-group-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--brand-color, #6366f1);
+            background: rgba(99, 102, 241, 0.1);
+            padding: 6px 14px;
+            border-radius: 8px;
+            margin-bottom: 1.2rem;
+            font-weight: 800;
+            display: inline-block;
+            border: 1px solid rgba(99, 102, 241, 0.15);
+        }
+        .filter-item {
+            cursor: pointer;
+            padding: 12px 16px;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #64748b;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            border: 1px solid transparent;
+            font-weight: 500;
+        }
+        .filter-item:hover {
+            background-color: #f8fafc;
+            color: var(--brand-color, #6366f1);
+            border-color: rgba(99, 102, 241, 0.1);
+            transform: translateX(4px);
+        }
+        .filter-item.active {
+            background: var(--brand-gradient, linear-gradient(135deg, #6366f1 0%, #a855f7 100%));
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        }
+        .filter-item.active .badge {
+            background-color: rgba(255,255,255,0.2) !important;
+            color: white !important;
+        }
+        .hospital-card {
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            border: 1px solid rgba(0,0,0,0.05);
+            background: white;
+        }
+        .hospital-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px -12px rgba(0,0,0,0.12) !important;
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+        .search-wrapper {
+            max-width: 850px;
+            margin: -60px auto 0;
+            position: relative;
+            z-index: 10;
+        }
+        .search-glass {
+            background: white;
+            padding: 8px;
+            border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            display: flex;
+            align-items: center;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .search-input-modern {
+            border: none;
+            padding: 15px 20px;
+            font-size: 1rem;
+            width: 100%;
+            border-radius: 12px;
+            color: #1e293b;
+        }
+        .search-input-modern:focus {
+            outline: none;
+        }
+        .btn-purple {
+            background: var(--brand-gradient, linear-gradient(135deg, #6366f1 0%, #a855f7 100%));
+            color: white;
+            border-radius: 14px;
+            padding: 14px 32px;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            border: none;
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+        }
+        .btn-purple:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.23);
+            color: white;
+            opacity: 0.95;
+        }
+        .bg-primary-soft {
+            background-color: rgba(99, 102, 241, 0.1) !important;
+            color: #6366f1 !important;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<!-- Premium Hero Header -->
+<div class="page-header-premium text-center">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="hero-glass-card" data-aos="zoom-in" data-aos-duration="1000">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb justify-content-center mb-3">
+                            <li class="breadcrumb-item"><a href="{{ path('app_home', {'_locale': app.request.locale}) }}" class="text-white-50 text-decoration-none">{{ 'Home'|trans }}</a></li>
+                            <li class="breadcrumb-item text-white active">{{ 'Clinics'|trans }}</li>
+                        </ol>
+                    </nav>
+                    <h1 class="display-3 fw-bold text-white mb-3">{{ 'Premium Medical Network'|trans }}</h1>
+                    <p class="lead text-white opacity-75 mb-0 px-md-5">{{ 'Discover superior healthcare facilities equipped with cutting-edge technology and world-class medical specialists.'|trans }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modern Search Bar -->
+<div class="container search-wrapper">
+    <div class="search-glass px-4" data-aos="fade-up" data-aos-delay="200">
+        <i class="bi bi-search text-purple fs-5 me-2" style="color: #6f42c1;"></i>
+        <input type="text" id="hospitalSearch" class="search-input-modern" placeholder="{{ 'Search by clinic name, specialty, or location...'|trans }}">
+        <button class="btn btn-purple d-none d-md-block">{{ 'Search'|trans }}</button>
+    </div>
+</div>
+
+<section class="py-5 bg-light">
+    <div class="container py-5">
+        <div class="row g-5">
+            <!-- Sidebar Filters -->
+            <div class="col-lg-3">
+                <div class="filter-sidebar p-4 bg-white rounded-4 shadow-sm" data-aos="fade-right" data-aos-delay="400">
+                    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                        <h5 class="fw-bold mb-0" style="color: #6f42c1;">{{ 'Refine Search'|trans }}</h5>
+                        <button class="btn btn-purple btn-sm p-2 rounded-3 d-flex align-items-center justify-content-center border-0 shadow-sm" id="clearFilters" title="{{ 'Reset'|trans }}" style="width: 32px; height: 32px;">
+                            <i class="bi bi-arrow-counterclockwise text-white"></i>
+                        </button>
+                    </div>
+
+                    <div class="filter-group mb-4">
+                        <div class="filter-group-title">{{ 'Specialties'|trans }}</div>
+                        <div id="departmentFilters">
+                            <div class="filter-item active" data-filter="all">
+                                <span>{{ 'All Departments'|trans }}</span>
+                                <span class="badge bg-light text-muted rounded-pill">{{ hospitals|length }}</span>
+                            </div>
+                            {% for dept in departments %}
+                                <div class="filter-item" data-filter="{{ dept.name }}">
+                                    <span>{{ dept.name|trans }}</span>
+                                    <span class="badge bg-light text-muted rounded-pill">{{ dept.hospitalDepartments|length }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="filter-group">
+                        <div class="filter-group-title">{{ 'Filter By'|trans }}</div>
+                        <div class="form-check custom-checkbox mb-3 p-3 bg-light rounded-3 transition-hover border">
+                            <input class="form-check-input ms-0 me-2" type="checkbox" id="open247">
+                            <label class="form-check-label small fw-bold" for="open247">{{ 'Active Emergency'|trans }}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hospital Grid -->
+            <div class="col-lg-9">
+                <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down" data-aos-delay="500">
+                    <p class="text-muted mb-0 fw-medium"><i class="bi bi-grid-fill me-2"></i>{{ 'Showing'|trans }} <span id="resultCount" class="text-dark fw-bold">{{ hospitals|length }}</span> {{ 'premium facilities'|trans }}</p>
+                    <div class="dropdown">
+                        <button class="btn btn-purple btn-sm shadow-sm dropdown-toggle px-3" type="button" data-bs-toggle="dropdown">
+                            {{ 'Sort Options'|trans }}
+                        </button>
+                        <ul class="dropdown-menu border-0 shadow-lg p-2">
+                            <li><a class="dropdown-item rounded-2 small py-2" href="#" data-sort="alphabetical">{{ 'Alphabetical'|trans }}</a></li>
+                            <li><a class="dropdown-item rounded-2 small py-2" href="#" data-sort="priority">{{ 'Priority'|trans }}</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="row g-4" id="hospitalGrid">
+                    {% for hospital in hospitals %}
+                    <div class="col-md-6 hospital-item" 
+                         data-name="{{ hospital.name|lower }}" 
+                         data-address="{{ hospital.address|lower }}"
+                         data-departments="{{ hospital.deptList|join(',')|lower }}"
+                         data-open247="{{ hospital.workingHours == '24/7' ? 'true' : 'false' }}"
+                         data-aos="fade-up"
+                         data-aos-delay="{{ 600 + (loop.index0 * 100) }}">
+                        <a href="{{ path('app_hospital_public_show', {'id': hospital.id, '_locale': app.request.locale|default('hy')}) }}" class="card hospital-card h-100 border-0 shadow-sm rounded-4 overflow-hidden text-decoration-none bg-white">
+                            <div class="position-relative" style="height: 220px;">
+                                {% if hospital.workingHours == '24/7' %}
+                                    <div class="badge bg-success position-absolute top-0 end-0 m-3 rounded-pill px-3 py-2 fw-bold" style="z-index: 5; font-size: 0.65rem; letter-spacing: 0.5px;">{{ 'OPEN 24/7'|trans }}</div>
+                                {% else %}
+                                    <div class="badge bg-primary position-absolute top-0 end-0 m-3 rounded-pill px-3 py-2 fw-bold" style="z-index: 5; font-size: 0.65rem; letter-spacing: 0.5px;">{{ hospital.workingHours }}</div>
+                                {% endif %}
+                                <img src="{{ hospital.image ? hospital.image : asset('img/about-img.jpg') }}" alt="{{ hospital.name }}" class="w-100 h-100" style="object-fit: cover;">
+                            </div>
+                            <div class="card-body p-4">
+                                <span class="badge bg-primary-soft mb-2" style="font-size: 0.7rem; letter-spacing: 0.5px;">{{ hospital.deptList|first|default('General Medicine')|trans }}</span>
+                                <h5 class="fw-bold mb-2 text-dark">{{ hospital.name }}</h5>
+                                <p class="text-muted small mb-4"><i class="bi bi-geo-alt-fill me-1 text-purple" style="color: #6f42c1;"></i> {{ hospital.address }}</p>
+                                
+                                <div class="row g-2 pt-3 border-top">
+                                    <div class="col-4">
+                                        <div class="bg-light p-2 rounded-3 text-center border">
+                                            <div class="fw-bold mb-0 text-dark small">{{ hospital.bedsCount|default(0)|number_format }}</div>
+                                            <small class="text-muted" style="font-size: 0.6rem; text-transform: uppercase;">{{ 'Beds'|trans }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="bg-light p-2 rounded-3 text-center border">
+                                            <div class="fw-bold mb-0 text-dark small">{{ hospital.staffCount|default(0)|number_format }}</div>
+                                            <small class="text-muted" style="font-size: 0.6rem; text-transform: uppercase;">{{ 'Staff'|trans }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="bg-light p-2 rounded-3 text-center border">
+                                            <div class="fw-bold mb-0 {{ hospital.hasAmbulance ? 'text-success' : 'text-danger' }} small">{{ (hospital.hasAmbulance ? 'Yes' : 'No')|trans }}</div>
+                                            <small class="text-muted" style="font-size: 0.6rem; text-transform: uppercase;">{{ 'ER'|trans }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Empty State -->
+                <div id="emptyState" class="text-center py-5 d-none bg-white rounded-4 shadow-sm">
+                    <div class="mb-4">
+                        <i class="bi bi-search text-muted opacity-25" style="font-size: 5rem;"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark">{{ 'No results found'|trans }}</h4>
+                    <p class="text-muted">{{ 'Adjust your keywords or filters to find more facilities.'|trans }}</p>
+                    <button class="btn btn-purple rounded-pill mt-3 px-5" id="resetAll">{{ 'Reset All Filters'|trans }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('hospitalSearch');
+        const heroSearchBtn = document.querySelector('.search-wrapper .btn-purple');
+        const open247Checkbox = document.getElementById('open247');
+        const filterItems = document.querySelectorAll('.filter-item');
+        const hospitalItems = Array.from(document.querySelectorAll('.hospital-item'));
+        const resultCount = document.getElementById('resultCount');
+        const emptyState = document.getElementById('emptyState');
+        const hospitalGrid = document.getElementById('hospitalGrid');
+        const clearBtn = document.getElementById('clearFilters');
+        const resetAllBtn = document.getElementById('resetAll');
+        const sortOptions = document.querySelectorAll('.dropdown-item');
+
+        let activeFilter = 'all';
+        let searchQuery = '';
+
+        function filterList() {
+            let visibleCount = 0;
+            searchQuery = searchInput.value.toLowerCase();
+            const isOpen247Only = open247Checkbox.checked;
+
+            hospitalItems.forEach(item => {
+                const name = item.dataset.name;
+                const address = item.dataset.address;
+                const departments = item.dataset.departments;
+                const isOpen247 = item.dataset.open247 === 'true';
+
+                const matchesSearch = name.includes(searchQuery) || address.includes(searchQuery) || departments.includes(searchQuery);
+                const matchesDept = activeFilter === 'all' || departments.includes(activeFilter.toLowerCase());
+                const matchesAvailability = !isOpen247Only || isOpen247;
+
+                if (matchesSearch && matchesDept && matchesAvailability) {
+                    item.classList.remove('d-none');
+                    visibleCount++;
+                } else {
+                    item.classList.add('d-none');
+                }
+            });
+
+            resultCount.textContent = visibleCount;
+            if (visibleCount === 0) {
+                hospitalGrid.classList.add('d-none');
+                emptyState.classList.remove('d-none');
+            } else {
+                hospitalGrid.classList.remove('d-none');
+                emptyState.classList.add('d-none');
+            }
+        }
+
+        function sortList(criteria) {
+            const sortedItems = [...hospitalItems];
+            
+            if (criteria === 'alphabetical') {
+                sortedItems.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
+            } else if (criteria === 'priority') {
+                // Mock priority sorting by name reverse for now
+                sortedItems.sort((a, b) => b.dataset.name.localeCompare(a.dataset.name));
+            }
+
+            hospitalGrid.innerHTML = '';
+            sortedItems.forEach(item => hospitalGrid.appendChild(item));
+        }
+
+        // Search inputs
+        if (searchInput) searchInput.addEventListener('input', filterList);
+        if (heroSearchBtn) heroSearchBtn.addEventListener('click', filterList);
+
+        // Specialty filters
+        filterItems.forEach(item => {
+            item.addEventListener('click', () => {
+                filterItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                activeFilter = item.dataset.filter;
+                filterList();
+            });
+        });
+
+        // Availability checkbox
+        if (open247Checkbox) open247Checkbox.addEventListener('change', filterList);
+
+        // Sorting
+        sortOptions.forEach(opt => {
+            opt.addEventListener('click', (e) => {
+                e.preventDefault();
+                const criteria = opt.dataset.sort;
+                const label = opt.textContent.trim();
+                const dropdownBtn = document.querySelector('.dropdown-toggle');
+                dropdownBtn.innerHTML = `${label}`;
+                sortList(criteria);
+            });
+        });
+
+        const resetActions = () => {
+            if (searchInput) searchInput.value = '';
+            if (open247Checkbox) open247Checkbox.checked = false;
+            activeFilter = 'all';
+            filterItems.forEach(i => i.classList.remove('active'));
+            document.querySelector('.filter-item[data-filter="all"]').classList.add('active');
+            filterList();
+        };
+
+        if (clearBtn) clearBtn.addEventListener('click', resetActions);
+        if (resetAllBtn) resetAllBtn.addEventListener('click', resetActions);
+    });
+    </script>
+{% endblock %}
+{% endblock %}

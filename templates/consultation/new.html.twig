@@ -1,0 +1,249 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}{{ 'booking.title'|trans }}{% endblock %}
+
+{% block body %}
+<section class="section py-5 mt-5">
+    <div class="container py-lg-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <!-- Header Card with Premium Gradient -->
+                <div class="card border-0 shadow-xl rounded-5 overflow-hidden mb-5" data-aos="fade-up">
+                    <div class="card-header p-0 border-0 position-relative overflow-hidden" style="min-height: 240px; background: var(--brand-gradient);">
+                        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.1) 0%, transparent 50%);"></div>
+                        
+                        <div class="card-body p-5 text-center d-flex flex-column align-items-center justify-content-center position-relative z-1" style="height: 240px;">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-4 shadow-lg border border-white border-opacity-50" 
+                                 style="width: 80px; height: 80px; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);" 
+                                 data-aos="zoom-in" data-aos-delay="200">
+                                <i class="bi bi-calendar-check-fill text-white" style="font-size: 2.5rem;"></i>
+                            </div>
+                            <h1 class="display-5 fw-900 text-white mb-2 tracking-tight">{{ 'booking.card.title'|trans }}</h1>
+                            <p class="mb-0 text-white opacity-75 lead fs-6 max-w-500 mx-auto">{{ 'booking.card.subtitle'|trans }}</p>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-4 p-md-5 bg-white">
+                        {% for label, messages in app.flashes %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ label == 'error' ? 'danger' : (label == 'success' ? 'success' : 'info') }} border-0 rounded-4 shadow-sm py-3 px-4 mb-4 animate-fade-in" role="alert">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <i class="bi {{ label == 'error' ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill' }} fs-4"></i>
+                                        <div>{{ message }}</div>
+                                    </div>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+
+                        <form method="post" role="form" class="consultation-form mt-4">
+                            <!-- Section 1: Patient Information -->
+                            <div class="mb-5" data-aos="fade-up" data-aos-delay="100">
+                                <h6 class="form-label-premium mb-4"><i class="bi bi-person-badge"></i> {{ 'booking.patient.details'|trans }}</h6>
+                                
+                                <div class="row g-4">
+                                    <div class="col-md-6 text-start">
+                                        <label class="form-label small fw-bold text-muted ms-1 mb-2">{{ 'booking.full_name'|trans }}</label>
+                                        <input type="text" name="name" class="form-control medical-input" placeholder="{{ 'John Doe'|trans }}" value="{{ app.user.firstName ? app.user.firstName ~ ' ' ~ app.user.lastName : app.user.email|split('@')[0]|capitalize }}" required>
+                                    </div>
+                                    <div class="col-md-6 text-start">
+                                        <label class="form-label small fw-bold text-muted ms-1 mb-2">{{ 'booking.phone_number'|trans }}</label>
+                                        <input type="text" name="phone" class="form-control medical-input" placeholder="{{ '+1 234...'|trans }}" value="{{ app.user.phone|default('') }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="section-divider opacity-50"></div>
+
+                            <!-- Section 2: Appointment Details -->
+                            <div class="mb-5" data-aos="fade-up" data-aos-delay="200">
+                                <h6 class="form-label-premium mb-4"><i class="bi bi-hospital"></i> {{ 'booking.appointment.details'|trans }}</h6>
+                                
+                                <div class="row g-4">
+                                    <div class="col-md-6 text-start">
+                                        <label class="form-label small fw-bold text-muted ms-1 mb-2">{{ 'booking.preferred_date'|trans }}</label>
+                                        <input type="datetime-local" name="date" class="form-control medical-input" required>
+                                    </div>
+                                    <div class="col-md-6 text-start">
+                                        <label class="form-label small fw-bold text-muted ms-1 mb-2">{{ 'booking.select_hospital'|trans }}</label>
+                                        <select name="hospital" id="hospitalSelect" class="form-select medical-input select2-enable" required>
+                                            <option value="">{{ 'booking.choose_location'|trans }}</option>
+                                            {% for h in hospitals %}
+                                                <option value="{{ h.id }}" {{ h.id == app.request.query.get('hospital') ? 'selected' : '' }}>{{ h.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 text-start">
+                                        <label class="form-label small fw-bold text-muted ms-1 mb-2">{{ 'booking.department'|trans }}</label>
+                                        <select name="department" id="departmentSelect" class="form-select medical-input select2-enable" required {{ app.request.query.get('hospital') ? '' : 'disabled' }}>
+                                            <option value="">{{ 'booking.select_hospital_first'|trans }}</option>
+                                            {% for d in departments %}
+                                                {% set hos_ids = [] %}
+                                                {% for hd in hospitalDepartments %}
+                                                    {% if hd.department.id == d.id %}
+                                                        {% set hos_ids = hos_ids|merge([hd.hospital.id]) %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <option value="{{ d.id }}" data-hospitals="{{ hos_ids|join(',') }}" {{ d.id == app.request.query.get('department') ? 'selected' : '' }}>
+                                                    {{ d.name|trans }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 text-start">
+                                        <label class="form-label small fw-bold text-muted ms-1 mb-2">{{ 'booking.doctor'|trans }}</label>
+                                        <select name="doctor" id="doctorSelect" class="form-select medical-input select2-enable" required {{ app.request.query.get('department') ? '' : 'disabled' }}>
+                                            <option value="">{{ 'booking.select_department_first'|trans }}</option>
+                                            {% for doc in doctors %}
+                                                <option value="{{ doc.id }}" data-hospital="{{ doc.hospital ? doc.hospital.id : '' }}" data-department="{{ doc.department ? doc.department.id : '' }}" {{ doc.id == app.request.query.get('doctor') ? 'selected' : '' }}>
+                                                    {{ doc.user.firstName ? doc.user.firstName ~ ' ' ~ doc.user.lastName : doc.user.email|split('@')[0]|capitalize }} ({{ doc.specialty|trans }})
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-5" data-aos="fade-up" data-aos-delay="300">
+                                <label class="form-label small fw-bold text-muted ms-1 mb-2">{{ 'booking.message_label'|trans }}</label>
+                                <textarea class="form-control medical-input" name="message" rows="4" placeholder="{{ 'booking.message_placeholder'|trans }}"></textarea>
+                            </div>
+
+                            <div class="text-center pt-3" data-aos="zoom-in" data-aos-delay="400">
+                                <button type="submit" class="btn-premium-gradient btn-lg py-3 px-5 shadow-lg w-100 mb-4">
+                                    <span class="d-flex align-items-center justify-content-center gap-2">
+                                        {{ 'booking.confirm_btn'|trans }}
+                                        <i class="bi bi-arrow-right-circle-fill fs-5"></i>
+                                    </span>
+                                </button>
+                                <p class="text-muted small">
+                                    <i class="bi bi-shield-check me-1 text-success"></i>
+                                    {{ 'booking.privacy_note'|trans }}
+                                </p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .fw-900 { font-weight: 900; }
+    .fw-800 { font-weight: 800; }
+    .tracking-wider { letter-spacing: 0.05em; }
+    .shadow-xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15); }
+    .backdrop-blur { backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+    .group-premium-focus {
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+    .group-premium-focus:focus-within {
+        background-color: #fff !important;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        border-color: rgba(99, 102, 241, 0.2);
+    }
+    .hover-scale { transition: transform 0.3s ease; }
+    .hover-scale:hover { transform: scale(1.02); }
+    .max-w-500 { max-width: 500px; }
+    .bg-indigo { background-color: #6366f1; }
+    .text-indigo { color: #6366f1; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const hospitalSelect = document.getElementById('hospitalSelect');
+    const departmentSelect = document.getElementById('departmentSelect');
+    const doctorSelect = document.getElementById('doctorSelect');
+
+    if (!hospitalSelect || !departmentSelect || !doctorSelect) return;
+
+    // Use jQuery as it's already bundled with Select2 in this project
+    const $h = $(hospitalSelect);
+    const $d = $(departmentSelect);
+    const $doc = $(doctorSelect);
+
+    // Store original options for filtering (exclude placeholder)
+    const allDeptOptions = Array.from(departmentSelect.querySelectorAll('option:not([value=""])')).map(opt => ({
+        id: opt.value,
+        text: opt.textContent,
+        hospitals: opt.dataset.hospitals ? opt.dataset.hospitals.split(',') : []
+    }));
+
+    const allDocOptions = Array.from(doctorSelect.querySelectorAll('option:not([value=""])')).map(opt => ({
+        id: opt.value,
+        text: opt.textContent,
+        hospital: opt.dataset.hospital,
+        department: opt.dataset.department
+    }));
+
+    function refreshSelect2(element) {
+        if ($(element).data('select2')) {
+            $(element).trigger('change.select2');
+        }
+    }
+
+    function filterDepartments(hospitalId) {
+        const currentVal = $d.val();
+        $d.empty().append(new Option(hospitalId ? "{{ 'booking.choose_department'|trans }}" : "{{ 'booking.select_hospital_first'|trans }}", ""));
+        
+        allDeptOptions.forEach(opt => {
+            if (!hospitalId || opt.hospitals.includes(hospitalId)) {
+                const newOpt = new Option(opt.text, opt.id);
+                if (opt.id === currentVal) newOpt.selected = true;
+                $d.append(newOpt);
+            }
+        });
+        
+        $d.prop('disabled', !hospitalId);
+        refreshSelect2(departmentSelect);
+    }
+
+    function filterDoctors(hospitalId, departmentId) {
+        const currentVal = $doc.val();
+        $doc.empty().append(new Option(departmentId ? "{{ 'booking.choose_specialist'|trans }}" : "{{ 'booking.select_department_first'|trans }}", ""));
+        
+        let matchCount = 0;
+        allDocOptions.forEach(opt => {
+            // Strict match: must match both hospital and department
+            if (opt.hospital == hospitalId && opt.department == departmentId) {
+                const newOpt = new Option(opt.text, opt.id);
+                if (opt.id === currentVal) newOpt.selected = true;
+                $doc.append(newOpt);
+                matchCount++;
+            }
+        });
+        
+        $doc.prop('disabled', !departmentId || matchCount === 0);
+        if (matchCount === 0 && departmentId) {
+            $doc.find('option:first').text("{{ 'booking.no_doctors_found'|trans }}");
+        }
+        refreshSelect2(doctorSelect);
+    }
+
+    // Listeners using jQuery to catch Select2 events
+    $h.on('change', function() {
+        const hospitalId = this.value;
+        filterDepartments(hospitalId);
+        // Reset doctor select
+        $doc.empty().append(new Option("{{ 'booking.select_department_first'|trans }}", "")).prop('disabled', true);
+        refreshSelect2(doctorSelect);
+    });
+
+    $d.on('change', function() {
+        const departmentId = this.value;
+        const hospitalId = $h.val();
+        filterDoctors(hospitalId, departmentId);
+    });
+
+    // Initial load handling
+    if ($h.val()) {
+        filterDepartments($h.val());
+        if ($d.val()) {
+            filterDoctors($h.val(), $d.val());
+        }
+    }
+});
+</script>
+{%endblock%}

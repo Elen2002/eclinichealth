@@ -1,0 +1,64 @@
+{{ form_start(form) }}
+                    {% for field in form %}
+                        {{ form_errors(field) }}
+                        {% if field.vars.compound and field.vars.name != '_token' %}
+                            <fieldset class="mb-3">
+                                <legend class="w-auto px-2">{{ field.vars.label|trans }}</legend>
+                                {% for subfield in field %}
+                                    {% set subType = subfield.vars.block_prefixes[1] %}
+                                    <div class="mb-3">
+                                        {{ form_errors(subfield) }}
+                                        {{ form_label(subfield, subfield.vars.label|trans) }}
+
+                                        {% if subType == 'textarea' %}
+                                            {{ form_widget(subfield, {'attr': {'class': 'form-control large-textarea'}}) }}
+                                        {% elseif subType == 'checkbox' or (subfield.vars.expanded is defined and subfield.vars.expanded) %}
+                                            {% if subfield.vars.expanded is defined and subfield.vars.expanded %}
+                                                {% for subfile in subfield %}
+                                                    <div class="d-flex justify-content-between col-md-3">
+                                                        {{ form_label(subfile, subfile.vars.label|trans) }}
+                                                        {{ form_widget(subfile, {'attr': {'class': 'form-check-input'}}) }}
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                {{ form_widget(subfield, {'attr': {'class': 'form-check-input'}}) }}
+                                            {% endif %}
+                                        {% elseif subType == 'choice' and subfield.vars.expanded is defined and subfield.vars.expanded == false %}
+                                            {{ form_widget(subfield, {'attr': {'class': 'form-select select2'}}) }}
+                                        {% else %}
+                                            {{ form_widget(subfield, {'attr': {'class': 'form-control'}}) }}
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </fieldset>
+                        {% elseif field.vars.name != '_token' %}
+                            {% set fieldType = field.vars.block_prefixes[1] %}
+                            <div class="mb-3">
+                                {{ form_errors(field) }}
+                                {{ form_label(field, field.vars.label|trans) }}
+
+                                {% if fieldType == 'textarea' %}
+                                    {{ form_widget(field, {'attr': {'class': 'form-control large-textarea'}}) }}
+                                {% elseif fieldType == 'checkbox' or (field.vars.expanded is defined and field.vars.expanded) %}
+                                    {{ form_widget(field, {'attr': {'class': 'form-check-input'}}) }}
+                                {% elseif fieldType == 'choice' and field.vars.expanded is defined and field.vars.expanded == false %}
+                                    {{ form_widget(field, {'attr': {'class': 'form-select select2'}}) }}
+                                {% else %}
+                                    {{ form_widget(field, {'attr': {'class': 'form-control'}}) }}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if map %}
+                        <div class="row justify-content-center">
+                            <div>
+                                {{ map(mode is not empty ? mode : 'add-marker', type, polygon, marker, geoPoints, geoPolygons, geoPolygonsParent, geoPointsParent, size, circle) }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <button class="btn btn-primary mt-3 w-auto px-5">{{ button_label|default(buttonName is defined and buttonName != '' ? buttonName|trans : 'Save'|trans) }}</button>
+
+                    {{ form_end(form) }}
+<script src="https://cdn.ckeditor.com/4.21.0/standard/ckeditor.js"></script>

@@ -1,0 +1,90 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'profile.editTitle'|trans }}{% endblock %}
+
+{% block body %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="card-header p-4 text-white text-center border-0" style="background: linear-gradient(135deg, var(--brand-color), var(--accent-color))">
+                    <h2 class="fw-bold mb-0">Edit Profile</h2>
+                    <p class="opacity-75 mb-0">Update your information and avatar</p>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ label == 'error' ? 'danger' : label }} rounded-pill px-4">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+
+                    {{ form_start(form) }}
+                        <div class="text-center mb-4">
+                            <div class="position-relative d-inline-block">
+                                <img src="{{ user.avatar ?: asset('img/default-avatar.png') }}" 
+                                     alt="Avatar" 
+                                     class="rounded-circle shadow-sm border border-4 border-white" 
+                                     style="width: 120px; height: 120px; object-fit: cover;">
+                                <div class="position-absolute bottom-0 end-0">
+                                    <label for="{{ form.avatar_file.vars.id }}" class="btn btn-primary btn-sm rounded-circle p-2 shadow">
+                                        <i class="bi bi-camera-fill"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ form_widget(form.firstName, {'attr': {'placeholder': 'First Name', 'class': 'form-control rounded-pill px-4'}}) }}
+                                    {{ form_label(form.firstName) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    {{ form_widget(form.lastName, {'attr': {'placeholder': 'Last Name', 'class': 'form-control rounded-pill px-4'}}) }}
+                                    {{ form_label(form.lastName) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            {{ form_widget(form.email, {'attr': {'placeholder': 'name@example.com', 'class': 'form-control rounded-pill px-4'}}) }}
+                            {{ form_label(form.email) }}
+                        </div>
+
+                        <div class="d-none">
+                            {{ form_widget(form.avatar_file) }}
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm transition-all hover-scale">
+                                Save Changes
+                            </button>
+                            <a href="{{ is_granted('ROLE_DOCTOR') ? path('app_doctor_dashboard') : path('app_profile') }}" class="btn btn-light btn-lg rounded-pill text-muted">
+                                Cancel
+                            </a>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-floating > .form-control:focus ~ label,
+    .form-floating > .form-control:not(:placeholder-shown) ~ label {
+        transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+        padding-left: 20px;
+    }
+    .form-floating > label {
+        padding-left: 20px;
+    }
+    .hover-scale:hover {
+        transform: scale(1.02);
+    }
+</style>
+{% endblock %}

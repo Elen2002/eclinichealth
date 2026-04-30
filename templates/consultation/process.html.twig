@@ -1,0 +1,64 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}{{ 'Process Consultation'|trans }}{% endblock %}
+
+{% block body %}
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 py-4 text-center">
+                     <h3 class="fw-bold text-primary mb-1">{{ 'Process Appointment Request'|trans }}</h3>
+                     <p class="text-muted mb-0">{{ 'Step 2: Provide Medical Details & Confirm Date'|trans }}</p>
+                </div>
+                <div class="card-body p-5">
+                    
+                    <div class="alert alert-light border rounded-3 text-center mb-4">
+                        <h5 class="fw-bold mb-1">{{ consultation.patientName }}</h5>
+                        <p class="text-muted small mb-0">{{ 'Requested Date:'|trans }} {{ consultation.requestedDate|date('M d, Y H:i') }}</p>
+                        <p class="text-muted small mt-2">"{{ consultation.message }}"</p>
+                    </div>
+
+                    <form method="post">
+                        {% if app.flashes('error') %}
+                            <div class="alert alert-danger">
+                                {% for message in app.flashes('error') %}
+                                    {{ message }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">{{ 'Confirm Appointment Date & Time'|trans }} <span class="text-danger">*</span></label>
+                            <input type="datetime-local" name="proposed_date" class="form-control form-control-lg bg-light border-0" value="{{ consultation.requestedDate|date('Y-m-d\\TH:i') }}" required>
+                            <div class="form-text">{{ 'You can adjust the time if necessary.'|trans }}</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">{{ 'Prescription / Medical Advice'|trans }}</label>
+                            <textarea name="prescription" class="form-control bg-light border-0" rows="4" placeholder="{{ 'Enter prescription details...'|trans }}"></textarea>
+                        </div>
+                        
+                        <div class="d-flex align-items-center mb-3">
+                            <hr class="flex-grow-1">
+                            <span class="mx-3 text-muted small fw-bold">{{ 'OR'|trans }}</span>
+                            <hr class="flex-grow-1">
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form-label fw-bold">{{ 'Required Medical Tests'|trans }}</label>
+                            <textarea name="tests" class="form-control bg-light border-0" rows="3" placeholder="{{ 'List any required tests before the visit...'|trans }}"></textarea>
+                            <div class="form-text text-danger small"><i class="bi bi-info-circle me-1"></i> {{ 'You must provide either a prescription or a list of tests.'|trans }}</div>
+                        </div>
+
+                        <div class="d-flex flex-column align-items-center gap-3">
+                             <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold px-5" style="width: 320px; max-width: 100%;">{{ 'Confirm & Accept Appointment'|trans }}</button>
+                             <a href="{{ path('app_doctor_dashboard') }}" class="btn btn-secondary btn-lg rounded-pill fw-bold" style="width: 320px; max-width: 100%; background: #64748b; border: none; color: white;">{{ 'Cancel'|trans }}</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

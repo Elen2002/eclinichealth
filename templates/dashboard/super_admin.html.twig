@@ -1,0 +1,192 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block dashboard_content %}
+    <div class="row">
+        <!-- Hospital Management Section -->
+        <div class="col-lg-12">
+            <!-- Redesigned Action Bar -->
+            <div class="glass-card mb-4 p-3 d-flex flex-wrap align-items-center justify-content-between gap-3" style="border-radius: 20px; background: white; border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
+                <div class="d-flex flex-grow-1 gap-2 align-items-center">
+                    <div class="search-box position-relative flex-grow-1" style="max-width: 500px;">
+                        <i class="bi bi-search position-absolute" style="left: 20px; top: 50%; transform: translateY(-50%); color: var(--brand-color); opacity: 0.5;"></i>
+                        <input type="text" id="hospitalSearch" class="form-control medical-input ps-5 py-3 rounded-4 border-0 shadow-none" 
+                               placeholder="{{ 'Search by name, ID...'|trans }}" style="background: #f1f5f9; font-size: 0.95rem; height: 52px;">
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3 align-items-center">
+                    <form action="{{ path('app_hospital_import') }}" method="post" enctype="multipart/form-data" id="hospitalImportForm" style="display: none;">
+                        <input type="file" name="import_file" accept=".csv" onchange="this.closest('form').submit()">
+                    </form>
+                    <button class="btn btn-action-light px-3 py-2 d-flex align-items-center gap-2" onclick="document.querySelector('#hospitalImportForm input').click()">
+                        <i class="bi bi-upload"></i> <span>{{ 'Import'|trans }}</span>
+                    </button>
+
+                    <div class="dropdown">
+                        <button class="btn btn-action-light px-3 py-2 d-flex align-items-center gap-2 dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="bi bi-download"></i> <span>{{ 'Export'|trans }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg rounded-4 animate-fade-in mt-2 p-2">
+                            <li><a class="dropdown-item rounded-3 d-flex align-items-center gap-2 py-2" href="{{ path('app_hospital_export', {'type': 'excel'}) }}"><i class="bi bi-file-earmark-excel text-success"></i> {{ 'Excel Format'|trans }}</a></li>
+                            <li><a class="dropdown-item rounded-3 d-flex align-items-center gap-2 py-2" href="{{ path('app_hospital_export', {'type': 'doc'}) }}"><i class="bi bi-file-earmark-word text-primary"></i> {{ 'Word Format'|trans }}</a></li>
+                            <li><a class="dropdown-item rounded-3 d-flex align-items-center gap-2 py-2" href="#" onclick="window.print()"><i class="bi bi-printer text-secondary"></i> {{ 'Print View'|trans }}</a></li>
+                        </ul>
+                    </div>
+
+                    <a href="{{ path('app_hospital_new') }}" class="btn btn-add-primary px-4 py-2 d-flex align-items-center gap-2">
+                        <i class="bi bi-plus-lg"></i> <span>{{ 'Add Hospital'|trans }}</span>
+                    </a>
+                </div>
+            </div>
+
+            <style>
+                .btn-action-light {
+                    background: var(--brand-gradient-soft);
+                    color: var(--brand-color);
+                    border: 1px solid rgba(99, 102, 241, 0.1);
+                    border-radius: 14px;
+                    font-weight: 600;
+                    font-size: 0.9rem;
+                    transition: all 0.3s ease;
+                    height: 52px;
+                }
+                .btn-action-light:hover {
+                    background: var(--brand-color);
+                    color: white;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+                }
+                .btn-add-primary {
+                    background: var(--brand-gradient);
+                    color: white;
+                    border: none;
+                    border-radius: 14px;
+                    font-weight: 700;
+                    font-size: 0.9rem;
+                    transition: all 0.3s ease;
+                    height: 52px;
+                    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+                }
+                .btn-add-primary:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
+                    color: white;
+                }
+                .btn-table-action {
+                    width: 38px;
+                    height: 38px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: all 0.3s ease;
+                    border: none;
+                    font-size: 1.1rem;
+                }
+                .btn-table-action.view {
+                    background: var(--brand-gradient-soft);
+                    color: var(--brand-color);
+                }
+                .btn-table-action.view:hover {
+                    background: var(--brand-color);
+                    color: white;
+                    transform: rotate(15deg) scale(1.1);
+                }
+                .btn-table-action.edit {
+                    background: rgba(148, 163, 184, 0.1);
+                    color: #64748b;
+                }
+                .btn-table-action.edit:hover {
+                    background: #64748b;
+                    color: white;
+                    transform: rotate(-15deg) scale(1.1);
+                }
+                .btn-table-action.delete {
+                    background: rgba(244, 63, 94, 0.1);
+                    color: #f43f5e;
+                }
+                .btn-table-action.delete:hover {
+                    background: #f43f5e;
+                    color: white;
+                    transform: scale(1.1);
+                }
+            </style>
+
+            <div class="medical-card p-0 overflow-hidden">
+                <div class="table-responsive">
+                    <table class="table table-management mb-0">
+                        <thead>
+                            <tr>
+                                <th>{{ 'Hospital'|trans }}</th>
+                                <th>{{ 'Location'|trans }}</th>
+                                <th>{{ 'Depts'|trans }}</th>
+                                <th>{{ 'Staff Count'|trans }}</th>
+                                <th>{{ 'Status'|trans }}</th>
+                                <th class="text-end">{{ 'Actions'|trans }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hospital in hospitals %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="p-2 rounded bg-light" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-hospital fs-5 text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <p class="mb-0 fw-bold">{{ hospital.name }}</p>
+                                            <p class="mb-0 text-muted small">ID: EC-{{ hospital.id }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ hospital.address ?? 'N/A' }}</td>
+                                <td>{{ hospital.departmentsCount ?? 0 }}</td>
+                                <td>{{ hospital.staffCount ?? 0 }}</td>
+                                <td><span class="badge bg-success-subtle text-success">{{ 'Active'|trans }}</span></td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-2 px-3">
+                                        <a href="{{ path('app_hospital_show', {'id': hospital.id}) }}" class="btn-table-action view" title="{{ 'View details'|trans }}"><i class="bi bi-eye"></i></a>
+                                        <a href="{{ path('app_hospital_edit', {'id': hospital.id}) }}" class="btn-table-action edit" title="{{ 'Edit branch'|trans }}"><i class="bi bi-pencil"></i></a>
+                                        <form method="post" action="{{ path('app_hospital_delete', {'id': hospital.id}) }}" onsubmit="return confirm('{{ 'Are you sure you want to delete this hospital?'|trans }}');" style="display: inline-block;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ hospital.id) }}">
+                                            <button class="btn-table-action delete" title="{{ 'Delete branch'|trans }}"><i class="bi bi-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr class="empty-row">
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="bi bi-building fs-1 text-muted d-block mb-3"></i>
+                                    {{ 'No hospital branches registered yet.'|trans }}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Advanced Table Filter
+        const searchInput = document.getElementById('hospitalSearch');
+        const tableRows = document.querySelectorAll('.table-management tbody tr:not(.empty-row)');
+        
+        function filterTable() {
+            const searchQuery = searchInput.value.toLowerCase();
+
+            tableRows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                const matchesSearch = text.includes(searchQuery);
+                
+                row.style.display = matchesSearch ? '' : 'none';
+            });
+        }
+
+        if (searchInput) searchInput.addEventListener('input', filterTable);
+    });
+    </script>
+{% endblock %}

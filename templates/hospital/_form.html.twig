@@ -1,0 +1,92 @@
+{{ form_start(form) }}
+    <div class="medical-card-admin p-4 p-lg-5">
+        <h6 class="fw-bold text-dark mb-4 d-flex align-items-center">
+            <i class="bi bi-info-circle-fill me-2 text-primary"></i> 
+            {{ 'Core Identity'|trans }}
+        </h6>
+        
+        <div class="row g-4">
+            <div class="col-md-6 text-start">
+                <label class="form-label-premium"><i class="bi bi-hospital"></i> {{ 'Hospital Name'|trans }}</label>
+                {{ form_widget(form.name, {'attr': {'class': 'form-control medical-input', 'placeholder': 'e.g. City General Branch'|trans}}) }}
+            </div>
+            <div class="col-md-6 text-start">
+                <label class="form-label-premium"><i class="bi bi-envelope-at"></i> {{ 'Professional Email'|trans }}</label>
+                {{ form_widget(form.email, {'attr': {'class': 'form-control medical-input', 'placeholder': 'branch@eclinic.com'|trans}}) }}
+            </div>
+            <div class="col-md-12 text-start">
+                <label class="form-label-premium"><i class="bi bi-telephone"></i> {{ 'Contact Phone'|trans }}</label>
+                {{ form_widget(form.phone, {'attr': {'class': 'form-control medical-input', 'placeholder': '+1 (555) 000-0000'|trans}}) }}
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <h6 class="fw-bold text-dark mb-4 d-flex align-items-center">
+            <i class="bi bi-gear-fill me-2 text-primary"></i> 
+            {{ 'Capacity & Services'|trans }}
+        </h6>
+
+        <div class="row g-4">
+            <div class="col-md-3 text-start">
+                <label class="form-label-premium"><i class="bi bi-clock"></i> {{ 'Working Hours'|trans }}</label>
+                {{ form_widget(form.workingHours, {'attr': {'class': 'form-control medical-input', 'placeholder': 'e.g. 24/7'|trans}}) }}
+            </div>
+            <div class="col-md-3 text-start">
+                <label class="form-label-premium"><i class="bi bi-door-open"></i> {{ 'Beds Count'|trans }}</label>
+                {{ form_widget(form.bedsCount, {'attr': {'class': 'form-control medical-input', 'placeholder': 'e.g. 150'|trans}}) }}
+            </div>
+            <div class="col-md-3 text-start">
+                <label class="form-label-premium"><i class="bi bi-people"></i> {{ 'Staff Count'|trans }}</label>
+                {{ form_widget(form.staffCount, {'attr': {'class': 'form-control medical-input', 'placeholder': 'e.g. 450'|trans}}) }}
+            </div>
+            <div class="col-md-3 text-start d-flex align-items-end">
+                <div class="form-check form-switch pb-2 ms-2">
+                    {{ form_widget(form.hasAmbulance, {'attr': {'class': 'form-check-input'}}) }}
+                    <label class="form-check-label small fw-bold text-muted ms-2" for="{{ form.hasAmbulance.vars.id }}">{{ 'Ambulance Service'|trans }}</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <h6 class="fw-bold text-dark mb-4 d-flex align-items-center">
+            <i class="bi bi-geo-alt-fill me-2 text-primary"></i> 
+            {{ 'Location & Details'|trans }}
+        </h6>
+
+        <div class="row g-4">
+            <div class="col-md-12 text-start">
+                <label class="form-label-premium"><i class="bi bi-pin-map"></i> {{ 'Official Address'|trans }}</label>
+                {{ form_widget(form.address, {'attr': {'class': 'form-control medical-input', 'placeholder': '123 Medical Blvd, Suite 100'|trans}}) }}
+            </div>
+            <div class="col-md-12 text-start">
+                <label class="form-label-premium"><i class="bi bi-card-text"></i> {{ 'About the Hospital'|trans }}</label>
+                {{ form_widget(form.about, {'attr': {'class': 'form-control medical-input', 'rows': '4', 'placeholder': 'Tell us about the history and mission of this branch...'|trans}}) }}
+            </div>
+            <div class="col-md-12 text-start">
+                <label class="form-label-premium"><i class="bi bi-diagram-3"></i> {{ 'Available Departments'|trans }}</label>
+                {{ form_widget(form.department, {'attr': {'class': 'form-select medical-input', 'style': 'height: 150px;'}}) }}
+            </div>
+            <div class="col-md-12 text-start">
+                <label class="form-label-premium"><i class="bi bi-image"></i> {{ 'Hospital Logo'|trans }}</label>
+                <div class="bg-light p-3 rounded-4 border border-white d-flex align-items-center gap-4">
+                    {% if hospital_image is defined and hospital_image %}
+                        <div class="flex-shrink-0" style="width: 100px; height: 100px;">
+                            <img src="{{ hospital_image }}" class="w-100 h-100 object-fit-contain rounded-3 bg-white p-2 shadow-sm" alt="Current Logo">
+                        </div>
+                    {% endif %}
+                    <div class="flex-grow-1">
+                        {{ form_widget(form.image, {'attr': {'class': 'form-control medical-input'}}) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mt-5 text-end pt-4 border-top">
+            <button class="btn-premium-gradient px-5 shadow">
+                <i class="bi bi-check2-circle me-2"></i> {{ button_label|trans|default('Save Configuration'|trans) }}
+            </button>
+        </div>
+    </div>
+{{ form_end(form) }}

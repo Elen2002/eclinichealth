@@ -1,0 +1,160 @@
+{% set locale = app.request.locale %}
+{% set user = app.user %}
+{% set dashboard_url = user ? (is_granted('ROLE_SUPER_ADMIN') ? path('app_super_admin_dashboard') : (is_granted('ROLE_ADMIN') ? path('app_admin_dashboard') : (is_granted('ROLE_DOCTOR') ? path('app_doctor_dashboard') : path('app_profile')))) : path('app_login') %}
+
+<header id="header" class="header fixed-top transition-all py-0" style="transition: all 0.3s ease; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(10px);">
+    <div class="container-fluid px-4 d-flex align-items-center justify-content-between">
+        <a href="{{ path('app_home') }}" class="logo d-flex align-items-center me-auto me-xl-0 text-decoration-none">
+            <img src="{{ asset('build/img/header-logo.png') }}" alt="Logo" class="img-fluid" style="max-height: 42px;">
+        </a>
+
+        <nav id="navmenu" class="navmenu d-none d-xl-block mx-auto">
+            <ul class="d-flex align-items-center mb-0 list-unstyled gap-4">
+                <li><a href="{{ path('app_home', {'_locale': locale}) }}" class="nav-link position-relative py-2" style="color: var(--nav-color); font-weight: 600; font-size: 0.9rem;">{{ 'nav.home'|trans }}</a></li>
+                <li><a href="{{ path('app_how_it_works', {'_locale': locale}) }}" class="nav-link position-relative py-2" style="color: var(--nav-color); font-weight: 600; font-size: 0.9rem;">{{ 'nav.howItWorks'|trans }}</a></li>
+                <li><a href="{{ path('app_departments', {'_locale': locale}) }}" class="nav-link position-relative py-2" style="color: var(--nav-color); font-weight: 600; font-size: 0.9rem;">{{ 'nav.departments'|trans }}</a></li>
+                <li><a href="{{ path('app_hospital_public_list', {'_locale': locale}) }}" class="nav-link position-relative py-2" style="color: var(--nav-color); font-weight: 600; font-size: 0.9rem;">{{ 'nav.locations'|trans }}</a></li>
+                <li><a href="{{ path('app_contact', {'_locale': locale}) }}" class="nav-link position-relative py-2" style="color: var(--nav-color); font-weight: 600; font-size: 0.9rem;">{{ 'nav.contact'|trans }}</a></li>
+            </ul>
+        </nav>
+
+        <div class="d-flex align-items-center gap-3" style="order: 2;">
+            <!-- Language Selector -->
+            <div class="position-relative d-none d-md-block">
+                <div id="lang-selector-btn" class="d-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-white border cursor-pointer hover-bg-gray transition-all shadow-sm">
+                    {% set current_flag = locale == 'en' ? 'gb' : (locale == 'hy' ? 'am' : 'ru') %}
+                    {% set current_name = locale == 'en' ? 'English' : (locale == 'hy' ? 'Հայերեն' : 'Русский') %}
+                    <span class="fi fi-{{ current_flag }} rounded-circle"></span>
+                    <span class="fw-semibold small">{{ current_name }}</span>
+                    <i class="bi bi-chevron-down small opacity-50"></i>
+                </div>
+                <div id="lang-dropdown" class="position-absolute end-0 bg-white shadow-lg rounded-4 p-2 d-none animate-fade-in" style="z-index: 1000; min-width: 160px; border: 1px solid #edf2f7; top: 100%; margin-top: 10px;">
+                    {% for lang in [{code: 'en', name: 'English', flag: 'gb'}, {code: 'hy', name: 'Հայերեն', flag: 'am'}, {code: 'ru', name: 'Русский', flag: 'ru'}] %}
+                        <a href="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')|merge({'_locale': lang.code})) }}" class="d-flex align-items-center gap-3 px-3 py-2 rounded-3 cursor-pointer transition-all text-decoration-none {{ lang.code == locale ? 'bg-primary-subtle text-primary fw-bold' : 'hover-bg-light text-dark' }}">
+                            <span class="fi fi-{{ lang.flag }} rounded-circle"></span>
+                            <span class="small">{{ lang.name }}</span>
+                            {% if lang.code == locale %}<i class="bi bi-check2 ms-auto"></i>{% endif %}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Global Notifications -->
+            <div id="notification-badge-root"></div>
+
+            {% if user %}
+                <div class="dropdown d-none d-md-block">
+                    <button class="btn rounded-pill px-4 py-1 d-flex align-items-center gap-2 transition-all shadow-sm border-0 text-white dropdown-toggle"
+                            style="background: var(--brand-gradient); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2); font-weight: 600; letter-spacing: 0.01em;"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="small">{{ 'nav.myProfile'|trans }}</span>
+                        <div class="d-flex align-items-center justify-content-center rounded-circle"
+                             style="width: 32px; height: 32px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <i class="bi bi-person-circle text-white" style="font-size: 1.1rem;"></i>
+                        </div>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 animate-fade-in"
+                        style="min-width: 200px; top: 100% !important; margin-top: 10px;">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-3 py-2 px-3" href="{{ dashboard_url }}">
+                                <i class="bi bi-speedometer2 text-primary fs-5"></i>
+                                <span class="fw-semibold">{{ 'Dashboard'|trans }}</span>
+                            </a>
+                        </li>
+                        {% if is_granted('ROLE_DOCTOR') %}
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-3 py-2 px-3" href="{{ path('app_profile_edit') }}">
+                                    <i class="bi bi-pencil-square text-primary fs-5"></i>
+                                    <span class="fw-semibold">{{ 'dashboard.editProfile'|trans }}</span>
+                                </a>
+                            </li>
+                        {% endif %}
+                        <li><hr class="dropdown-divider opacity-10"></li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-3 py-2 px-3 text-danger" href="{{ path('app_logout') }}">
+                                <i class="bi bi-box-arrow-right fs-5"></i>
+                                <span class="fw-semibold">{{ 'dashboard.logout'|trans }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            {% else %}
+                <a href="{{ path('app_login') }}"
+                   class="btn rounded-pill px-4 py-1 d-none d-md-flex align-items-center gap-2 transition-all shadow-sm border-0 text-white"
+                   style="background: var(--brand-gradient); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2); font-weight: 600; letter-spacing: 0.01em;">
+                    <span class="small">{{ 'nav.login'|trans }}</span>
+                    <div class="d-flex align-items-center justify-content-center rounded-circle"
+                         style="width: 32px; height: 32px; background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);">
+                        <i class="bi bi-box-arrow-in-right text-white" style="font-size: 1.1rem;"></i>
+                    </div>
+                </a>
+            {% endif %}
+
+            <!-- Mobile Menu Toggle -->
+            <button id="mobile-nav-toggle" class="btn btn-link p-0 border-0 d-xl-none ms-2" style="background: transparent !important; box-shadow: none !important; border: none !important;">
+                <i class="bi bi-list fs-1 text-dark"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- Mobile Navigation Overlay -->
+<div id="mobile-nav-overlay" class="mobile-nav-overlay position-fixed top-0 start-0 w-100 h-100 bg-white d-xl-none d-none" style="z-index: 2000; padding: 80px 20px 120px; overflow-y: auto;">
+    <ul class="list-unstyled">
+        <li class="mb-4"><a href="{{ path('app_home', {'_locale': locale}) }}" class="fs-3 fw-bold text-dark text-decoration-none">{{ 'nav.home'|trans }}</a></li>
+        <li class="mb-4"><a href="{{ path('app_how_it_works', {'_locale': locale}) }}" class="fs-3 fw-bold text-dark text-decoration-none">{{ 'nav.howItWorks'|trans }}</a></li>
+        <li class="mb-4"><a href="{{ path('app_departments', {'_locale': locale}) }}" class="fs-3 fw-bold text-dark text-decoration-none">{{ 'nav.departments'|trans }}</a></li>
+        <li class="mb-4"><a href="{{ path('app_hospital_public_list', {'_locale': locale}) }}" class="fs-3 fw-bold text-dark text-decoration-none">{{ 'nav.locations'|trans }}</a></li>
+        <li class="mb-4"><a href="{{ path('app_contact', {'_locale': locale}) }}" class="fs-3 fw-bold text-dark text-decoration-none">{{ 'nav.contact'|trans }}</a></li>
+        <li class="mt-5">
+            <a href="{{ dashboard_url }}" class="btn btn-primary btn-lg w-100 rounded-pill mb-3">
+                {{ user ? 'nav.goToPortal'|trans : 'nav.login'|trans }}
+            </a>
+            {% if user %}
+                <a href="{{ path('app_logout') }}" class="btn btn-outline-danger btn-lg w-100 rounded-pill">
+                    {{ 'Logout'|trans }}
+                </a>
+            {% endif %}
+        </li>
+    </ul>
+    <button id="mobile-nav-close" class="position-absolute top-0 end-0 m-4 btn-close fs-3"></button>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const header = document.getElementById('header');
+        const langBtn = document.getElementById('lang-selector-btn');
+        const langDropdown = document.getElementById('lang-dropdown');
+        const mobileToggle = document.getElementById('mobile-nav-toggle');
+        const mobileClose = document.getElementById('mobile-nav-close');
+        const mobileOverlay = document.getElementById('mobile-nav-overlay');
+
+        // Scroll effect
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 20) {
+                header.classList.add('shadow-sm');
+                header.style.backgroundColor = 'rgba(248, 250, 252, 0.98)';
+                header.style.backdropFilter = 'blur(10px)';
+            } else {
+                header.classList.remove('shadow-sm');
+                header.style.backgroundColor = 'rgba(248, 250, 252, 0.95)';
+                header.style.backdropFilter = 'blur(10px)';
+            }
+        });
+
+        // Language dropdown
+        if (langBtn) {
+            langBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                langDropdown.classList.toggle('d-none');
+            });
+            document.addEventListener('click', () => langDropdown.classList.add('d-none'));
+        }
+
+        // Mobile nav
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', () => mobileOverlay.classList.remove('d-none'));
+            mobileClose.addEventListener('click', () => mobileOverlay.classList.add('d-none'));
+        }
+    });
+</script>

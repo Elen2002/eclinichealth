@@ -1,0 +1,121 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}{{ doctor.user.email|split('@')[0]|capitalize }} - {{ doctor.specialty }}{% endblock %}
+
+{% block body %}
+<section class="section py-5 mt-5">
+    <div class="container">
+        
+        <!-- Doctor Profile Card -->
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden mb-5">
+            <div class="row g-0">
+                <div class="col-md-4 bg-light d-flex align-items-center justify-content-center" style="min-height: 300px;">
+                    <!-- Placeholder for Doctor Image -->
+                    <i class="bi bi-person-fill text-secondary" style="font-size: 8rem;"></i>
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body p-5 d-flex flex-column h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <span class="badge bg-primary-subtle text-primary rounded-pill mb-2">{{ doctor.specialty }}</span>
+                                <h1 class="fw-bold display-6 mb-1">Dr. {{ doctor.user.email|split('@')[0]|capitalize }}</h1>
+                                <a href="{{ path('app_hospital_public_show', {'id': doctor.hospital.id}) }}" class="text-muted text-decoration-none">
+                                    <i class="bi bi-hospital me-1"></i> {{ doctor.hospital.name }}
+                                </a>
+                            </div>
+                            <div class="text-end">
+                                <div class="h2 fw-bold text-warning mb-0">
+                                    {{ averageRating }} <i class="bi bi-star-fill fs-4"></i>
+                                </div>
+                                <small class="text-muted">{{ reviewCount }} Reviews</small>
+                            </div>
+                        </div>
+
+                        <p class="lead text-muted mb-4">
+                            Highly experienced specialist dedicated to providing comprehensive care. Dr. {{ doctor.user.email|split('@')[0]|capitalize }} is known for a patient-centered approach and expertise in {{ doctor.specialty|lower }}.
+                        </p>
+
+                        <div class="mt-auto d-flex gap-3">
+                            <a href="{{ path('app_consultation_new', {'hospital': doctor.hospital.id, 'department': doctor.department.id, 'doctor': doctor.id}) }}" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold">
+                                Book Appointment
+                            </a>
+                            <button class="btn btn-outline-secondary btn-lg rounded-pill w-auto" onclick="document.getElementById('reviews').scrollIntoView({behavior: 'smooth'})">
+                                Read Reviews
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Info Column -->
+            <div class="col-lg-4 mb-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-4">Professional Info</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-3">
+                                <small class="text-muted d-block uppercase fw-bold" style="font-size: 0.7rem;">DEPARTMENT</small>
+                                <span class="fw-semibold">{{ doctor.department.name }}</span>
+                            </li>
+                            <li class="mb-3">
+                                <small class="text-muted d-block uppercase fw-bold" style="font-size: 0.7rem;">EXPERIENCE</small>
+                                <span class="fw-semibold">10+ Years</span>
+                            </li>
+                            <li class="mb-3">
+                                <small class="text-muted d-block uppercase fw-bold" style="font-size: 0.7rem;">LANGUAGES</small>
+                                <span class="fw-semibold">English, Armenian, Russian</span>
+                            </li>
+                             <li>
+                                <small class="text-muted d-block uppercase fw-bold" style="font-size: 0.7rem;">CONTACT</small>
+                                <span class="fw-semibold">{{ doctor.phone|default(doctor.hospital.phone) }}</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews Column -->
+            <div class="col-lg-8" id="reviews">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h3 class="fw-bold mb-0">Patient Reviews</h3>
+                    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                        <!-- Optional: Link to rate if they have an appointment (handled in profile usually) -->
+                    {% endif %}
+                </div>
+
+                {% for review in doctor.reviews %}
+                    <div class="card border-0 shadow-sm rounded-4 mb-3">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center me-3 fw-bold" style="width: 40px; height: 40px;">
+                                        {{ review.patient.email|first|upper }}
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0">{{ review.patient.email|split('@')[0]|capitalize }}</h6>
+                                        <small class="text-muted">{{ review.createdAt|date('M d, Y') }}</small>
+                                    </div>
+                                </div>
+                                <div class="text-warning">
+                                    {% for i in 1..5 %}
+                                        <i class="bi bi-star{{ i <= review.rating ? '-fill' : '' }}"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <p class="mb-0 text-muted">{{ review.comment }}</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5 bg-light rounded-4">
+                        <i class="bi bi-chat-square-quote fs-1 text-muted opacity-25 mb-3 d-block"></i>
+                        <p class="text-muted">No reviews yet. Be the first to share your experience!</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}

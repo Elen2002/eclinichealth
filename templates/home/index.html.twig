@@ -1,0 +1,282 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block body %}
+{% set locale = app.request.locale %}
+<div class="main-wrapper" style="background: var(--background-color);">
+
+    <!-- --- HERO SECTION --- -->
+    <section id="hero" class="hero-modern d-flex align-items-center py-5" style="min-height: 85vh; position: relative; overflow: hidden;">
+        <div class="hero-blob hero-blob-1 pulse-subtle" style="position: absolute; top: -10%; left: -5%; width: 500px; height: 500px; background: rgba(99, 102, 241, 0.08); border-radius: 50%; filter: blur(100px); z-index: 0;"></div>
+        <div class="hero-blob hero-blob-2 pulse-subtle" style="position: absolute; bottom: 10%; right: -5%; width: 400px; height: 400px; background: rgba(139, 92, 246, 0.12); border-radius: 50%; filter: blur(80px); z-index: 0;"></div>
+
+        <div class="container position-relative py-5">
+            <div class="row align-items-center gy-5">
+                <div class="col-lg-5" data-aos="fade-right">
+                    <h1 class="display-2 fw-bold mb-4" style="color: #0f172a; letter-spacing: -1.5px; line-height: 1.1;">
+                        {{ 'home.hero.title1'|trans }}<br />
+                        <span style="background: var(--brand-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{ 'home.hero.title2'|trans }}</span>
+                    </h1>
+                    <p class="lead mb-5" style="color: #555; fontSize: 1.2rem; maxWidth: 480px; lineHeight: 1.6;">
+                        {{ 'home.hero.subtitle'|trans }}
+                    </p>
+
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="#beauty-experience" class="btn btn-gradient-blue rounded-pill px-5 py-3 shadow-lg fw-bold" style="font-size: 1rem;">
+                            {{ 'home.hero.cta'|trans }}
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-7" data-aos="zoom-in" data-aos-delay="200">
+                    <div class="hero-image-container ps-lg-5">
+                        <div class="hero-image-card" style="position: relative;">
+                            <div style="position: absolute; inset: -20px; background: rgba(99, 102, 241, 0.03); border-radius: 40px; z-index: -1;"></div>
+                            <img src="{{ asset('build/img/hero-clinic-new.png') }}" alt="Futuristic Medical Clinic" class="img-fluid" style="border-radius: 32px; box-shadow: 0 40px 100px rgba(0,0,0,0.1); width: 100%; height: auto; object-fit: cover;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- --- BEAUTY ART & CALL TO ACTION SECTION --- -->
+    <section id="beauty-experience" class="section py-5 overflow-hidden" style="background: var(--surface-color);">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-5 mb-lg-0" data-aos="fade-right">
+                    <div class="position-relative">
+                        <div class="experience-badge mb-4">
+                            <span class="badge rounded-pill px-3 py-2" style="background: rgba(99, 102, 241, 0.1); color: var(--brand-color); font-size: 0.9rem;">
+                                {{ 'home.beautyArt.subtitle'|trans }}
+                            </span>
+                        </div>
+                        <h2 class="display-4 fw-bold mb-4" style="color: #1a1a1a; lineHeight: 1.2;">
+                            {{ 'home.beautyArt.title'|trans }}
+                        </h2>
+                        <p class="lead text-muted mb-4" style="font-size: 1.1rem;">
+                            {{ 'home.beautyArt.desc'|trans }}
+                        </p>
+                        <div class="features-list mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0 bg-success-subtle rounded-circle p-2 me-3" style="background: #ecfdf5;">
+                                    <i class="bi bi-calendar-check text-success"></i>
+                                </div>
+                                <span>{{ 'home.beautyArt.feature1'|trans }}</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0 bg-primary-subtle rounded-circle p-2 me-3" style="background: #eef2ff;">
+                                    <i class="bi bi-people text-primary"></i>
+                                </div>
+                                <span>{{ 'home.beautyArt.feature2'|trans }}</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 bg-info-subtle rounded-circle p-2 me-3" style="background: #ecfeff;">
+                                    <i class="bi bi-hospital text-info"></i>
+                                </div>
+                                <span>{{ 'home.beautyArt.feature3'|trans }}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-3">
+                            <a href="{{ path('app_consultation_new', {'_locale': locale}) }}" class="btn btn-gradient-blue rounded-pill px-5 py-3 shadow-lg fw-bold" style="width: auto; minWidth: 200px; textDecoration: none;">
+                                {{ 'home.beautyArt.cta'|trans }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <div class="image-stack position-relative ms-lg-5">
+                        <div class="image-stack-bg" style="position: absolute; top: 10%; left: -10%; width: 100%; height: 100%; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 50px; z-index: 0; transform: rotate(-3deg);"></div>
+                        <img src="{{ asset('build/img/booking-art-new.png') }}" alt="Medical Booking Experience" class="img-fluid position-relative shadow-2xl" style="border-radius: 40px; z-index: 1;">
+                        <div class="stats-badge position-absolute bottom-0 start-0 translate-middle-y translate-middle-x bg-white p-4 rounded-4 shadow-lg d-none d-md-block" style="z-index: 2; margin-left: 40px;">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-primary-subtle p-3 rounded-circle" style="background: #eef2ff;">
+                                    <i class="bi bi-people-fill text-primary fs-4"></i>
+                                </div>
+                                <div>
+                                    <h4 class="fw-bold mb-0">10k+</h4>
+                                    <p class="text-muted small mb-0">{{ 'home.beautyArt.happyClients'|trans }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- --- HOW IT WORKS SECTION --- -->
+    <section id="how-it-works" class="connected-loop-section text-center" style="background: var(--background-color);" data-aos="fade-up">
+        <div class="container py-5">
+            <div class="mb-5">
+                <h6 class="text-uppercase fw-bold" style="color: var(--accent-color);">{{ 'home.howItWorks.subtitle'|trans }}</h6>
+                <h2 class="display-6 fw-bold" style="color: var(--heading-color);">{{ 'home.howItWorks.title'|trans }}</h2>
+                <p class="text-muted">{{ 'home.howItWorks.desc'|trans }}</p>
+            </div>
+
+            <div class="position-relative py-5">
+                <div class="connected-line d-none d-lg-block"></div>
+                <div class="row justify-content-center align-items-center gy-5 position-relative" style="z-index: 2;">
+                    <div class="col-lg-4 col-md-6 d-flex justify-content-center">
+                        <div class="connected-node">
+                            <i class="bi bi-phone mb-2 fs-1 text-primary"></i>
+                            <span class="fw-bold">{{ 'home.howItWorks.patient'|trans }}</span>
+                            <span class="small opacity-75">{{ 'home.howItWorks.patientDesc'|trans }}</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 d-flex justify-content-center">
+                        <div class="connected-node center-node cursor-pointer" onclick="openChat()">
+                            <i class="bi bi-cpu mb-2 fs-1"></i>
+                            <span class="fw-bold fs-5">{{ 'home.howItWorks.coreAI'|trans }}</span>
+                            <span class="small opacity-75">{{ 'home.howItWorks.coreAIDesc'|trans }}</span>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 d-flex justify-content-center">
+                        <div class="connected-node">
+                            <i class="bi bi-person-badge mb-2 fs-1 text-info"></i>
+                            <span class="fw-bold">{{ 'home.howItWorks.specialist'|trans }}</span>
+                            <span class="small opacity-75">{{ 'home.howItWorks.specialistDesc'|trans }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- --- AI ASSISTANT SECTION --- -->
+    <section id="ai-assistant" class="section py-5 position-relative overflow-hidden" style="background: linear-gradient(135deg, #f5f3ff 0%, #f1f5f9 100%);">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-lg-6 order-2 order-lg-1" data-aos="fade-right">
+                    <div class="pe-lg-5">
+                        <h6 class="text-uppercase fw-bold mb-3" style="color: var(--brand-color); letter-spacing: 1px;">
+                            {{ 'home.aiChat.subtitle'|trans }}
+                        </h6>
+                        <h2 class="display-5 fw-bold mb-4">
+                            {{ 'home.aiChat.title'|trans }}
+                        </h2>
+                        <p class="lead text-muted mb-5">
+                            {{ 'home.aiChat.desc'|trans }}
+                        </p>
+                        <button onclick="openChat()" class="btn btn-gradient-blue rounded-pill px-5 py-3 shadow-lg fw-bold d-flex align-items-center gap-2">
+                            <i class="bi bi-chat-dots-fill"></i>
+                            {{ 'home.aiChat.cta'|trans }}
+                        </button>
+                    </div>
+                </div>
+                <div class="col-lg-6 order-1 order-lg-2 mb-5 mb-lg-0" data-aos="zoom-in">
+                    <div class="ai-visual-container position-relative">
+                        <div class="ai-glow-bg"></div>
+                        <img src="{{ asset('build/img/ai-assistant.png') }}" alt="AI Assistant" class="img-fluid rounded-5 shadow-2xl position-relative" style="z-index: 1; border: 1px solid rgba(255,255,255,0.3);">
+                        <div class="floating-card p-3 bg-white rounded-4 shadow-lg position-absolute top-0 end-0 translate-middle-y mt-5 me-n3 d-none d-md-block" style="z-index: 2;">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="status-dot pulse-success"></div>
+                                <span class="small fw-bold">{{ 'home.aiChat.typing'|trans }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- --- DEPARTMENTS SECTION --- -->
+    <section id="departments" class="section py-5" style="background: var(--background-color);">
+        <div class="container py-5" data-aos="fade-up">
+            <div class="mb-5">
+                <h2 class="display-6 fw-bold mb-2">{{ 'home.departments.title'|trans }}</h2>
+                <p class="text-muted mb-0">{{ 'home.departments.subtitle'|trans }}</p>
+            </div>
+
+            <div class="bento-grid">
+                {% for dept in departments %}
+                    {% if loop.first %}
+                        {% set dept_img = department_images[dept.id] ?? null %}
+                        <div class="bento-item department-card-large" style="grid-column: span 6; grid-row: span 2; background-image: {% if dept_img %}linear-gradient(to top, rgba(0,0,0,0.6), rgba(0,0,0,0.1)), url('{{ dept_img }}'){% elseif 'cardiology' in dept.name|lower %}linear-gradient(to top, rgba(0,0,0,0.9), transparent), url('{{ asset('build/img/cardiology_institute_bg.png') }}'){% else %}var(--brand-gradient){% endif %}; background-size: cover; background-position: center;">
+                            <div class="icon-box">
+                                <i class="bi bi-hospital text-white"></i>
+                            </div>
+                            <h4>{{ dept.name ?: 'hospital.unknownDept'|trans }}</h4>
+                            {% set desc = dept.description ?: 'hospital.noDesc'|trans %}
+                            <p>{{ desc|length > 120 ? desc|slice(0, 120) ~ '...' : desc }}</p>
+                        </div>
+                    {% else %}
+                        {% set dept_img = department_images[dept.id] ?? null %}
+                        <div class="bento-item department-card-small blue-theme" style="grid-column: span 3;{% if dept_img %} background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.55)), url('{{ dept_img }}'); background-size: cover; background-position: center;{% endif %}">
+                            <div class="icon-box">
+                                <i class="bi bi-hospital"></i>
+                            </div>
+                            <h5>{{ dept.name ?: 'hospital.unknownDept'|trans }}</h5>
+                            {% set desc = dept.description ?: 'hospital.noDesc'|trans %}
+                            <p>{{ desc|length > 80 ? desc|slice(0, 80) ~ '...' : desc }}</p>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="col-12 text-center text-muted">
+                        <p>{{ 'home.departments.noData'|trans }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- --- OUR NETWORK SECTION --- -->
+    <section id="network" class="section py-5" style="background: var(--surface-color);">
+        <div class="container py-5" data-aos="fade-up">
+            <div class="d-flex justify-content-between align-items-end mb-5">
+                <div class="text-start">
+                    <h2 class="display-6 fw-bold mb-2">{{ 'home.network.title'|trans }}</h2>
+                    <p class="text-muted mb-0">{{ 'home.network.subtitle'|trans }}</p>
+                </div>
+                <div class="ms-auto">
+                    <a href="{{ path('app_hospital_public_list', {'_locale': locale}) }}" class="btn btn-primary btn-sm rounded-pill px-3 py-2" style="font-size: 0.8rem; font-weight: 400; white-space: nowrap;">
+                        {{ 'dashboard.viewAll'|trans }} <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {% for hospital in hospitals|slice(0, 3) %}
+                    <div class="col-lg-4 col-md-6">
+                        <a href="{{ path('app_hospital_public_show', {'id': hospital.id, '_locale': locale}) }}" class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden transition-hover text-decoration-none">
+                            <div class="position-relative" style="height: 220px;">
+                                {% if hospital.workingHours == '24/7' %}
+                                    <div class="badge bg-success position-absolute top-0 end-0 m-3 rounded-pill px-3 py-2 fw-bold" style="z-index: 5; font-size: 0.7rem;">{{ 'OPEN 24/7'|trans }}</div>
+                                {% else %}
+                                    <div class="badge bg-primary position-absolute top-0 end-0 m-3 rounded-pill px-3 py-2 fw-bold" style="z-index: 5; font-size: 0.7rem;">{{ hospital.workingHours }}</div>
+                                {% endif %}
+                                <img src="{{ hospital.images[0] ?: asset('build/img/about.png') }}" alt="{{ hospital.name }}" class="w-100 h-100" style="object-fit: cover;">
+                            </div>
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold mb-1 text-dark">{{ hospital.name }}</h5>
+                                <p class="text-muted small mb-4"><i class="bi bi-geo-alt me-1"></i> {{ hospital.address }}</p>
+
+                                <div class="row g-2 pt-3 border-top">
+                                    <div class="col-4">
+                                        <div class="bg-light p-2 rounded text-center">
+                                            <div class="fw-bold mb-0 text-dark">{{ hospital.bedsCount|default(0)|number_format }}</div>
+                                            <small class="text-muted" style="font-size: 0.65rem;">{{ 'Beds'|trans }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="bg-light p-2 rounded text-center">
+                                            <div class="fw-bold mb-0 text-dark">{{ hospital.staffCount|default(0)|number_format }}</div>
+                                            <small class="text-muted" style="font-size: 0.65rem;">{{ 'Staff'|trans }}</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="bg-light p-2 rounded text-center">
+                                            <div class="fw-bold mb-0 {{ hospital.hasAmbulance ? 'text-success' : 'text-danger' }}">{{ (hospital.hasAmbulance ? 'Yes' : 'No')|trans }}</div>
+                                            <small class="text-muted" style="font-size: 0.65rem;">{{ 'ER'|trans }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

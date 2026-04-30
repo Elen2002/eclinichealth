@@ -1,0 +1,92 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block title %}{{ 'Department Details'|trans }}{% endblock %}
+{% block dashboard_title %}{{ 'Department Details'|trans }}{% endblock %}
+{% block dashboard_subtitle %}{{ 'Viewing structural information for'|trans }} {{ department.name }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="container-fluid p-0" data-aos="fade-up">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-4 text-primary">
+                            <i class="bi bi-diagram-3 fs-4"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0 text-dark">{{ 'General Information'|trans }}</h5>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ path('app_department_edit', {'id': department.id}) }}" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm">
+                            <i class="bi bi-pencil-square me-2"></i>{{ 'Edit'|trans }}
+                        </a>
+                        <a href="{{ path('app_department_index') }}" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm">
+                            <i class="bi bi-arrow-left me-2"></i>{{ 'Back'|trans }}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row gy-4">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4 border border-white">
+                                <label class="small text-muted fw-bold text-uppercase tracking-wider mb-1">{{ 'ID'|trans }}</label>
+                                <div class="h5 fw-bold text-dark mb-0">#{{ department.id }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-4 border border-white">
+                                <label class="small text-muted fw-bold text-uppercase tracking-wider mb-1">{{ 'Department Name'|trans }}</label>
+                                <div class="h5 fw-bold text-dark mb-0">{{ department.name }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-5 pt-4 border-top">
+                        <div class="d-flex align-items-center justify-content-between mb-4">
+                            <h6 class="fw-bold text-dark mb-0">{{ 'Department Security'|trans }}</h6>
+                            <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill small">Danger Zone</span>
+                        </div>
+                        <div class="bg-danger bg-opacity-5 p-4 rounded-4 border border-danger border-opacity-10">
+                            <p class="small text-muted mb-4">Deleting this department will remove all associations with doctors and hospitals. This action cannot be undone.</p>
+                            {{ include('department/_delete_form.html.twig') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 text-center d-flex flex-column align-items-center justify-content-center">
+                    {% if department_image %}
+                        <div class="mb-4 rounded-4 overflow-hidden shadow-sm" style="height: 250px;">
+                            <img src="{{ department_image }}" class="w-100 h-100 object-fit-cover" alt="{{ department.name }}">
+                        </div>
+                    {% else %}
+                        <div class="bg-primary bg-opacity-10 p-4 rounded-circle mb-4">
+                            <i class="bi bi-info-circle-fill fs-1 text-primary"></i>
+                        </div>
+                    {% endif %}
+                    <h5 class="fw-bold mb-3">Management Insight</h5>
+                    <p class="text-muted small">Departments serve as the core organizational units of the medical network. Ensure names are clear and localized for all regions.</p>
+                    <div class="mt-4 w-100">
+                        <div class="d-flex justify-content-between mb-2 small">
+                            <span class="text-muted">Status</span>
+                            <span class="text-success fw-bold">Operational</span>
+                        </div>
+                        <div class="progress" style="height: 6px;">
+                            <div class="progress-bar bg-success" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .tracking-wider { letter-spacing: 0.05em; }
+    .bg-opacity-5 { --bs-bg-opacity: 0.05; }
+    .bg-opacity-10 { --bs-bg-opacity: 0.1; }
+</style>
+{% endblock %}

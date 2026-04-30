@@ -1,0 +1,21 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}{{ 'Chat with Dr.'|trans }} {{ doctor.user.firstName or doctor.user.lastName ? doctor.user.firstName ~ ' ' ~ doctor.user.lastName : doctor.user.email|split('@')[0]|capitalize }}{% endblock %}
+
+{% block body %}
+<div id="doctor-patient-chat-root" 
+     data-doctor="{{ {
+         id: doctor.id,
+         identifier: doctor.user.email|split('@')[0]|capitalize,
+         name: doctor.user.firstName or doctor.user.lastName ? doctor.user.firstName ~ ' ' ~ doctor.user.lastName : doctor.user.email|split('@')[0]|capitalize,
+         avatar: doctor.user.avatar,
+         specialty: doctor.specialty|default(doctor.department.name|default('Specialist'|trans))
+     }|json_encode }}"
+     data-patient="{{ {
+         id: app.user.id,
+         identifier: app.user.userIdentifier,
+         email: app.user.email
+     }|json_encode }}"
+     data-locale="{{ app.request.locale }}">
+</div>
+{% endblock %}

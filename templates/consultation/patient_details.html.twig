@@ -1,0 +1,134 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}{{ 'Consultation Details'|trans }}{% endblock %}
+
+{% block body %}
+<div class="container py-5 mt-5">
+    <div class="row align-items-center mb-5">
+        <div class="col">
+            <h1 class="h3 fw-bold mb-0 text-dark">{{ 'Consultation Details'|trans }}</h1>
+        </div>
+        <div class="col-auto">
+            <a href="{{ path('app_profile') }}" class="btn btn-sm rounded-pill px-3 shadow-sm transition-all d-inline-flex align-items-center" style="background: rgba(133, 96, 205, 0.08); color: var(--brand-color); border: 1px solid rgba(133, 96, 205, 0.2); font-weight: 600; font-size: 0.85rem; height: 36px;">
+                <i class="bi bi-chevron-left small me-1"></i> {{ 'Back'|trans }}
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Doctor Info -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-body p-4 text-center">
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                         <i class="bi bi-person-fill fs-2 text-secondary"></i>
+                    </div>
+                    {% if consultation.doctor and consultation.doctor.user %}
+                        <h4 class="fw-bold mb-1">{{ consultation.doctor.user.email|split('@')[0]|capitalize }}</h4>
+                        {% if consultation.department %}
+                            <p class="text-primary fw-bold mb-1">{{ consultation.department.name }}</p>
+                        {% endif %}
+                        <p class="text-muted small mb-3">{{ consultation.doctor.user.email }}</p>
+                        
+                        <div class="d-flex justify-content-center gap-2 mb-3">
+                            <a href="mailto:{{ consultation.doctor.user.email }}" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center transition-all shadow-sm" style="width: 38px; height: 38px; background: #fff; color: var(--brand-color); border: 1px solid #eee;">
+                                <i class="bi bi-envelope"></i>
+                            </a>
+                            <a href="tel:{{ consultation.doctor.phone ?? '#' }}" class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center transition-all shadow-sm" style="width: 38px; height: 38px; background: #fff; color: var(--brand-color); border: 1px solid #eee;">
+                                <i class="bi bi-telephone"></i>
+                            </a>
+                        </div>
+                    {% else %}
+                        <h4 class="fw-bold mb-1">{{ 'Unknown Doctor'|trans }}</h4>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Appointment Info -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-white border-0 py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                         <h5 class="fw-bold mb-0">{{ 'Appointment Summary'|trans }}</h5>
+                         {% if consultation.status == 'confirmed' %}
+                             <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2">{{ 'Confirmed'|trans }}</span>
+                         {% elseif consultation.status == 'cancelled' %}
+                             <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2">{{ 'Cancelled'|trans }}</span>
+                         {% else %}
+                             <span class="badge bg-warning-subtle text-warning rounded-pill px-3 py-2">{{ 'Pending'|trans }}</span>
+                         {% endif %}
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                     <div class="row g-4 mb-4">
+                         <div class="col-md-6">
+                             <div class="p-3 bg-light rounded-3">
+                                 <label class="small text-muted fw-bold">{{ 'Requested Date'|trans }}</label>
+                                 <div class="fw-bold fs-5">{{ consultation.requestedDate|date('M d, Y H:i') }}</div>
+                             </div>
+                         </div>
+                         {% if consultation.doctorProposedDate %}
+                         <div class="col-md-6">
+                             <div class="p-3 bg-primary-subtle text-primary rounded-3 border border-primary-subtle">
+                                 <label class="small opacity-75 fw-bold">{{ 'Confirmed Date'|trans }}</label>
+                                 <div class="fw-bold fs-5">{{ consultation.doctorProposedDate|date('M d, Y H:i') }}</div>
+                             </div>
+                         </div>
+                         {% endif %}
+                     </div>
+
+                     {% if consultation.message %}
+                     <div class="mb-4">
+                        <label class="small text-muted fw-bold">{{ 'Your Health Complaint'|trans }}</label>
+                        <div class="p-3 bg-light rounded-3 mt-1">
+                            {{ consultation.message }}
+                        </div>
+                     </div>
+                     {% endif %}
+
+                     {% if consultation.status == 'confirmed' %}
+                        <h6 class="fw-bold mb-3 border-bottom pb-2 mt-4">{{ 'Doctor\'s Orders'|trans }}</h6>
+
+                        <div class="mb-4">
+                            <label class="small text-muted fw-bold">{{ 'Prescription'|trans }}</label>
+                            {% if consultation.prescription %}
+                                <div class="mt-1 p-3 border rounded-3 bg-light">{{ consultation.prescription|nl2br }}</div>
+                            {% else %}
+                                <div class="mt-1 text-muted fst-italic">{{ 'No prescription provided yet.'|trans }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="small text-muted fw-bold">{{ 'Required Tests'|trans }}</label>
+                            {% if consultation.medicalTests %}
+                                <div class="mt-1 p-3 border rounded-3 bg-light">{{ consultation.medicalTests|nl2br }}</div>
+                            {% else %}
+                                <div class="mt-1 text-muted fst-italic">{{ 'No specific tests ordered.'|trans }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Patient Approval Section -->
+                        <div class="mt-5 border-top pt-4 text-end text-center">
+                            {% if consultation.isPatientApproved %}
+                                <div class="d-inline-flex align-items-center gap-2 text-success bg-success-subtle px-4 py-2 rounded-pill">
+                                    <i class="bi bi-check-circle-fill fs-5"></i>
+                                    <span class="fw-bold">{{ 'You have accepted this plan'|trans }}</span>
+                                </div>
+                            {% else %}
+                                <p class="text-muted small mb-3">{{ 'Please review the prescription and tests above. Click accept to confirm you understand and agree.'|trans }}</p>
+                                <div class="d-flex justify-content-center">
+                                    <a href="{{ path('app_consultation_approve_patient', {'id': consultation.id}) }}" class="btn btn-success px-5 py-3 rounded-pill shadow-sm fw-bold transition-all" style="background: var(--brand-color); border: none;">
+                                        <i class="bi bi-check2-circle me-2"></i>{{ 'Accept & Confirm'|trans }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                     {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

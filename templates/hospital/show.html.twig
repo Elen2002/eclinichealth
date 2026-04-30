@@ -1,0 +1,216 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block title %}{{ hospital.name }} - {{ 'Overview'|trans }}{% endblock %}
+{% block dashboard_title %}{{ hospital.name }}{% endblock %}
+{% block dashboard_subtitle %}{{ 'Branch details and structural overview'|trans }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="row">
+    <div class="col-lg-4">
+        <div class="medical-card p-3">
+            <div class="text-center mb-4">
+                <div class="medical-icon-box mx-auto" style="background: rgba(99, 102, 241, 0.1); color: var(--brand-color);">
+                    <i class="bi bi-hospital"></i>
+                </div>
+                <h4 class="fw-bold mt-3">{{ hospital.name }}</h4>
+                <div class="d-flex flex-column gap-2 align-items-center">
+                    <span class="badge bg-success-subtle text-success">{{ 'Active Branch'|trans }}</span>
+                    <a href="{{ path('app_hospital_edit', {'id': hospital.id}) }}#department" class="medical-btn btn-sm py-1 px-3" style="font-size: 0.7rem;">
+                        <i class="bi bi-gear me-1"></i> {{ 'Manage Departments'|trans }}
+                    </a>
+                </div>
+            </div>
+            
+            <ul class="list-group list-group-flush small">
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted">{{ 'ID'|trans }}</span>
+                    <span class="fw-bold">EC-{{ hospital.id }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted">{{ 'Email'|trans }}</span>
+                    <span class="fw-bold">{{ hospital.email }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted">{{ 'Phone'|trans }}</span>
+                    <span class="fw-bold">{{ hospital.phone }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted">{{ 'Working Hours'|trans }}</span>
+                    <span class="fw-bold text-primary">{{ hospital.workingHours|default('24/7') }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted">{{ 'Beds Count'|trans }}</span>
+                    <span class="fw-bold">{{ hospital.bedsCount|default('0') }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between px-0 py-2">
+                    <span class="text-muted">{{ 'Ambulance'|trans }}</span>
+                    {% if hospital.hasAmbulance %}
+                        <span class="badge bg-success-subtle text-success py-1 px-2 small">{{ 'Available'|trans }}</span>
+                    {% else %}
+                        <span class="badge bg-danger-subtle text-danger py-1 px-2 small">{{ 'N/A'|trans }}</span>
+                    {% endif %}
+                </li>
+                <li class="list-group-item px-0 py-2 border-0">
+                    <span class="text-muted d-block mb-1">{{ 'Address'|trans }}</span>
+                    <p class="mb-0 fw-bold text-end">{{ hospital.address }}</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <div class="medical-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold mb-0"><i class="bi bi-diagram-3 me-2"></i>{{ 'Active Departments'|trans }}</h5>
+                
+                <form action="{{ path('app_hospital_add_department', {'id': hospital.id}) }}" method="POST" class="d-flex gap-2 align-items-center">
+                    <select name="department_id" class="form-select medical-input py-1 px-3 small" style="width: auto; min-width: 200px; font-size: 0.8rem;">
+                        <option value="">{{ 'Select department...'|trans }}</option>
+                        {% for dept in get_all_departments() %}
+                            <option value="{{ dept.id }}">{{ dept.name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="medical-btn btn-sm py-1 px-3" style="font-size: 0.8rem;">
+                        <i class="bi bi-plus-lg"></i> {{ 'Add'|trans }}
+                    </button>
+                </form>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-management">
+                    <thead>
+                        <tr>
+                            <th>{{ 'Department'|trans }}</th>
+                            <th>{{ 'Status'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for hd in hospital.hospitalDepartments %}
+                        <tr>
+                            <td><strong>{{ hd.department.name }}</strong></td>
+                            <td><span class="badge bg-primary-subtle text-primary">{{ 'Operational'|trans }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted py-4">{{ 'No departments assigned.'|trans }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="medical-card mt-4">
+            <h5 class="fw-bold mb-4"><i class="bi bi-people me-2"></i>{{ 'Medical Staff'|trans }}</h5>
+            
+            <div class="d-flex flex-wrap flex-md-nowrap justify-content-between align-items-center bg-light p-3 rounded-3 border mb-4 gap-3">
+                
+                <form action="{{ path('app_hospital_assign_doctor', {'id': hospital.id}) }}" method="POST" class="d-flex flex-wrap gap-2 align-items-center m-0">
+                    <select name="doctor_id" class="form-select medical-input py-1 px-3 small" style="width: auto; min-width: 180px; font-size: 0.8rem;">
+                        <option value="">{{ 'Select doctor...'|trans }}</option>
+                        {% for doctor in get_all_doctors() %}
+                            <option value="{{ doctor.id }}">{{ doctor.user.email }} ({{ doctor.specialty|default('General'|trans) }})</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <select name="department_id" class="form-select medical-input py-1 px-3 small" style="width: auto; min-width: 150px; font-size: 0.8rem;">
+                        <option value="">{{ 'Select department...'|trans }}</option>
+                        {% for hd in hospital.hospitalDepartments %}
+                            <option value="{{ hd.department.id }}">{{ hd.department.name }}</option>
+                        {% endfor %}
+                    </select>
+                    
+                    <button type="submit" class="medical-btn btn-sm py-1 px-3" style="font-size: 0.8rem;">
+                        <i class="bi bi-person-plus"></i> {{ 'Assign'|trans }}
+                    </button>
+                </form>
+
+                <div class="ms-auto flex-shrink-0">
+                    <button type="button" class="btn btn-primary btn-sm py-1 px-3" style="font-size: 0.8rem; border-radius: 10px; white-space: nowrap;" data-bs-toggle="modal" data-bs-target="#onboardDoctorModal">
+                        <i class="bi bi-person-plus-fill me-1"></i> {{ 'Onboard New Doctor'|trans }}
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-management">
+                    <thead>
+                        <tr>
+                            <th>{{ 'Doctor'|trans }}</th>
+                            <th>{{ 'Department'|trans }}</th>
+                            <th>{{ 'Specialty'|trans }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for doctor in hospital.doctors %}
+                        <tr>
+                            <td><strong>{{ doctor.user.email }}</strong></td>
+                            <td>
+                                {% if doctor.department %}
+                                    <span class="badge bg-secondary-subtle text-secondary">{{ doctor.department.name }}</span>
+                                {% else %}
+                                    <span class="text-muted small">{{ 'Not assigned'|trans }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ doctor.specialty|trans }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted py-4">{{ 'No staff assigned.'|trans }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Onboard Doctor Modal -->
+<div class="modal fade" id="onboardDoctorModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
+            <div class="modal-header border-0 p-4">
+                <h5 class="modal-title fw-bold">{{ 'Onboard Medical Specialist'|trans }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4 pt-0">
+                {{ form_start(doctor_form) }}
+                    <div class="row gy-3">
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">{{ 'Specialist Name'|trans }}</label>
+                            {{ form_widget(doctor_form.name, {'attr': {'class': 'form-control medical-input', 'placeholder': 'Dr. John Doe'|trans}}) }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">{{ 'Professional Email'|trans }}</label>
+                            {{ form_widget(doctor_form.email, {'attr': {'class': 'form-control medical-input', 'placeholder': 'doctor@eclinic.com'|trans}}) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">{{ 'Specialty / Title'|trans }}</label>
+                            {{ form_widget(doctor_form.specialty, {'attr': {'class': 'form-control medical-input', 'placeholder': 'e.g. Cardiologist'|trans}}) }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">{{ 'Role Category'|trans }}</label>
+                            {{ form_widget(doctor_form.roleType, {'attr': {'class': 'form-control medical-input', 'placeholder': 'Surgeon, etc'|trans}}) }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">{{ 'Contact Phone'|trans }}</label>
+                            {{ form_widget(doctor_form.phone, {'attr': {'class': 'form-control medical-input', 'placeholder': '+1 234...'}}) }}
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold text-muted">{{ 'Assign to Department'|trans }}</label>
+                            {{ form_widget(doctor_form.department, {'attr': {'class': 'form-select medical-input'}}) }}
+                        </div>
+                        <div class="col-md-12 d-none">
+                            {{ form_widget(doctor_form.hospital, {'attr': {'class': 'form-control'}}) }}
+                        </div>
+                    </div>
+            </div>
+            <div class="modal-footer border-0 p-4 pt-0 d-flex gap-3">
+                <button type="button" class="btn btn-outline-secondary flex-grow-1" data-bs-dismiss="modal" style="border-radius: 12px; padding: 10px 20px; font-weight: 600; border-width: 2px;">{{ 'Cancel'|trans }}</button>
+                <button type="submit" class="medical-btn flex-grow-1" style="padding: 10px 20px;">{{ 'Hire Specialist'|trans }}</button>
+            </div>
+            {{ form_end(doctor_form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

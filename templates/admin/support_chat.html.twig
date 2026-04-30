@@ -1,0 +1,20 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block title %}Support Chat - E-Clinic Admin{% endblock %}
+{% block dashboard_title %}Support Management{% endblock %}
+{% block dashboard_subtitle %}Respond to patient inquiries in real-time{% endblock %}
+
+{% block dashboard_content %}
+    <div class="row">
+        <div class="col-md-12">
+            <div id="admin-chat-root" class="medical-card shadow-sm border-0" style="height: 750px; overflow: hidden; border-radius: 24px;">
+                <div class="d-flex align-items-center justify-content-center h-100">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary mb-3" role="status"></div>
+                        <p class="text-muted">Initializing Secure Support Channel...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

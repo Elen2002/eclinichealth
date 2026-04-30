@@ -1,0 +1,8 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}{{ hospital.name }}{% endblock %}
+
+{% block body %}
+    <div id="hospital-page-root" data-hospital="{{ hospital|serialize('json', { groups: ['hospital:read', 'doctor:read', 'department:read'] }) }}"></div>
+{% endblock %}
+

@@ -1,0 +1,120 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Register - eclinic-health{% endblock %}
+
+{% block body %}
+    <div class="auth-wrapper min-vh-100 d-flex align-items-stretch" style="background: var(--background-color);">
+        <!-- Side Branding Panel -->
+        <div class="auth-side d-none d-lg-flex flex-column justify-content-between p-5 text-white" 
+             style="width: 40%; background: var(--brand-gradient); position: relative; overflow: hidden;">
+            <div class="auth-blob position-absolute top-0 start-0 w-100 h-100 opacity-25" 
+                 style="background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.2) 0%, transparent 50%);"></div>
+            
+            <div class="position-relative">
+                <a href="{{ path('app_home') }}" class="text-white text-decoration-none d-flex align-items-center gap-2 mb-5">
+                    <img src="{{ asset('build/img/header-logo.png') }}" alt="Logo" class="img-fluid" style="max-height: 48px;">
+                </a>
+                
+                <div class="mt-5">
+                    <h1 class="display-4 fw-bold mb-4 text-white" style="line-height: 1.1;">{{ 'Join Our Medical Network.'|trans }}</h1>
+                    <p class="lead text-white opacity-75">{{ 'Create an account to start your journey with modern healthcare. Connect with doctors and manage your appointments effortlessly.'|trans }}</p>
+                </div>
+
+                <div class="mt-5 pt-4 d-none d-xl-block">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="p-3 rounded-4 transition-all hover-translate-y" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); width: 85%;">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center text-primary flex-shrink-0" style="width: 48px; height: 48px;">
+                                    <i class="bi bi-people-fill fs-4" style="color: var(--brand-color);"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1 fw-bold text-white">{{ 'Expert Specialists'|trans }}</h5>
+                                    <p class="mb-0 small text-white opacity-75">{{ 'Connect with top-rated medical professionals.'|trans }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-4 transition-all hover-translate-y ms-4" style="background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); width: 85%;">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-white rounded-circle d-flex align-items-center justify-content-center text-primary flex-shrink-0" style="width: 48px; height: 48px;">
+                                    <i class="bi bi-calendar2-check-fill fs-4" style="color: var(--brand-color);"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-1 fw-bold text-white">{{ 'Easy Booking'|trans }}</h5>
+                                    <p class="mb-0 small text-white opacity-75">{{ 'Schedule appointments with just a few clicks.'|trans }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="position-relative small opacity-50">
+                &copy; {{ "now"|date("Y") }} eClinic Health. {{ 'Premium Healthcare Solutions.'|trans }}
+            </div>
+        </div>
+
+        <!-- Form Panel -->
+        <div class="auth-form-panel flex-grow-1 d-flex align-items-center justify-content-center p-4">
+            <div class="w-100" style="max-width: 420px;">
+                <div class="text-center mb-5 d-lg-none">
+                    <img src="{{ asset('build/img/header-logo.png') }}" alt="Logo" class="img-fluid mb-3" style="max-height: 48px;">
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="fw-bold text-dark">{{ 'Create Account'|trans }}</h2>
+                    <p class="text-muted">{{ 'Join eclinic-health to manage your medical journey'|trans }}</p>
+                </div>
+
+                {% for flash_error in app.flashes('verify_email_error') %}
+                    <div class="alert alert-danger mb-4 border-0 shadow-sm" style="border-radius: 12px; background: #fff1f2; color: #e11d48;">
+                        <i class="bi bi-exclamation-triangle me-2"></i> {{ flash_error }}
+                    </div>
+                {% endfor %}
+
+                {{ form_start(registrationForm, {'attr': {'class': 'medical-form'}}) }}
+                    <div class="mb-3">
+                        {{ form_label(registrationForm.email, 'Email Address'|trans, {'label_attr': {'class': 'form-label small fw-bold text-dark'}}) }}
+                        {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control medical-input py-3', 'placeholder': 'name@example.com'}}) }}
+                        <div class="text-danger small mt-1">{{ form_errors(registrationForm.email) }}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form_label(registrationForm.plainPassword, 'Password'|trans, {'label_attr': {'class': 'form-label small fw-bold text-dark'}}) }}
+                        {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control medical-input py-3', 'placeholder': 'Minimum 6 characters'|trans}}) }}
+                        <div class="text-danger small mt-1">{{ form_errors(registrationForm.plainPassword) }}</div>
+                    </div>
+
+                    <div class="mb-4 d-flex align-items-center gap-2">
+                        {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input'}}) }}
+                        {{ form_label(registrationForm.agreeTerms, 'I agree to the terms and conditions'|trans, {'label_attr': {'class': 'form-check-label small text-muted'}}) }}
+                    </div>
+                    <div class="text-danger small mb-3">{{ form_errors(registrationForm.agreeTerms) }}</div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-lg transition-all hover-translate-y mb-4" 
+                            style="background: var(--brand-gradient); border: none;">
+                        {{ 'Create Account'|trans }} <i class="bi bi-person-plus-fill ms-2"></i>
+                    </button>
+
+                    <div class="text-center">
+                        <span class="text-muted small">{{ 'Already have an account?'|trans }}</span>
+                        <a href="{{ path('app_login') }}" class="small fw-bold text-decoration-none ms-1" style="color: var(--accent-color);">{{ 'Sign in instead'|trans }}</a>
+                    </div>
+                {{ form_end(registrationForm) }}
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .hover-translate-y:hover {
+            transform: translateY(-2px);
+        }
+        .medical-input:focus {
+            border-color: var(--brand-color);
+            box-shadow: 0 0 0 4px rgba(25, 119, 204, 0.1);
+        }
+        .form-check-input:checked {
+            background-color: var(--brand-color);
+            border-color: var(--brand-color);
+        }
+    </style>
+{% endblock %}

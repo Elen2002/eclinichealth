@@ -1,0 +1,25 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block title %}Edit Department{% endblock %}
+{% block dashboard_title %}{{ 'Edit Department'|trans }}{% endblock %}
+{% block dashboard_subtitle %}{{ 'Update medical classification details'|trans }}{% endblock %}
+
+{% block dashboard_nav %}
+    <li>
+        <a href="{{ path('app_department_index') }}" class="nav-item-link">
+            <i class="bi bi-arrow-left"></i>
+            <span>{{ 'Back to List'|trans }}</span>
+        </a>
+    </li>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="medical-card">
+            <h5 class="fw-bold mb-4">{{ 'Department Details'|trans }}</h5>
+            {{ include('department/_form.html.twig', {'button_label': 'Update'|trans}) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}{{ department.name }} - E-Clinic Health{% endblock %}
+
+{% block body %}
+    <main class="main">
+        <div id="department-detail-page-root"
+             data-department="{{ department|serialize('json', { groups: 'department:read' })|e('html_attr') }}"
+             data-image="{{ department_image }}"
+        ></div>
+    </main>
+{% endblock %}

@@ -1,0 +1,154 @@
+.auth-section {
+    background: var(--background-color);
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.1) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, rgba(139, 92, 246, 0.1) 0, transparent 50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.auth-container {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.login-box,
+.signup-box {
+    background: var(--surface-color);
+    border-radius: 20px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    padding: 40px 50px;
+    width: 350px;
+    text-align: center;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.login-box h2,
+.signup-box h2 {
+    margin-bottom: 25px;
+    color: black;
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    outline: none;
+    font-size: 14px;
+}
+
+input:focus {
+    border-color: var(--brand-color);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.forgot {
+    display: block;
+    text-align: left;
+    color: var(--brand-color);
+    font-size: 14px;
+    text-decoration: none;
+    margin-bottom: 15px;
+}
+
+.forgot:hover {
+    text-decoration: underline;
+}
+
+.login-box .btn,
+.signup-box .btn {
+    width: 100%;
+}
+
+.btn {
+    background: var(--brand-gradient);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+    filter: brightness(1.1);
+}
+
+.btn-link {
+    color: var(--brand-color);
+    border: none;
+    border-radius: 5px;
+    padding: 12px;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: var(--brand-color);
+}
+
+p {
+    font-size: 14px;
+    color: #333;
+    margin-top: 20px;
+}
+
+p a {
+    color: var(--brand-color);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+p a:hover {
+    text-decoration: underline;
+}
+
+/* AI Assistant Section Styles */
+.ai-glow-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+    z-index: 0;
+}
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+}
+.pulse-success {
+    animation: pulse-green 2s infinite;
+}
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+.bg-primary-gradient {
+    background: var(--brand-gradient);
+    color: white;
+}
+.connected-node.center-node {
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.connected-node.center-node:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+}

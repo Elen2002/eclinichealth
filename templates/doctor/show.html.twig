@@ -1,0 +1,51 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}Doctor {{ doctor.user.email }}{% endblock %}
+
+{% block body %}
+    <section id="doctor-details" class="doctor-details section">
+        <div class="container" data-aos="fade-up">
+            <div class="row gy-4">
+                <div class="col-lg-4">
+                    <div class="member-img">
+                        <img src="{{ asset('assets/img/doctors/doctors-1.jpg') }}" class="img-fluid" alt="">
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="member-info">
+                        <h2>{{ doctor.user.email }}</h2> <!-- In real app use name logic -->
+                        <span class="d-block mb-3 text-primary">{{ doctor.specialty }}</span>
+                        <p class="fst-italic">{{ doctor.roleType }}</p>
+                        
+                        <div class="reviews mt-4">
+                            <h4>{{ 'Reviews'|trans }}</h4>
+                            {% if doctor.reviews|length > 0 %}
+                                {% for review in doctor.reviews %}
+                                    <div class="review-item border-bottom py-3">
+                                        <div class="stars text-warning">
+                                            {% for i in 1..5 %}
+                                                {% if i <= review.rating %}
+                                                    <i class="bi bi-star-fill"></i>
+                                                {% else %}
+                                                    <i class="bi bi-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <p class="mb-1">{{ review.comment }}</p>
+                                        <small class="text-muted">{{ review.createdAt|date('Y-m-d') }}</small>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <p>{{ 'No reviews yet.'|trans }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div class="mt-4">
+                            <a href="{{ path('app_consultation_new', {'doctor_id': doctor.id}) }}" class="btn btn-primary">{{ 'Book Appointment'|trans }}</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

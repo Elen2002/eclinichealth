@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <link rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+    {% block stylesheets %}
+        {{ encore_entry_link_tags('app') }}
+    {% endblock %}
+
+    {% block javascripts %}
+        {{ encore_entry_script_tags('app') }}
+    {% endblock %}
+
+    <script>
+        window.APP_DATA = {
+            user: {{ app.user ? {
+                'identifier': app.user.email|split('@')[0]|capitalize,
+                'email': app.user.email,
+                'dashboard_url': is_granted('ROLE_SUPER_ADMIN') ? path('app_super_admin_dashboard') : (is_granted('ROLE_ADMIN') ? path('app_admin_dashboard') : (is_granted('ROLE_DOCTOR') ? path('app_doctor_dashboard') : path('app_profile')))
+            }|json_encode|raw : 'null' }},
+            locale: '{{ app.request.locale }}',
+            routes: {
+                home: '{{ path("app_home") }}',
+                login: '{{ path("app_login") }}',
+                logout: '{{ path("app_logout") }}',
+                register: '{{ path("app_register") }}',
+                consultation_new: '{{ path("app_consultation_new") }}'
+            }
+        };
+    </script>
+</head>
+<body>
+{% block header %}
+    {% include 'layout/_header.html.twig' %}
+{% endblock %}
+
+{% block body %}{% endblock %}
+
+{% block footer %}
+    {% include 'layout/_footer.html.twig' %}
+{% endblock %}
+
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
+            class="bi bi-arrow-up-short"></i></a>
+
+    <div id="ai-chat-root"></div>
+</body>
+</html>
