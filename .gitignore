@@ -10,5 +10,6 @@
 /migrations/
 /.idea/
 /.vscode/
+/var/
 /package-lock.json
 /yarn.lock
