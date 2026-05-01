@@ -27,7 +27,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class ApiController extends AbstractController
 {
     #[Route('/chat/history/{roomId}', name: 'app_api_chat_history', methods: ['GET'])]
-    // #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function chatHistory(string $roomId, ChatMessageRepository $chatMessageRepository): JsonResponse
     {
         $messages = $chatMessageRepository->findByRoomId($roomId);
@@ -35,7 +35,7 @@ class ApiController extends AbstractController
     }
 
     #[Route('/chat/save', name: 'app_api_chat_save', methods: ['POST'])]
-    // #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function chatSave(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -45,8 +45,22 @@ class ApiController extends AbstractController
 
         $sender = $this->getUser();
         $userRepo = $entityManager->getRepository(User::class);
-        $recipient = $userRepo->find($data['targetId']);
+        $doctorRepo = $entityManager->getRepository(Doctor::class);
+        
+        $recipient = null;
+        
+        // 1. Try finding by Doctor ID (since frontend often sends doctor.id)
+        $doctor = $doctorRepo->find($data['targetId']);
+        if ($doctor && $doctor->getUser()) {
+            $recipient = $doctor->getUser();
+        }
+        
+        // 2. Try finding by direct User ID
+        if (!$recipient) {
+            $recipient = $userRepo->find($data['targetId']);
+        }
 
+        // 3. Try fuzzy email match (for cases where targetId is an email prefix)
         if (!$recipient) {
              $users = $userRepo->findAll();
              foreach ($users as $u) {
@@ -59,7 +73,7 @@ class ApiController extends AbstractController
         }
 
         if (!$recipient) {
-            return $this->json(['error' => 'Recipient not found'], 404);
+            return $this->json(['error' => 'Recipient not found', 'targetId' => $data['targetId']], 404);
         }
 
         $chatMessage = new ChatMessage();
@@ -186,7 +200,7 @@ class ApiController extends AbstractController
 
         $data = array_map(fn($d) => [
             'id' => $d->getId(),
-            'name' => $d->getUser() ? $d->getUser()->getEmail() : 'Unknown', 
+            'name' => $d->getUser() ? $d->getUser()->getEmail() : 'Unknown',
             'specialty' => $d->getSpecialty(),
             'departmentId' => $d->getDepartment() ? $d->getDepartment()->getId() : null,
         ], $hospital->getDoctors()->toArray());
@@ -234,8 +248,8 @@ class ApiController extends AbstractController
         $entityManager->flush();
 
         return $this->json([
-            'status' => 'success', 
-            'message' => 'Consultation requested successfully', 
+            'status' => 'success',
+            'message' => 'Consultation requested successfully',
             'id' => $consultation->getId()
         ]);
     }

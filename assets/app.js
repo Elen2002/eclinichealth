@@ -168,6 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <DoctorPatientChatPage 
                 doctor={JSON.parse(data.doctor || '{}')}
                 patient={JSON.parse(data.patient || '{}')}
+                user={JSON.parse(data.user || '{}')}
                 locale={data.locale}
             />
         );

@@ -73,7 +73,7 @@ class DashboardController extends AbstractController
 
     #[Route('/dashboard/doctor', name: 'app_doctor_dashboard')]
     #[IsGranted('ROLE_DOCTOR')]
-    public function doctorDashboard(): Response
+    public function doctorDashboard(\Doctrine\ORM\EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
         $doctor = $this->doctorRepository->findOneBy(['user' => $user]);
@@ -108,6 +108,23 @@ class DashboardController extends AbstractController
             $chartData[] = rand(5, 20); // Placeholder for actual trend data
         }
 
+        $repo = $entityManager->getRepository(\App\Entity\Notification::class);
+        $notifications = $repo->findBy(
+            ['user' => $user, 'type' => 'chat'],
+            ['createdAt' => 'DESC'],
+            5
+        );
+
+        $communications = [];
+        foreach ($notifications as $n) {
+            $communications[] = [
+                'title' => $n->getTitle(),
+                'message' => $n->getMessage(),
+                'time' => $n->getCreatedAt()->format('H:i'),
+                'link' => $n->getLink()
+            ];
+        }
+
         return $this->render('dashboard/doctor.html.twig', [
             'doctor' => $doctor,
             'hospital' => $hospital,
@@ -118,6 +135,7 @@ class DashboardController extends AbstractController
             'recent_consultations' => $recentConsultations,
             'chart_labels' => json_encode($chartLabels),
             'chart_data' => json_encode($chartData),
+            'communications' => json_encode($communications),
         ]);
     }
 

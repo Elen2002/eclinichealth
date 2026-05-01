@@ -167,7 +167,7 @@ const AdminChatManager = ({ locale = 'en' }) => {
             body: JSON.stringify({
                 text: inputValue,
                 roomId: activeRoom,
-                targetId: activeRoom.split('_').pop() // Assumes pair_user_doctor format or similar
+                targetId: activeRoom.startsWith('pair_') ? activeRoom.split('_')[1] : activeRoom
             })
         }).catch(err => console.error('Failed to save message to DB:', err));
 

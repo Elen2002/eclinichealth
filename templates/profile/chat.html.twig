@@ -12,9 +12,16 @@
          specialty: doctor.specialty|default(doctor.department.name|default('Specialist'|trans))
      }|json_encode }}"
      data-patient="{{ {
+         id: patient.id,
+         identifier: patient.email|split('@')[0]|capitalize,
+         name: patient.firstName or patient.lastName ? patient.firstName ~ ' ' ~ patient.lastName : patient.email|split('@')[0]|capitalize,
+         email: patient.email,
+         avatar: patient.avatar
+     }|json_encode }}"
+     data-user="{{ {
          id: app.user.id,
-         identifier: app.user.userIdentifier,
-         email: app.user.email
+         roles: app.user.roles,
+         name: app.user.firstName ? app.user.firstName ~ ' ' ~ app.user.lastName : app.user.email
      }|json_encode }}"
      data-locale="{{ app.request.locale }}">
 </div>

@@ -235,9 +235,10 @@ const DoctorDashboard = ({
                                                             <span className="text-muted">-</span>
                                                         </td>
                                                         <td className="text-end pe-4">
-                                                            <button className="btn btn-sm rounded-circle d-flex align-items-center justify-content-center ms-auto transition-all" style={{ width: '36px', height: '36px', background: 'rgba(111, 0, 152, 0.08)', color: 'var(--brand-color)', border: 'none' }}>
-                                                                <i className="bi bi-three-dots-vertical"></i>
-                                                            </button>
+                                                             <a href={`/${locale}/profile/chat/${doctor.id}/${patient.id}`} className="btn btn-sm btn-outline-primary rounded-pill px-3 d-flex align-items-center gap-2 ms-auto" style={{ width: 'fit-content' }}>
+                                                                 <i className="bi bi-chat-dots"></i>
+                                                                 <span className="fw-bold">{t('dashboard.chat', locale)}</span>
+                                                             </a>
                                                         </td>
                                                     </tr>
                                                 );
@@ -344,27 +345,45 @@ const DoctorDashboard = ({
                         </div>
                         <div className="card-body p-0">
                             <div className="list-group list-group-flush">
-                                {liveCommunications && liveCommunications.length > 0 ? (
-                                    liveCommunications.map((notif, idx) => (
-                                        <a key={idx} href={notif.link || '#'} className="list-group-item list-group-item-action border-0 px-4 py-3 d-flex align-items-center gap-3">
-                                            <div className="bg-primary-subtle rounded-circle p-2 text-primary">
-                                                <i className="bi bi-chat-left-text"></i>
-                                            </div>
-                                            <div className="flex-grow-1 overflow-hidden">
-                                                <div className="d-flex justify-content-between align-items-center mb-1">
-                                                    <span className="fw-bold small text-dark">{notif.title}</span>
-                                                    <span className="text-muted" style={{ fontSize: '0.65rem' }}>{notif.time && notif.time.includes(' ') ? notif.time.split(' ')[1] : notif.time}</span>
-                                                </div>
-                                                <div className="text-muted small text-truncate">{notif.message}</div>
-                                            </div>
-                                        </a>
-                                    ))
-                                ) : (
-                                    <div className="p-4 text-center text-muted small">
-                                        <i className="bi bi-chat-dots fs-3 d-block mb-2 opacity-25"></i>
-                                        {t('dashboard.noCommunications', locale)}
-                                    </div>
-                                )}
+                                                {liveCommunications && liveCommunications.length > 0 ? (
+                                                    liveCommunications.map((notif, idx) => (
+                                                        <a key={idx} href={notif.link || '#'} className="list-group-item list-group-item-action border-0 px-4 py-3 d-flex align-items-center gap-3">
+                                                            <div className="bg-primary-subtle rounded-circle p-2 text-primary">
+                                                                <i className="bi bi-chat-left-text"></i>
+                                                            </div>
+                                                            <div className="flex-grow-1 overflow-hidden">
+                                                                <div className="d-flex justify-content-between align-items-center mb-1">
+                                                                    <span className="fw-bold small text-dark">{notif.title}</span>
+                                                                    <span className="text-muted" style={{ fontSize: '0.65rem' }}>{notif.time && notif.time.includes(' ') ? notif.time.split(' ')[1] : notif.time}</span>
+                                                                </div>
+                                                                <div className="text-muted small text-truncate">{notif.message}</div>
+                                                            </div>
+                                                        </a>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-0">
+                                                        <div className="p-3 bg-light-subtle border-bottom small text-muted text-center">
+                                                            {t('dashboard.noCommunications', locale)} - {t('dashboard.quickConnect', locale)}
+                                                        </div>
+                                                        {doctorPatients && doctorPatients.slice(0, 3).map((relation, idx) => {
+                                                            const p = relation.pacient;
+                                                            return (
+                                                                <a key={idx} href={`/${locale}/profile/chat/${doctor.id}/${p.id}`} className="list-group-item list-group-item-action border-0 px-4 py-3 d-flex align-items-center gap-3">
+                                                                    <div className="bg-success-subtle rounded-circle p-2 text-success">
+                                                                        <i className="bi bi-person-plus"></i>
+                                                                    </div>
+                                                                    <div className="flex-grow-1">
+                                                                        <div className="fw-bold small text-dark">
+                                                                            {p.firstName ? `${p.firstName} ${p.lastName || ''}` : p.email.split('@')[0]}
+                                                                        </div>
+                                                                        <div className="text-muted small">{t('dashboard.startChat', locale)}</div>
+                                                                    </div>
+                                                                    <i className="bi bi-chevron-right text-muted small"></i>
+                                                                </a>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                )}
                             </div>
                         </div>
                         {liveCommunications && liveCommunications.length > 0 && (

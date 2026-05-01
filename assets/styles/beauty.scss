@@ -201,3 +201,12 @@
     background-color: var(--brand-color) !important;
     border-color: var(--brand-color) !important;
 }
+
+/* Flag Icon Fix */
+.fi {
+    line-height: 1;
+    vertical-align: middle;
+    text-indent: -9999px;
+    overflow: hidden;
+    font-size: 0 !important;
+}

@@ -106,6 +106,9 @@ export const translations = {
         'dashboard.communications': 'Patient Communications',
         'dashboard.chatsAndSms': 'Patient Chats',
         'dashboard.noCommunications': 'No recent communications',
+        'dashboard.chat': 'Chat',
+        'dashboard.quickConnect': 'Quick Connect',
+        'dashboard.startChat': 'Start conversation',
 
         'contact.subtitle': "Have questions? We're here to help. Reach out to our team of experts.",
         'contact.location': 'Location:',
@@ -280,6 +283,9 @@ export const translations = {
         'dashboard.communications': 'Վերջին հաղորդակցությունները',
         'dashboard.chatsAndSms': 'Պացիենտների չաթեր',
         'dashboard.noCommunications': 'Վերջին հաղորդագրություններ չկան',
+        'dashboard.chat': 'Չաթ',
+        'dashboard.quickConnect': 'Արագ կապ',
+        'dashboard.startChat': 'Սկսել զրույցը',
 
         'contact.subtitle': 'Հարցեր ունե՞ք: Մենք այստեղ ենք օգնելու համար: Դիմեք մեր փորձագետների թիմին:',
         'contact.location': 'Հասցե:',

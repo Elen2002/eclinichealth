@@ -70,38 +70,53 @@ class ProfileController extends AbstractController
         ]);
     }
 
-    #[Route('/{_locale}/profile/chat/{doctorId}', name: 'app_profile_chat', locale: 'hy')]
-    public function chat(int $doctorId, EntityManagerInterface $entityManager): Response
+    #[Route('/{_locale}/profile/chat/{doctorId}/{patientId}', name: 'app_profile_chat', locale: 'hy', defaults: ['patientId' => null])]
+    public function chat(int $doctorId, ?int $patientId, EntityManagerInterface $entityManager): Response
     {
         $doctor = $entityManager->getRepository(Doctor::class)->find($doctorId);
         if (!$doctor) {
             throw $this->createNotFoundException('Doctor not found');
         }
 
+        $patient = null;
+        if ($patientId) {
+            $patient = $entityManager->getRepository(User::class)->find($patientId);
+        } else {
+            $patient = $this->getUser();
+        }
+
         return $this->render('profile/chat.html.twig', [
             'doctor' => $doctor,
+            'patient' => $patient,
         ]);
     }
 
     #[Route('/{_locale}/profile/notifications', name: 'app_profile_notifications', locale: 'hy')]
-    public function notifications(EntityManagerInterface $entityManager): Response
-    {
+    public function notifications(
+        \Symfony\Component\HttpFoundation\Request $request,
+        EntityManagerInterface $entityManager
+    ): Response {
         $user = $this->getUser();
-        $notifications = $entityManager->getRepository(\App\Entity\Notification::class)->findBy(
+        $page = $request->query->getInt('page', 1);
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+
+        $repo = $entityManager->getRepository(\App\Entity\Notification::class);
+        
+        $notifications = $repo->findBy(
             ['user' => $user],
-            ['createdAt' => 'DESC']
+            ['createdAt' => 'DESC'],
+            $limit,
+            $offset
         );
 
-        // Mark all as read when opening the page
-        foreach ($notifications as $notification) {
-            if (!$notification->isRead()) {
-                $notification->setIsRead(true);
-            }
-        }
-        $entityManager->flush();
+        $total = $repo->count(['user' => $user]);
+        $totalPages = ceil($total / $limit);
 
         return $this->render('profile/notifications.html.twig', [
             'notifications' => $notifications,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
         ]);
     }
 

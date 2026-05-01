@@ -44,7 +44,7 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
         // Initialize socket connection to port 3001
         const socketUrl = `${window.location.protocol}//${window.location.hostname}:3001`;
         const newSocket = io(socketUrl, {
-            transports: ['websocket']
+            transports: ['polling']
         });
         setSocket(newSocket);
 
@@ -92,7 +92,7 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
         };
 
         setMessages(prev => [...prev, newMessage]);
-        socket?.emit('chat_message', { 
+        socket?.emit('chat_message', {
             text: inputValue,
             sender: 'user',
             roomId: currentRoomId,
@@ -100,17 +100,28 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
             email: user?.email || null
         });
 
+        // Save persistent message in DB
+        fetch('/api/chat/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: inputValue,
+                roomId: currentRoomId,
+                targetId: chatTarget?.id || 'support'
+            })
+        }).catch(err => console.error('Failed to save message to DB:', err));
+
         // Save persistent notification in DB if we have a target
         if (chatTarget?.id) {
             fetch('/api/notifications/create', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    targetIdentifier: chatTarget.id, // This was passed as the name/identifier in openDoctorChat
-                    title: 'New Message',
+                    targetIdentifier: chatTarget.id,
+                    title: (user && (user.firstName ? user.firstName + ' ' + user.lastName : user.email)) || 'Guest',
                     message: inputValue.substring(0, 100),
                     type: 'chat',
-                    link: '/' + locale + '/profile/chat/' + chatTarget.dbId // We should make sure we have the DB ID
+                    link: '/' + locale + '/profile/chat/' + chatTarget.dbId + (user ? '/' + user.id : '')
                 })
             }).catch(err => console.error('Failed to save notification:', err));
         }
@@ -228,16 +239,16 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
                     from { transform: translateY(20px); opacity: 0; }
                     to { transform: translateY(0); opacity: 1; }
                 }
-                
+
                 .chat-toggle-btn:hover {
                     transform: scale(1.1) rotate(5deg);
                 }
-                
+
                 .chat-toggle-btn.active {
                     transform: rotate(90deg);
                     background: #64748b;
                 }
-                
+
                 .online-indicator {
                     width: 10px;
                     height: 10px;
@@ -245,7 +256,7 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
                     border-radius: 50%;
                     border: 2px solid white;
                 }
-                
+
                 .notification-badge {
                     position: absolute;
                     top: -5px;

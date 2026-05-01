@@ -14,9 +14,9 @@ const messageHistory = new Map(); // roomId -> messages[]
 io.on('connection', (socket) => {
   console.log('New connection:', socket.id);
 
-  // User joins a support chat
+  // User joins a support chat or a specific room
   socket.on('join_support', (data) => {
-    const roomId = data.userId || data.roomId || socket.id;
+    const roomId = data.roomId || data.userId || socket.id;
     socket.join(roomId);
     console.log(`User/Admin joined room: ${roomId}`);
     

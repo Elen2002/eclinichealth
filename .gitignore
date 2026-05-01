@@ -1,0 +1,14 @@
+/var/
+/vendor/
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/public/build/
+/node_modules/
+/migrations/
+/.idea/
+/.vscode/
+/package-lock.json
+/yarn.lock

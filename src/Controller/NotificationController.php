@@ -59,4 +59,18 @@ class NotificationController extends AbstractController
 
         return new JsonResponse(['success' => true, 'id' => $notification->getId()]);
     }
+
+    #[Route('/api/notifications/mark-read/{id}', name: 'app_api_notification_mark_read', methods: ['POST'])]
+    public function markRead(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $notification = $entityManager->getRepository(Notification::class)->find($id);
+        if (!$notification || $notification->getUser() !== $this->getUser()) {
+            return new JsonResponse(['error' => 'Notification not found'], 404);
+        }
+
+        $notification->setIsRead(true);
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true]);
+    }
 }
