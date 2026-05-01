@@ -24,11 +24,12 @@ const NotificationBadge = ({ user = null, locale = 'en' }) => {
                 // Or if it's a new message in a different room
                 setCount(prev => prev + 1);
                 
-                // Play subtle sound
-                try {
-                    const audio = new Audio('/sounds/notification.mp3');
-                    audio.play();
-                } catch (e) {}
+                // Play subtle sound if permitted by browser
+                const audio = new Audio('/sounds/notification.mp3');
+                audio.play().catch(e => {
+                    // Silently ignore autoplay restrictions
+                    console.log('Audio playback prevented by browser policy');
+                });
             }
         });
 

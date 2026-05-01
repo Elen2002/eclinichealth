@@ -2,6 +2,47 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 
 const AdminChatManager = ({ locale = 'en' }) => {
+    const t = {
+        en: {
+            activeSessions: 'Active Sessions',
+            searchUser: 'Search user...',
+            noMatches: 'No matches found',
+            noActiveRequests: 'No active support requests',
+            chatWith: 'Chat with',
+            patientSupport: 'Patient Support',
+            support: 'Support',
+            typeResponse: 'Type your response...',
+            selectConversation: 'Select a conversation to start helping',
+            patientInquiries: 'Patient inquiries will appear on the left in real-time.',
+        },
+        hy: {
+            activeSessions: 'Ակտիվ սեսիաներ',
+            searchUser: 'Որոնել օգտատիրոջը...',
+            noMatches: 'Համընկնումներ չեն գտնվել',
+            noActiveRequests: 'Ակտիվ աջակցության հարցումներ չկան',
+            chatWith: 'Զրույց',
+            patientSupport: 'Պացիենտների աջակցություն',
+            support: 'Աջակցություն',
+            typeResponse: 'Գրեք ձեր պատասխանը...',
+            selectConversation: 'Ընտրեք զրույց՝ օգնություն սկսելու համար',
+            patientInquiries: 'Պացիենտների հարցումները կհայտնվեն ձախ կողմում իրական ժամանակում:',
+        },
+        ru: {
+            activeSessions: 'Активные сессии',
+            searchUser: 'Поиск пользователя...',
+            noMatches: 'Совпадений не найдено',
+            noActiveRequests: 'Активных запросов нет',
+            chatWith: 'Чат с',
+            patientSupport: 'Поддержка пациентов',
+            support: 'Поддержка',
+            typeResponse: 'Введите ваш ответ...',
+            selectConversation: 'Выберите беседу, чтобы начать помощь',
+            patientInquiries: 'Запросы пациентов будут появляться слева в реальном времени.',
+        }
+    };
+
+    const currentT = t[locale] || t.en;
+
     const [chats, setChats] = useState({}); // { roomId: { messages: [], lastMessage: '' } }
     const [activeRoom, setActiveRoom] = useState(null);
     const [inputValue, setInputValue] = useState('');
@@ -42,20 +83,6 @@ const AdminChatManager = ({ locale = 'en' }) => {
             });
         });
 
-        // Listen for message history
-        newSocket.on('chat_history', (data) => {
-            setChats(prev => {
-                const currentChat = prev[data.roomId] || { messages: [] };
-                return {
-                    ...prev,
-                    [data.roomId]: {
-                        ...currentChat,
-                        messages: data.messages,
-                        lastMessage: data.messages[data.messages.length - 1]?.text || 'History loaded'
-                    }
-                };
-            });
-        });
 
         // Listen for new users connecting
         newSocket.on('admin_user_online', (user) => {
@@ -81,31 +108,69 @@ const AdminChatManager = ({ locale = 'en' }) => {
         }
     }, [activeRoom, socket]);
 
+    useEffect(() => {
+        if (!activeRoom) return;
+
+        // Load history from DB
+        fetch(`/api/chat/history/${activeRoom}`)
+            .then(res => res.json())
+            .then(data => {
+                const formatted = data.map(msg => ({
+                    sender: msg.sender.roles.includes('ROLE_ADMIN') || msg.sender.roles.includes('ROLE_DOCTOR') ? 'admin' : 'user',
+                    text: msg.content,
+                    time: msg.createdAt,
+                    email: msg.sender.email
+                }));
+                
+                setChats(prev => ({
+                    ...prev,
+                    [activeRoom]: {
+                        ...prev[activeRoom],
+                        messages: formatted,
+                        lastMessage: formatted[formatted.length - 1]?.text || 'History loaded'
+                    }
+                }));
+            })
+            .catch(err => console.error('Failed to load chat history:', err));
+    }, [activeRoom]);
+
     const handleSend = () => {
         if (!inputValue.trim() || !activeRoom) return;
 
-        const msg = {
-            roomId: activeRoom,
-            text: inputValue,
+        const newMessage = {
             sender: 'admin',
-            time: new Date()
+            text: inputValue,
+            time: new Date(),
+            roomId: activeRoom
         };
 
-        socket.emit('chat_message', msg);
-        
-        // Add to local state immediately so admin sees their own message
+        // Emit via socket
+        socket?.emit('chat_message', newMessage);
+
+        // Update local state immediately
         setChats(prev => {
             const currentChat = prev[activeRoom] || { messages: [] };
             return {
                 ...prev,
                 [activeRoom]: {
                     ...currentChat,
-                    messages: [...currentChat.messages, msg],
-                    lastMessage: msg.text
+                    messages: [...currentChat.messages, newMessage],
+                    lastMessage: inputValue
                 }
             };
         });
-        
+
+        // Save to DB
+        fetch('/api/chat/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: inputValue,
+                roomId: activeRoom,
+                targetId: activeRoom.split('_').pop() // Assumes pair_user_doctor format or similar
+            })
+        }).catch(err => console.error('Failed to save message to DB:', err));
+
         setInputValue('');
     };
 
@@ -121,14 +186,14 @@ const AdminChatManager = ({ locale = 'en' }) => {
             <div className="border-end d-flex flex-column" style={{ width: '320px', background: '#f8fafc' }}>
                 <div className="p-3 border-bottom bg-white">
                     <div className="fw-bold text-uppercase small tracking-wider text-muted mb-3">
-                        Active Sessions
+                        {currentT.activeSessions}
                     </div>
                     <div className="input-group input-group-sm">
                         <span className="input-group-text bg-light border-0"><i className="bi bi-search"></i></span>
                         <input 
                             type="text" 
                             className="form-control border-0 bg-light" 
-                            placeholder="Search user..." 
+                            placeholder={currentT.searchUser}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -137,7 +202,7 @@ const AdminChatManager = ({ locale = 'en' }) => {
                 <div className="overflow-auto flex-grow-1">
                     {filteredRooms.length === 0 ? (
                         <div className="p-4 text-center text-muted small italic">
-                            {searchTerm ? 'No matches found' : 'No active support requests'}
+                            {searchTerm ? currentT.noMatches : currentT.noActiveRequests}
                         </div>
                     ) : (
                         filteredRooms.map(roomId => (
@@ -162,8 +227,8 @@ const AdminChatManager = ({ locale = 'en' }) => {
                     {activeRoom ? (
                         <>
                             <div className="p-3 border-bottom d-flex justify-content-between align-items-center">
-                                <h6 className="mb-0 fw-bold">Chat with {activeRoom}</h6>
-                                <span className="badge bg-soft-primary text-primary px-3 py-2 rounded-pill">Patient Support</span>
+                                <h6 className="mb-0 fw-bold">{currentT.chatWith} {activeRoom}</h6>
+                                <span className="badge bg-soft-primary text-primary px-3 py-2 rounded-pill">{currentT.patientSupport}</span>
                             </div>
                             
                             <div className="flex-grow-1 p-4 overflow-auto" style={{ background: '#f1f5f9', flexGrow: 1 }}>
@@ -177,7 +242,7 @@ const AdminChatManager = ({ locale = 'en' }) => {
                                             borderBottomLeftRadius: msg.sender === 'user' ? '4px' : '20px',
                                         }}>
                                             <div className="small mb-1 fw-bold opacity-75">
-                                                {msg.sender === 'admin' ? 'Support' : activeRoom}
+                                                {msg.sender === 'admin' ? currentT.support : activeRoom}
                                                 {msg.email && <span className="ms-2 fw-normal opacity-50">({msg.email})</span>}
                                             </div>
                                         <div>{msg.text}</div>
@@ -195,7 +260,7 @@ const AdminChatManager = ({ locale = 'en' }) => {
                                 <input 
                                     type="text" 
                                     className="form-control border-0 bg-light rounded-pill px-4" 
-                                    placeholder="Type your response..." 
+                                    placeholder={currentT.typeResponse}
                                     value={inputValue}
                                     onChange={e => setInputValue(e.target.value)}
                                     onKeyPress={e => e.key === 'Enter' && handleSend()}
@@ -213,8 +278,8 @@ const AdminChatManager = ({ locale = 'en' }) => {
                 ) : (
                     <div className="flex-grow-1 d-flex flex-column align-items-center justify-content-center text-muted p-5 text-center">
                         <i className="bi bi-chat-left-dots display-1 opacity-25 mb-4"></i>
-                        <h5>Select a conversation to start helping</h5>
-                        <p className="small">Patient inquiries will appear on the left in real-time.</p>
+                        <h5>{currentT.selectConversation}</h5>
+                        <p className="small">{currentT.patientInquiries}</p>
                     </div>
                 )}
             </div>

@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const adminChatRoot = document.getElementById('admin-chat-root');
     if (adminChatRoot) {
         const root = createRoot(adminChatRoot);
-        root.render(<AdminChatManager />);
+        root.render(<AdminChatManager locale={adminChatRoot.dataset.locale} />);
     }
 
     // Doctor-Patient Live Chat Page

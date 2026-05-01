@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { io } from 'socket.io-client';
 import Chart from 'chart.js/auto';
 import { t } from '../utils/translations.js';
 
@@ -12,11 +13,38 @@ const DoctorDashboard = ({
     recentConsultations,
     chartLabels,
     chartData,
+    communications = [],
     urlPatterns
 }) => {
+    const [liveCommunications, setLiveCommunications] = useState(communications);
     const chartRef = useRef(null);
     const chartInstance = useRef(null);
     const locale = window.APP_DATA?.locale || 'en';
+
+    useEffect(() => {
+        const socketUrl = `${window.location.protocol}//${window.location.hostname}:3001`;
+        const socket = io(socketUrl);
+
+        socket.on('connect', () => {
+            console.log('Dashboard notification socket connected');
+            socket.emit('join_notifications', { userId: doctor.identifier });
+        });
+
+        socket.on('new_notification', (notif) => {
+            if (notif.type === 'chat_message') {
+                const newComm = {
+                    title: notif.sender === 'user' ? 'Patient Message' : notif.sender,
+                    message: notif.text,
+                    time: 'Just now',
+                    link: notif.link || `/${locale}/profile/chat/${doctor.id}` // Default fallback
+                };
+                
+                setLiveCommunications(prev => [newComm, ...prev].slice(0, 5));
+            }
+        });
+
+        return () => socket.disconnect();
+    }, [doctor.identifier, doctor.id, locale]);
 
     useEffect(() => {
         if (chartRef.current) {
@@ -307,6 +335,43 @@ const DoctorDashboard = ({
                         <div className="card-body">
                             <canvas ref={chartRef} height="200"></canvas>
                         </div>
+                    </div>
+
+                    <div className="card border-0 shadow-sm rounded-4 mt-4">
+                        <div className="card-header bg-white border-0 py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <h5 className="fw-bold mb-0">{t('dashboard.communications', locale)}</h5>
+                            <span className="badge bg-light text-primary rounded-pill small">{t('dashboard.chatsAndSms', locale)}</span>
+                        </div>
+                        <div className="card-body p-0">
+                            <div className="list-group list-group-flush">
+                                {liveCommunications && liveCommunications.length > 0 ? (
+                                    liveCommunications.map((notif, idx) => (
+                                        <a key={idx} href={notif.link || '#'} className="list-group-item list-group-item-action border-0 px-4 py-3 d-flex align-items-center gap-3">
+                                            <div className="bg-primary-subtle rounded-circle p-2 text-primary">
+                                                <i className="bi bi-chat-left-text"></i>
+                                            </div>
+                                            <div className="flex-grow-1 overflow-hidden">
+                                                <div className="d-flex justify-content-between align-items-center mb-1">
+                                                    <span className="fw-bold small text-dark">{notif.title}</span>
+                                                    <span className="text-muted" style={{ fontSize: '0.65rem' }}>{notif.time && notif.time.includes(' ') ? notif.time.split(' ')[1] : notif.time}</span>
+                                                </div>
+                                                <div className="text-muted small text-truncate">{notif.message}</div>
+                                            </div>
+                                        </a>
+                                    ))
+                                ) : (
+                                    <div className="p-4 text-center text-muted small">
+                                        <i className="bi bi-chat-dots fs-3 d-block mb-2 opacity-25"></i>
+                                        {t('dashboard.noCommunications', locale)}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        {liveCommunications && liveCommunications.length > 0 && (
+                             <div className="card-footer bg-white border-0 text-center pb-3">
+                                <button className="btn btn-sm btn-light rounded-pill px-4 small w-100">{t('dashboard.viewAll', locale)}</button>
+                             </div>
+                        )}
                     </div>
 
                     <div className="card border-0 shadow-sm rounded-4 mt-4 bg-light text-white" style={{ background: 'linear-gradient(135deg, var(--brand-color), var(--accent-color))' }}>

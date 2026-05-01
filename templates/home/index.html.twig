@@ -179,6 +179,114 @@
         </div>
     </section>
 
+    <!-- --- ECOSYSTEM & ANALYTICS SECTION --- -->
+    <section id="ecosystem" class="section py-5 overflow-hidden" style="background: #ffffff; position: relative;">
+        <!-- Background Connection Path -->
+        <svg class="d-none d-lg-block" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 80%; height: 60%; z-index: 0; opacity: 0.1;" viewBox="0 0 1000 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M100 200 C 300 200, 400 100, 600 100 S 800 300, 950 300" stroke="url(#paint0_linear)" stroke-width="4" stroke-dasharray="10 10" />
+            <defs>
+                <linearGradient id="paint0_linear" x1="100" y1="200" x2="950" y2="300" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="var(--brand-color)" />
+                    <stop offset="1" stop-color="#10b981" />
+                </linearGradient>
+            </defs>
+        </svg>
+
+        <div class="container py-5 position-relative" style="z-index: 1;">
+            <div class="text-center mb-5" data-aos="fade-up">
+                <h6 class="text-uppercase fw-bold mb-2" style="color: var(--brand-color); letter-spacing: 2px;">{{ 'home.ecosystem.subtitle'|trans }}</h6>
+                <h2 class="display-5 fw-bold mb-3">{{ 'home.ecosystem.title'|trans }}</h2>
+            </div>
+
+            <div class="row g-5 align-items-stretch">
+                <!-- Analytics Column -->
+                <div class="col-lg-8 mx-auto" data-aos="fade-up">
+                    <div class="analytics-card p-4 p-md-5 rounded-5 shadow-2xl bg-white" style="border: 1px solid rgba(0,0,0,0.05);">
+                        <h5 class="fw-bold mb-2">{{ 'home.ecosystem.analytics.title'|trans }}</h5>
+                        <p class="text-muted small mb-4">{{ 'home.ecosystem.analytics.desc'|trans }}</p>
+                        
+                        <div class="chart-container" style="height: 350px; width: 100%; position: relative;">
+                            <canvas id="statsChart" data-chart-labels="{{ chart_labels }}" data-chart-data="{{ chart_data }}"></canvas>
+                        </div>
+
+                        <div class="row g-4 mt-4">
+                            <div class="col-md-6">
+                                <div class="stat-box p-4 rounded-4 bg-light text-center border-0" style="background: #f8fafc !important;">
+                                    <h2 class="fw-bold mb-1 text-primary">{{ stats.doctors_count }}</h2>
+                                    <p class="text-muted text-uppercase fw-bold mb-0" style="font-size: 0.7rem; letter-spacing: 1px;">Registered Specialists</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-box p-4 rounded-4 bg-light text-center border-0" style="background: #f8fafc !important;">
+                                    <h2 class="fw-bold mb-1 text-success">{{ stats.departments_count }}</h2>
+                                    <p class="text-muted text-uppercase fw-bold mb-0" style="font-size: 0.7rem; letter-spacing: 1px;">Medical Departments</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .ecosystem-diagram .diagram-step {
+            position: relative;
+            z-index: 1;
+        }
+        .step-icon {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+        .step-icon.active {
+            background: var(--brand-gradient);
+            color: white;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+        .diagram-step:hover .step-icon {
+            transform: translateY(-5px);
+            background: var(--brand-gradient);
+            color: white;
+        }
+        .diagram-line {
+            position: absolute;
+            top: 30px;
+            left: 10%;
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.1), transparent);
+            z-index: 0;
+        }
+        .stat-box {
+            transition: all 0.3s ease;
+        }
+        .stat-box:hover {
+            background: #fff !important;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transform: translateY(-3px);
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        svg path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 5s linear infinite;
+        }
+    </style>
+
     <!-- --- DEPARTMENTS SECTION --- -->
     <section id="departments" class="section py-5" style="background: var(--background-color);">
         <div class="container py-5" data-aos="fade-up">

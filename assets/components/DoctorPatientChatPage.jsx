@@ -5,13 +5,26 @@ const DoctorPatientChatPage = ({ doctor, patient, locale = 'en' }) => {
     const [messages, setMessages] = useState([]);
     const [inputValue, setInputValue] = useState('');
     const [socket, setSocket] = useState(null);
-    const messagesEndRef = useRef(null);
 
     const userId = patient?.identifier || 'Patient';
     const doctorId = doctor?.id || 'Doctor';
     const roomId = `pair_${userId}_${doctorId}`;
 
     useEffect(() => {
+        // Load history from DB
+        fetch(`/api/chat/history/${roomId}`)
+            .then(res => res.json())
+            .then(data => {
+                const formatted = data.map(msg => ({
+                    id: msg.id,
+                    text: msg.content,
+                    sender: msg.sender.id === patient.id ? 'user' : 'doctor',
+                    time: msg.createdAt
+                }));
+                setMessages(formatted);
+            })
+            .catch(err => console.error('Failed to load chat history:', err));
+
         const socketUrl = `${window.location.protocol}//${window.location.hostname}:3001`;
         const newSocket = io(socketUrl, {
             transports: ['websocket']
@@ -21,12 +34,6 @@ const DoctorPatientChatPage = ({ doctor, patient, locale = 'en' }) => {
         newSocket.on('connect', () => {
             console.log('Connected to socket server, joining room:', roomId);
             newSocket.emit('join_support', { userId: userId, roomId: roomId });
-        });
-
-        newSocket.on('chat_history', (data) => {
-            if (data.roomId === roomId) {
-                setMessages(data.messages);
-            }
         });
 
         newSocket.on('message', (msg) => {
@@ -41,17 +48,21 @@ const DoctorPatientChatPage = ({ doctor, patient, locale = 'en' }) => {
         });
 
         return () => newSocket.close();
-    }, [userId, roomId]);
+    }, [userId, roomId, patient.id]);
+
+    const messagesContainerRef = useRef(null);
 
     useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if (messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
     }, [messages]);
 
     const handleSend = () => {
         if (!inputValue.trim()) return;
 
         const newMessage = {
-            id: Date.now().toString(),
+            id: 'temp-' + Date.now(),
             text: inputValue,
             sender: 'user',
             time: new Date(),
@@ -59,6 +70,7 @@ const DoctorPatientChatPage = ({ doctor, patient, locale = 'en' }) => {
         };
 
         setMessages(prev => [...prev, newMessage]);
+        
         socket?.emit('chat_message', { 
             text: inputValue,
             sender: 'user',
@@ -67,7 +79,18 @@ const DoctorPatientChatPage = ({ doctor, patient, locale = 'en' }) => {
             email: patient?.email || null
         });
 
-        // Save persistent notification in DB
+        // Save to DB
+        fetch('/api/chat/save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: inputValue,
+                roomId: roomId,
+                targetId: doctor.id
+            })
+        }).catch(err => console.error('Failed to save message to DB:', err));
+
+        // Save persistent notification for the recipient
         fetch('/api/notifications/create', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -84,10 +107,10 @@ const DoctorPatientChatPage = ({ doctor, patient, locale = 'en' }) => {
     };
 
     return (
-        <div className="container-fluid pb-4 h-100" style={{ background: '#f8fafc', minHeight: 'calc(100vh - 80px)', marginTop: '80px', paddingTop: '20px' }}>
-            <div className="row h-100 justify-content-center">
-                <div className="col-lg-10 h-100">
-                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100 d-flex flex-column" style={{ height: '700px' }}>
+        <div className="container-fluid pb-0" style={{ background: '#f8fafc', minHeight: 'calc(100vh - 80px)', marginTop: '80px', paddingTop: '20px', display: 'flex', flexDirection: 'column' }}>
+            <div className="row flex-grow-1 justify-content-center pb-4">
+                <div className="col-lg-10 d-flex flex-column">
+                    <div className="card border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column flex-grow-1" style={{ minHeight: '600px', height: 'calc(100vh - 140px)' }}>
                         {/* Chat Header */}
                         <div className="card-header p-4 bg-white border-bottom d-flex align-items-center justify-content-between">
                             <div className="d-flex align-items-center gap-3">
@@ -107,7 +130,7 @@ const DoctorPatientChatPage = ({ doctor, patient, locale = 'en' }) => {
                         </div>
 
                         {/* Messages Area */}
-                        <div className="card-body p-4 flex-grow-1 overflow-auto" style={{ background: '#f1f5f9' }}>
+                        <div className="card-body p-4 flex-grow-1 overflow-auto" style={{ background: '#f1f5f9' }} ref={messagesContainerRef}>
                             {messages.length === 0 ? (
                                 <div className="h-100 d-flex flex-column align-items-center justify-content-center text-muted opacity-50 py-5">
                                     <i className="bi bi-chat-heart display-1 mb-3"></i>
@@ -136,7 +159,6 @@ const DoctorPatientChatPage = ({ doctor, patient, locale = 'en' }) => {
                                     </div>
                                 ))
                             )}
-                            <div ref={messagesEndRef} />
                         </div>
 
                         {/* Input Area */}

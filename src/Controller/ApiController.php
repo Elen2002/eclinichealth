@@ -19,10 +19,60 @@ use Symfony\Component\Routing\Attribute\Route;
 use App\Repository\UserRepository;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use App\Entity\User;
+use App\Entity\ChatMessage;
+use App\Repository\ChatMessageRepository;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/api')]
 class ApiController extends AbstractController
 {
+    #[Route('/chat/history/{roomId}', name: 'app_api_chat_history', methods: ['GET'])]
+    // #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function chatHistory(string $roomId, ChatMessageRepository $chatMessageRepository): JsonResponse
+    {
+        $messages = $chatMessageRepository->findByRoomId($roomId);
+        return $this->json($messages, 200, [], ['groups' => 'chat:read']);
+    }
+
+    #[Route('/chat/save', name: 'app_api_chat_save', methods: ['POST'])]
+    // #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function chatSave(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        if (!$data || !isset($data['text'], $data['roomId'], $data['targetId'])) {
+            return $this->json(['error' => 'Invalid data'], 400);
+        }
+
+        $sender = $this->getUser();
+        $userRepo = $entityManager->getRepository(User::class);
+        $recipient = $userRepo->find($data['targetId']);
+
+        if (!$recipient) {
+             $users = $userRepo->findAll();
+             foreach ($users as $u) {
+                 $uId = ucfirst(explode('@', $u->getEmail())[0]);
+                 if ($uId === $data['targetId']) {
+                     $recipient = $u;
+                     break;
+                 }
+             }
+        }
+
+        if (!$recipient) {
+            return $this->json(['error' => 'Recipient not found'], 404);
+        }
+
+        $chatMessage = new ChatMessage();
+        $chatMessage->setSender($sender);
+        $chatMessage->setRecipient($recipient);
+        $chatMessage->setContent($data['text']);
+        $chatMessage->setRoomId($data['roomId']);
+
+        $entityManager->persist($chatMessage);
+        $entityManager->flush();
+
+        return $this->json(['success' => true, 'id' => $chatMessage->getId()]);
+    }
     #[Route('/register', name: 'api_register', methods: ['POST'])]
     public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): JsonResponse
     {

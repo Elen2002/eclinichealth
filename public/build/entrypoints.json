@@ -1,0 +1,66 @@
+{
+  "entrypoints": {
+    "app": {
+      "js": [
+        "/build/runtime.js",
+        "/build/vendors-node_modules_core-js_internals_array-method-is-strict_js-node_modules_core-js_interna-368251.js",
+        "/build/vendors-node_modules_jquery_dist_jquery_js-node_modules_bootstrap-icons_font_bootstrap-icons_-5a1f86.js",
+        "/build/vendors-node_modules_aos_dist_aos_js-node_modules_aos_dist_aos_css-node_modules_react-dom_cli-5fe8b7.js",
+        "/build/vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js.js",
+        "/build/vendors-node_modules_leaflet_dist_leaflet_js.js",
+        "/build/vendors-node_modules_select2_dist_css_select2_min_css-node_modules_select2_dist_js_select2_js-f3f13b.js",
+        "/build/assets_js_main_js-assets_js_map_js.js",
+        "/build/assets_utils_translations_js.js",
+        "/build/app.js"
+      ],
+      "css": [
+        "/build/vendors-node_modules_jquery_dist_jquery_js-node_modules_bootstrap-icons_font_bootstrap-icons_-5a1f86.css",
+        "/build/vendors-node_modules_aos_dist_aos_js-node_modules_aos_dist_aos_css-node_modules_react-dom_cli-5fe8b7.css",
+        "/build/vendors-node_modules_select2_dist_css_select2_min_css-node_modules_select2_dist_js_select2_js-f3f13b.css",
+        "/build/assets_styles_app_scss.css",
+        "/build/app.css"
+      ]
+    },
+    "map": {
+      "js": [
+        "/build/runtime.js",
+        "/build/vendors-node_modules_core-js_internals_array-method-is-strict_js-node_modules_core-js_interna-368251.js",
+        "/build/vendors-node_modules_jquery_dist_jquery_js-node_modules_bootstrap-icons_font_bootstrap-icons_-5a1f86.js",
+        "/build/vendors-node_modules_leaflet_dist_leaflet_js.js",
+        "/build/assets_js_main_js-assets_js_map_js.js",
+        "/build/map.js"
+      ],
+      "css": [
+        "/build/vendors-node_modules_jquery_dist_jquery_js-node_modules_bootstrap-icons_font_bootstrap-icons_-5a1f86.css"
+      ]
+    },
+    "backend_app": {
+      "js": [
+        "/build/runtime.js",
+        "/build/vendors-node_modules_core-js_internals_array-method-is-strict_js-node_modules_core-js_interna-368251.js",
+        "/build/vendors-node_modules_jquery_dist_jquery_js-node_modules_bootstrap-icons_font_bootstrap-icons_-5a1f86.js",
+        "/build/vendors-node_modules_bootstrap_dist_js_bootstrap_esm_js.js",
+        "/build/vendors-node_modules_leaflet_dist_leaflet-src_js.js",
+        "/build/assets_js_main_js-assets_js_map_js.js",
+        "/build/backend_app.js"
+      ],
+      "css": [
+        "/build/vendors-node_modules_jquery_dist_jquery_js-node_modules_bootstrap-icons_font_bootstrap-icons_-5a1f86.css",
+        "/build/assets_styles_app_scss.css",
+        "/build/backend_app.css"
+      ]
+    },
+    "contact": {
+      "js": [
+        "/build/runtime.js",
+        "/build/vendors-node_modules_core-js_internals_array-method-is-strict_js-node_modules_core-js_interna-368251.js",
+        "/build/vendors-node_modules_aos_dist_aos_js-node_modules_aos_dist_aos_css-node_modules_react-dom_cli-5fe8b7.js",
+        "/build/assets_utils_translations_js.js",
+        "/build/contact.js"
+      ],
+      "css": [
+        "/build/vendors-node_modules_aos_dist_aos_js-node_modules_aos_dist_aos_css-node_modules_react-dom_cli-5fe8b7.css"
+      ]
+    }
+  }
+}

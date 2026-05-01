@@ -18,11 +18,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read'])]
+    #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read', 'chat:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
-    #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read'])]
+    #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read', 'chat:read'])]
     private ?string $email = null;
 
     /**
@@ -41,15 +41,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private bool $isVerified = false;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read'])]
+    #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read', 'chat:read'])]
     private ?string $firstName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read'])]
+    #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read', 'chat:read'])]
     private ?string $lastName = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read'])]
+    #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read', 'chat:read'])]
     private ?string $avatar = null;
 
     /**

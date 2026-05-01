@@ -14,6 +14,7 @@
          data-recent-consultations="{{ recent_consultations|serialize('json', { groups: 'consultation:read' })|e('html_attr') }}"
          data-chart-labels="{{ chart_labels|e('html_attr') }}"
          data-chart-data="{{ chart_data|e('html_attr') }}"
-         data-url-patterns="{{ { 'doctorConsultations': path('app_doctor_consultations'), 'consultationProcess': path('app_consultation_process', {'id': '__ID__'}), 'consultationDetails': path('app_consultation_details', {'id': '__ID__'}), 'profileEdit': path('app_profile_edit'), 'logout': path('app_logout') }|json_encode|e('html_attr') }}"
+         data-communications="{{ communications|e('html_attr') }}"
+         data-url-patterns="{{ { 'doctorConsultations': path('app_doctor_consultations'), 'consultationProcess': path('app_consultation_process', {'id': '__ID__'}), 'consultationDetails': path('app_doctor_consultations'), 'profileEdit': path('app_profile_edit'), 'logout': path('app_logout') }|json_encode|e('html_attr') }}"
     ></div>
 {% endblock %}

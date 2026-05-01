@@ -103,6 +103,9 @@ export const translations = {
         'dashboard.logout': 'Logout',
         'dashboard.editProfile': 'Edit Profile',
         'dashboard.viewAllReq': 'View All Requests',
+        'dashboard.communications': 'Patient Communications',
+        'dashboard.chatsAndSms': 'Patient Chats',
+        'dashboard.noCommunications': 'No recent communications',
 
         'contact.subtitle': "Have questions? We're here to help. Reach out to our team of experts.",
         'contact.location': 'Location:',
@@ -274,6 +277,9 @@ export const translations = {
         'dashboard.logout': 'Ելք',
         'dashboard.editProfile': 'Խմբագրել պրոֆիլը',
         'dashboard.viewAllReq': 'Դիտել բոլորը',
+        'dashboard.communications': 'Վերջին հաղորդակցությունները',
+        'dashboard.chatsAndSms': 'Պացիենտների չաթեր',
+        'dashboard.noCommunications': 'Վերջին հաղորդագրություններ չկան',
 
         'contact.subtitle': 'Հարցեր ունե՞ք: Մենք այստեղ ենք օգնելու համար: Դիմեք մեր փորձագետների թիմին:',
         'contact.location': 'Հասցե:',

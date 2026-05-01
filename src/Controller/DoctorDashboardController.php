@@ -57,6 +57,24 @@ class DoctorDashboardController extends AbstractController
         $chartLabels = array_keys($appointmentsPerMonth);
         $chartData = array_values($appointmentsPerMonth);
 
+        $notifications = $entityManager->getRepository(\App\Entity\Notification::class)->findBy(
+            ['user' => $user, 'type' => 'chat'],
+            ['createdAt' => 'DESC'],
+            5
+        );
+        
+        // Map notifications to a simpler format for React
+        $communications = [];
+        foreach ($notifications as $notif) {
+            $communications[] = [
+                'id' => $notif->getId(),
+                'title' => $notif->getTitle(),
+                'message' => $notif->getMessage(),
+                'time' => $notif->getCreatedAt()->format('Y-m-d H:i'),
+                'link' => $notif->getLink()
+            ];
+        }
+
         return $this->render('dashboard/doctor.html.twig', [
             'doctor' => $doctor,
             'hospital' => $doctor->getHospital(),
@@ -68,6 +86,7 @@ class DoctorDashboardController extends AbstractController
             'total_appointments' => count($consultations),
             'chart_labels' => json_encode($chartLabels),
             'chart_data' => json_encode($chartData),
+            'communications' => json_encode($communications),
         ]);
     }
 }
