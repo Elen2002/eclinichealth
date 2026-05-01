@@ -31,7 +31,7 @@ const DoctorPatientChatPage = ({ doctor, patient, user, locale = 'en' }) => {
             })
             .catch(err => console.error('Failed to load chat history:', err));
 
-        const socketUrl = `${window.location.protocol}//${window.location.hostname}:3001`;
+        const socketUrl = `${window.location.protocol}//${window.location.hostname}`;
         const newSocket = io(socketUrl, {
             transports: ['polling']
         });

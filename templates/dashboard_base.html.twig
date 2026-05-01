@@ -180,7 +180,7 @@
             <a href="{{ path('app_home') }}" class="sidebar-logo text-decoration-none">
                 <img src="{{ asset('build/img/header-logo.png') }}" alt="Logo" class="img-fluid" style="max-height: 40px;">
             </a>
-            
+
             <nav>
                 <div class="sidebar-section-label">{{ 'Management'|trans }}</div>
                 <ul class="nav-list mb-3">
@@ -245,7 +245,7 @@
                     <h1 class="h3 mb-1" style="font-weight: 700; color: var(--heading-color);">{% block dashboard_title %}{{ 'Dashboard'|trans }}{% endblock %}</h1>
                     <p class="text-muted mb-0">{% block dashboard_subtitle %}{{ 'Welcome back!'|trans }}{% endblock %}</p>
                 </div>
-                
+
                 <div class="header-actions">
                     <div class="dropdown">
                         <button class="lang-switcher-btn dropdown-toggle border-0" type="button" data-bs-toggle="dropdown">
@@ -257,12 +257,12 @@
                             <li><a class="dropdown-item rounded-3 small py-2" href="{{ path(app.request.attributes.get('_route', 'app_dashboard'), app.request.attributes.get('_route_params', [])|merge({'_locale': 'ru'})) }}">🇷🇺 Русский</a></li>
                         </ul>
                     </div>
-    
+
                     <div class="header-icon-btn">
                         <i class="bi bi-bell"></i>
                         <div class="notification-dot"></div>
                     </div>
-                    
+
                     <div class="user-profile-pill">
                         <div class="user-avatar">
                             <i class="bi bi-person-fill"></i>
@@ -290,12 +290,12 @@
             // Use protocol-aware socket URL
             const protocol = window.location.protocol;
             const hostname = window.location.hostname;
-            const socketUrl = `${protocol}//${hostname}:3001`;
-            
+            const socketUrl = `${protocol}//${hostname}`;
+
             const socket = io(socketUrl, {
                 transports: ['websocket', 'polling']
             });
-            
+
             const dot = document.querySelector('.notification-dot');
             const chatBadge = document.getElementById('chat-notification-badge');
             let unreadCount = parseInt(localStorage.getItem('admin_unread_count') || '0');
@@ -324,10 +324,10 @@
                     unreadCount++;
                     localStorage.setItem('admin_unread_count', unreadCount);
                     updateUI();
-                    
+
                     // Trigger a browser notification if supported
                     if (Notification.permission === "granted") {
-                        new Notification(data.title, { 
+                        new Notification(data.title, {
                             body: data.message,
                             icon: '/favicon.ico'
                         });
@@ -344,7 +344,7 @@
                     localStorage.setItem('admin_unread_count', '0');
                     updateUI();
                 });
-                
+
                 // Also clear if they click the sidebar link again
                 const supportLink = document.querySelector('a[href*="/admin/support"]');
                 if (supportLink) {
@@ -354,7 +354,7 @@
                         updateUI();
                     });
                 }
-                
+
                 // Auto-clear if already on page and seeing the message?
                 // For now, let's leave it to user clicks to ensure they "saw" it.
             }

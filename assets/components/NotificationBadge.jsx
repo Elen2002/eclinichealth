@@ -7,7 +7,7 @@ const NotificationBadge = ({ user = null, locale = 'en' }) => {
     useEffect(() => {
         if (!user) return;
 
-        const socketUrl = `${window.location.protocol}//${window.location.hostname}:3001`;
+        const socketUrl = `${window.location.protocol}//${window.location.hostname}`;
         const socket = io(socketUrl, {
             transports: ['polling']
         });

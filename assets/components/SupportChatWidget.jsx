@@ -42,7 +42,7 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
 
     useEffect(() => {
         // Initialize socket connection to port 3001
-        const socketUrl = `${window.location.protocol}//${window.location.hostname}:3001`;
+        const socketUrl = `${window.location.protocol}//${window.location.hostname}`;
         const newSocket = io(socketUrl, {
             transports: ['polling']
         });

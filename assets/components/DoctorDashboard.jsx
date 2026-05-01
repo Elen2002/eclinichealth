@@ -22,7 +22,7 @@ const DoctorDashboard = ({
     const locale = window.APP_DATA?.locale || 'en';
 
     useEffect(() => {
-        const socketUrl = `${window.location.protocol}//${window.location.hostname}:3001`;
+        const socketUrl = `${window.location.protocol}//${window.location.hostname}`;
         const socket = io(socketUrl);
 
         socket.on('connect', () => {
@@ -38,7 +38,7 @@ const DoctorDashboard = ({
                     time: 'Just now',
                     link: notif.link || `/${locale}/profile/chat/${doctor.id}` // Default fallback
                 };
-                
+
                 setLiveCommunications(prev => [newComm, ...prev].slice(0, 5));
             }
         });
@@ -93,9 +93,9 @@ const DoctorDashboard = ({
             <div className="row align-items-center mb-4">
                 <div className="col">
                     <div className="d-flex align-items-center gap-3">
-                        <img 
-                            src={doctor?.user?.avatar || '/img/default-avatar.png'} 
-                            alt="Avatar" 
+                        <img
+                            src={doctor?.user?.avatar || '/img/default-avatar.png'}
+                            alt="Avatar"
                             className="rounded-circle shadow-sm border border-2 border-white"
                             style={{ width: '60px', height: '60px', objectFit: 'cover' }}
                         />

@@ -50,7 +50,7 @@ const AdminChatManager = ({ locale = 'en' }) => {
     const messagesEndRef = useRef(null);
 
     useEffect(() => {
-        const socketUrl = `${window.location.protocol}//${window.location.hostname}:3001`;
+        const socketUrl = `${window.location.protocol}//${window.location.hostname}`;
         const newSocket = io(socketUrl);
         setSocket(newSocket);
 
@@ -69,7 +69,7 @@ const AdminChatManager = ({ locale = 'en' }) => {
 
         newSocket.on('message', (msg) => {
             // Room ID is usually the user's ID or socket ID
-            const roomId = msg.roomId || 'global'; 
+            const roomId = msg.roomId || 'global';
             setChats(prev => {
                 const currentChat = prev[roomId] || { messages: [] };
                 return {
@@ -121,7 +121,7 @@ const AdminChatManager = ({ locale = 'en' }) => {
                     time: msg.createdAt,
                     email: msg.sender.email
                 }));
-                
+
                 setChats(prev => ({
                     ...prev,
                     [activeRoom]: {
@@ -176,7 +176,7 @@ const AdminChatManager = ({ locale = 'en' }) => {
 
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredRooms = Object.keys(chats).filter(roomId => 
+    const filteredRooms = Object.keys(chats).filter(roomId =>
         roomId.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -190,9 +190,9 @@ const AdminChatManager = ({ locale = 'en' }) => {
                     </div>
                     <div className="input-group input-group-sm">
                         <span className="input-group-text bg-light border-0"><i className="bi bi-search"></i></span>
-                        <input 
-                            type="text" 
-                            className="form-control border-0 bg-light" 
+                        <input
+                            type="text"
+                            className="form-control border-0 bg-light"
                             placeholder={currentT.searchUser}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
@@ -206,8 +206,8 @@ const AdminChatManager = ({ locale = 'en' }) => {
                         </div>
                     ) : (
                         filteredRooms.map(roomId => (
-                            <div 
-                                key={roomId} 
+                            <div
+                                key={roomId}
                                 onClick={() => setActiveRoom(roomId)}
                                 className={`p-3 border-bottom cursor-pointer transition-all ${activeRoom === roomId ? 'bg-primary-subtle border-start border-4 border-primary' : 'hover-bg-light'}`}
                                 style={{ cursor: 'pointer' }}
@@ -230,7 +230,7 @@ const AdminChatManager = ({ locale = 'en' }) => {
                                 <h6 className="mb-0 fw-bold">{currentT.chatWith} {activeRoom}</h6>
                                 <span className="badge bg-soft-primary text-primary px-3 py-2 rounded-pill">{currentT.patientSupport}</span>
                             </div>
-                            
+
                             <div className="flex-grow-1 p-4 overflow-auto" style={{ background: '#f1f5f9', flexGrow: 1 }}>
                                 {chats[activeRoom].messages.map((msg, i) => (
                                     <div key={i} className={`d-flex mb-3 ${msg.sender === 'admin' ? 'justify-content-end' : 'justify-content-start'}`}>
@@ -257,16 +257,16 @@ const AdminChatManager = ({ locale = 'en' }) => {
 
                         <div className="p-3 bg-white border-top">
                             <div className="input-group">
-                                <input 
-                                    type="text" 
-                                    className="form-control border-0 bg-light rounded-pill px-4" 
+                                <input
+                                    type="text"
+                                    className="form-control border-0 bg-light rounded-pill px-4"
                                     placeholder={currentT.typeResponse}
                                     value={inputValue}
                                     onChange={e => setInputValue(e.target.value)}
                                     onKeyPress={e => e.key === 'Enter' && handleSend()}
                                 />
-                                <button 
-                                    className="btn btn-primary rounded-circle ms-2" 
+                                <button
+                                    className="btn btn-primary rounded-circle ms-2"
                                     onClick={handleSend}
                                     style={{ width: '45px', height: '45px', background: 'var(--brand-color)', border: 'none' }}
                                 >
