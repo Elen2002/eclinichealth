@@ -22,6 +22,13 @@ import './js/map.js'
 import './js/home_chart.js';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
+
+// Reorganized Layout & Page Logic
+import './js/layout/dashboard.js';
+// import './js/layout/header.js';
+import './js/pages/profile.js';
+import './js/pages/notifications.js';
+
 import 'select2/dist/css/select2.min.css';
 import $ from 'jquery';
 import 'select2';
@@ -191,3 +198,5 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 console.log('This log comes from assets/app.js - welcome to AssetMapper! 🎉');
+
+

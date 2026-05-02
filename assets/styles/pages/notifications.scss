@@ -1,0 +1,22 @@
+/* Notifications Page Styles */
+.pagination-rounded .page-link {
+    transition: all 0.3s ease;
+}
+.pagination-rounded .page-item.active .page-link {
+    border: none;
+}
+.hover-translate-y:hover {
+    transform: translateY(-3px);
+    background: #f1f5f9 !important;
+}
+.list-group-item {
+    transition: all 0.2s ease;
+}
+.notification-item.unread {
+    background: #f0f7ff !important;
+    border-left: 4px solid var(--brand-color) !important;
+}
+.notification-item.read {
+    background: white !important;
+    border-left: none !important;
+}

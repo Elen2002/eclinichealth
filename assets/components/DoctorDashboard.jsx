@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
 import Chart from 'chart.js/auto';
 import { t } from '../utils/translations.js';
 
@@ -22,31 +21,22 @@ const DoctorDashboard = ({
     const locale = window.APP_DATA?.locale || 'en';
 
     useEffect(() => {
-        const socketUrl = `${window.location.protocol}//${window.location.hostname}`;
-        const socket = io(socketUrl, {
-            transports: ['polling']
-        });
+        const fetchMessages = () => {
+            fetch('/api/chat/recent-communications')
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        setLiveCommunications(data.slice(0, 5));
+                    }
+                })
+                .catch(err => console.error('Failed to fetch communications:', err));
+        };
 
-        socket.on('connect', () => {
-            console.log('Dashboard notification socket connected');
-            socket.emit('join_notifications', { userId: doctor.identifier });
-        });
+        fetchMessages();
+        const interval = setInterval(fetchMessages, 8000); // Poll every 8 seconds
 
-        socket.on('new_notification', (notif) => {
-            if (notif.type === 'chat_message') {
-                const newComm = {
-                    title: notif.sender === 'user' ? 'Patient Message' : notif.sender,
-                    message: notif.text,
-                    time: 'Just now',
-                    link: notif.link || `/${locale}/profile/chat/${doctor.id}` // Default fallback
-                };
-
-                setLiveCommunications(prev => [newComm, ...prev].slice(0, 5));
-            }
-        });
-
-        return () => socket.disconnect();
-    }, [doctor.identifier, doctor.id, locale]);
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         if (chartRef.current) {

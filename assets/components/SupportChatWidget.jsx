@@ -32,7 +32,13 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
 
     const [userId] = useState(() => {
         if (user && user.identifier) return user.identifier;
-        return 'Guest_' + Math.random().toString(36).substr(2, 5);
+        
+        const storedId = localStorage.getItem('chat_guest_id');
+        if (storedId) return storedId;
+        
+        const newId = 'Guest_' + Math.random().toString(36).substr(2, 5);
+        localStorage.setItem('chat_guest_id', newId);
+        return newId;
     });
 
     const currentRoomId = chatTarget ? `pair_${userId}_${chatTarget.id}` : userId;
@@ -41,20 +47,52 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
         // Simple polling instead of sockets
         const fetchHistory = () => {
             fetch(`/api/chat/history/${currentRoomId}`)
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) throw new Error('Auth failed or server error');
+                    return res.json();
+                })
                 .then(data => {
-                    setMessages(data.map(msg => ({
-                        id: msg.id,
-                        text: msg.content,
-                        sender: msg.sender.identifier === userId ? 'user' : 'support',
-                        time: msg.createdAt
-                    })));
+                    if (Array.isArray(data) && data.length > 0) {
+                        const serverMessages = data.map(msg => {
+                            const isMe = (msg.sender && (
+                                msg.sender.email === user?.email || 
+                                msg.sender.identifier === userId ||
+                                (msg.sender.email && userId && msg.sender.email.toLowerCase().includes(userId.toLowerCase()))
+                            )) || (!msg.sender && currentRoomId === userId);
+
+                            return {
+                                id: msg.id,
+                                text: msg.content,
+                                sender: isMe ? 'user' : 'support',
+                                time: msg.createdAt
+                            };
+                        });
+                        
+                        setMessages(prev => {
+                            const tempMessages = prev.filter(m => String(m.id).startsWith('temp-'));
+                            const nonTempMessages = prev.filter(m => !String(m.id).startsWith('temp-'));
+
+                            // Merge server messages with local non-temp ones
+                            const mergedServer = [...serverMessages];
+                            
+                            // Filter out temp messages that are already confirmed by server
+                            const remainingTemp = tempMessages.filter(temp => 
+                                !serverMessages.some(server => 
+                                    server.text === temp.text && 
+                                    server.sender === 'user' &&
+                                    (new Date(server.time).getTime() - new Date(temp.time).getTime() < 60000)
+                                )
+                            );
+
+                            return [...mergedServer, ...remainingTemp];
+                        });
+                    }
                 })
                 .catch(err => console.error('Polling failed:', err));
         };
 
         fetchHistory(); // Initial load
-        const interval = setInterval(fetchHistory, 5000); // Poll every 5 seconds
+        const interval = setInterval(fetchHistory, 4000); // Poll every 4 seconds
 
         return () => clearInterval(interval);
     }, [userId, currentRoomId]);
@@ -67,34 +105,33 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
 
     const handleSend = () => {
         if (!inputValue.trim()) return;
+        const text = inputValue;
+        setInputValue('');
 
         const newMessage = {
-            id: Date.now().toString(),
-            text: inputValue,
+            id: 'temp-' + Date.now(),
+            text: text,
             sender: 'user',
             time: new Date(),
             roomId: currentRoomId
         };
 
         setMessages(prev => [...prev, newMessage]);
-        socket?.emit('chat_message', {
-            text: inputValue,
-            sender: 'user',
-            roomId: currentRoomId,
-            targetId: chatTarget?.id || 'support',
-            email: user?.email || null
-        });
 
         // Save persistent message in DB
         fetch('/api/chat/save', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                text: inputValue,
+                text: text,
                 roomId: currentRoomId,
                 targetId: chatTarget?.id || 'support'
             })
-        }).catch(err => console.error('Failed to save message to DB:', err));
+        })
+        .then(res => {
+            if (!res.ok) console.error('Failed to save message to DB');
+        })
+        .catch(err => console.error('Failed to save message to DB:', err));
 
         // Save persistent notification in DB if we have a target
         if (chatTarget?.id) {
@@ -104,26 +141,24 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
                 body: JSON.stringify({
                     targetIdentifier: chatTarget.id,
                     title: (user && (user.firstName ? user.firstName + ' ' + user.lastName : user.email)) || 'Guest',
-                    message: inputValue.substring(0, 100),
+                    message: text.substring(0, 100),
                     type: 'chat',
-                    link: '/' + locale + '/profile/chat/' + chatTarget.dbId + (user ? '/' + user.id : '')
+                    link: '/' + locale + '/profile/chat/' + chatTarget.id + (user ? '/' + user.id : '')
                 })
             }).catch(err => console.error('Failed to save notification:', err));
         }
 
-        setInputValue('');
-
-        // Mock auto-reply if no backend socket is responding
-        setTimeout(() => {
-            if (messages.length < 3) {
+        // Mock auto-reply if it's the first message
+        if (messages.length < 2) {
+            setTimeout(() => {
                 setMessages(prev => [...prev, {
-                    id: Date.now() + 1,
+                    id: 'mock-' + Date.now(),
                     text: locale === 'hy' ? 'Շնորհակալություն: Մեր մասնագետը շուտով կմիանա զրույցին:' : 'Thank you. Our specialist will join the chat shortly.',
                     sender: 'support',
                     time: new Date()
                 }]);
-            }
-        }, 1500);
+            }, 1500);
+        }
     };
 
     return (
@@ -147,7 +182,7 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
                         {messages.map((msg) => (
                             <div key={msg.id} className={`d-flex mb-3 ${msg.sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`}>
                                 <div className={`p-3 rounded-4 shadow-sm chat-bubble sender-${msg.sender}`}>
-                                    {msg.text}
+                                    <div className="chat-text">{msg.text}</div>
                                     <div className="chat-time">
                                         {new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </div>
@@ -225,31 +260,40 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
                 }
 
                 .chat-bubble {
-                    max-width: 80%;
+                    max-width: 85%;
+                    position: relative;
+                    transition: all 0.2s ease;
+                }
+
+                .chat-text {
                     font-size: 0.95rem;
+                    line-height: 1.4;
+                    word-wrap: break-word;
                 }
 
                 .chat-bubble.sender-user {
                     background: var(--brand-color);
                     color: #ffffff !important;
                     border-bottom-right-radius: 4px;
+                    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
                 }
 
                 .chat-bubble.sender-user .chat-time {
                     color: rgba(255, 255, 255, 0.8) !important;
+                    text-align: right;
                 }
 
                 .chat-bubble.sender-support {
                     background: white;
                     color: #1e293b;
                     border-bottom-left-radius: 4px;
+                    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
                 }
 
                 .chat-time {
                     font-size: 0.65rem;
                     opacity: 0.7;
-                    text-align: right;
-                    margin-top: 4px;
+                    margin-top: 5px;
                 }
 
                 .chat-toggle-btn {

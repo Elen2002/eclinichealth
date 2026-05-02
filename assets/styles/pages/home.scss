@@ -1,0 +1,54 @@
+/* Home Page Styles */
+.ecosystem-diagram .diagram-step {
+    position: relative;
+    z-index: 1;
+}
+.step-icon {
+    width: 60px;
+    height: 60px;
+    background: white;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #64748b;
+    transition: all 0.3s ease;
+}
+.step-icon.active {
+    background: var(--brand-gradient);
+    color: white;
+    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+}
+.diagram-step:hover .step-icon {
+    transform: translateY(-5px);
+    background: var(--brand-gradient);
+    color: white;
+}
+.diagram-line {
+    position: absolute;
+    top: 30px;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(99, 102, 241, 0.1), transparent);
+    z-index: 0;
+}
+.stat-box {
+    transition: all 0.3s ease;
+}
+.stat-box:hover {
+    background: #fff !important;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    transform: translateY(-3px);
+}
+@keyframes dash {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+svg path {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: dash 5s linear infinite;
+}

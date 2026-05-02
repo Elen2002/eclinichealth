@@ -147,7 +147,7 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    (function() {
         const header = document.getElementById('header');
         const langBtn = document.getElementById('lang-selector-btn');
         const langDropdown = document.getElementById('lang-dropdown');
@@ -157,14 +157,16 @@
 
         // Scroll effect
         window.addEventListener('scroll', () => {
-            if (window.scrollY > 20) {
-                header.classList.add('shadow-sm');
-                header.style.backgroundColor = 'rgba(248, 250, 252, 0.98)';
-                header.style.backdropFilter = 'blur(10px)';
-            } else {
-                header.classList.remove('shadow-sm');
-                header.style.backgroundColor = 'rgba(248, 250, 252, 0.95)';
-                header.style.backdropFilter = 'blur(10px)';
+            if (header) {
+                if (window.scrollY > 20) {
+                    header.classList.add('shadow-sm');
+                    header.style.backgroundColor = 'rgba(248, 250, 252, 0.98)';
+                    header.style.backdropFilter = 'blur(10px)';
+                } else {
+                    header.classList.remove('shadow-sm');
+                    header.style.backgroundColor = 'rgba(248, 250, 252, 0.95)';
+                    header.style.backdropFilter = 'blur(10px)';
+                }
             }
         });
 
@@ -174,13 +176,19 @@
                 e.stopPropagation();
                 langDropdown.classList.toggle('d-none');
             });
-            document.addEventListener('click', () => langDropdown.classList.add('d-none'));
+            document.addEventListener('click', () => {
+                if (langDropdown) langDropdown.classList.add('d-none');
+            });
         }
 
         // Mobile nav
         if (mobileToggle) {
             mobileToggle.addEventListener('click', () => mobileOverlay.classList.remove('d-none'));
-            mobileClose.addEventListener('click', () => mobileOverlay.classList.add('d-none'));
+            if (mobileClose) {
+                mobileClose.addEventListener('click', () => mobileOverlay.classList.add('d-none'));
+            }
         }
-    });
+    })();
 </script>
+
+

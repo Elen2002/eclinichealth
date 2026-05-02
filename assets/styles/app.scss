@@ -2416,3 +2416,9 @@ section,
     background: #0f172a;
     color: white;
 }
+
+@import 'layout/dashboard';
+@import 'pages/auth';
+@import 'pages/profile';
+@import 'pages/home';
+@import 'pages/notifications';

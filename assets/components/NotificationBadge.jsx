@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
 
 const NotificationBadge = ({ user = null, locale = 'en' }) => {
     const [count, setCount] = useState(0);
@@ -7,33 +6,21 @@ const NotificationBadge = ({ user = null, locale = 'en' }) => {
     useEffect(() => {
         if (!user) return;
 
-        const socketUrl = `${window.location.protocol}//${window.location.hostname}`;
-        const socket = io(socketUrl, {
-            transports: ['polling']
-        });
+        const fetchNotifications = () => {
+            fetch('/api/notifications/unread-count')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.count !== undefined) {
+                        setCount(data.count);
+                    }
+                })
+                .catch(err => console.error('Failed to fetch notifications:', err));
+        };
 
-        // Listen for messages that are targeted to this user
-        socket.on('connect', () => {
-            console.log('Notification socket connected');
-            socket.emit('join_notifications', { userId: user.identifier || user.email });
-        });
+        fetchNotifications();
+        const interval = setInterval(fetchNotifications, 10000); // Poll every 10 seconds
 
-        socket.on('new_notification', (data) => {
-            if (data.type === 'chat_message') {
-                // Only increment if we are not on the chat page for this doctor
-                // Or if it's a new message in a different room
-                setCount(prev => prev + 1);
-
-                // Play subtle sound if permitted by browser
-                const audio = new Audio('/sounds/notification.mp3');
-                audio.play().catch(e => {
-                    // Silently ignore autoplay restrictions
-                    console.log('Audio playback prevented by browser policy');
-                });
-            }
-        });
-
-        return () => socket.close();
+        return () => clearInterval(interval);
     }, [user]);
 
     if (!user) return null;

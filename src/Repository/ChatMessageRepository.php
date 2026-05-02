@@ -22,7 +22,7 @@ class ChatMessageRepository extends ServiceEntityRepository
     public function findByRoomId(string $roomId): array
     {
         return $this->createQueryBuilder('c')
-            ->andWhere('c.roomId = :val')
+            ->andWhere('LOWER(c.roomId) = LOWER(:val)')
             ->setParameter('val', $roomId)
             ->orderBy('c.createdAt', 'ASC')
             ->getQuery()
