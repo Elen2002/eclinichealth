@@ -23,7 +23,9 @@ const DoctorDashboard = ({
 
     useEffect(() => {
         const socketUrl = `${window.location.protocol}//${window.location.hostname}`;
-        const socket = io(socketUrl);
+        const socket = io(socketUrl, {
+            transports: ['polling']
+        });
 
         socket.on('connect', () => {
             console.log('Dashboard notification socket connected');

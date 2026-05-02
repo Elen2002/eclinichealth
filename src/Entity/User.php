@@ -52,6 +52,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read', 'chat:read'])]
     private ?string $avatar = null;
 
+    #[ORM\Column(length: 255, nullable: true, unique: true)]
+    #[Groups(['user:read'])]
+    private ?string $apiToken = null;
+
     /**
      * @var \Doctrine\Common\Collections\Collection<int, Notification>
      */
@@ -218,6 +222,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $notification->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getApiToken(): ?string
+    {
+        return $this->apiToken;
+    }
+
+    public function setApiToken(?string $apiToken): static
+    {
+        $this->apiToken = $apiToken;
 
         return $this;
     }

@@ -32,12 +32,22 @@ class ApiAuthController extends AbstractController
 
         // For a simple generic app, we return the user info. 
         // In a full production app, you'd return a JWT token here.
+        // Get or generate a simple token for mobile use
+        if (!$user->getApiToken()) {
+            $user->setApiToken(bin2hex(random_bytes(32)));
+            $entityManager->persist($user);
+            $entityManager->flush();
+        }
+
         return $this->json([
             'message' => 'Login successful',
+            'token' => $user->getApiToken(),
             'user' => [
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
+                'firstName' => $user->getFirstName(),
+                'lastName' => $user->getLastName(),
             ]
         ]);
     }

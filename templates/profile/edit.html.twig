@@ -1,73 +1,137 @@
-{% extends 'base.html.twig' %}
+{% extends 'frontend_layout/index.html.twig' %}
 
-{% block title %}{{ 'profile.editTitle'|trans }}{% endblock %}
+{% block title %}{{ 'Edit Profile'|trans }}{% endblock %}
 
 {% block body %}
-<div class="container py-5 mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="card-header p-4 text-white text-center border-0" style="background: linear-gradient(135deg, var(--brand-color), var(--accent-color))">
-                    <h2 class="fw-bold mb-0">{{ 'Edit Profile'|trans }}</h2>
-                    <p class="opacity-75 mb-0">{{ 'Update your information and avatar'|trans }}</p>
+<div class="profile-page bg-light min-vh-100 mt-5 pt-4">
+    <!-- Profile Header/Hero -->
+    <div class="profile-hero py-5 mb-5" style="background: linear-gradient(135deg, var(--brand-color), var(--accent-color));">
+        <div class="container position-relative" style="z-index: 1;">
+            <div class="row align-items-center">
+                <div class="col-md-auto text-center text-md-start mb-3 mb-md-0">
+                    <div class="position-relative d-inline-block">
+                        <img src="{{ user.avatar|default('/img/default-avatar.png') }}" 
+                             class="rounded-circle border border-4 border-white shadow-lg" 
+                             style="width: 130px; height: 130px; object-fit: cover;" alt="Profile">
+                    </div>
                 </div>
-                <div class="card-body p-4 p-md-5">
-                    {% for label, messages in app.flashes %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ label == 'error' ? 'danger' : label }} rounded-pill px-4">
-                                {{ message|trans }}
+                <div class="col text-center text-md-start text-white">
+                    <h1 class="fw-bold mb-1 text-white">{{ user.firstName ? user.firstName ~ ' ' ~ user.lastName : user.email|split('@')[0]|capitalize }}</h1>
+                    <p class="text-white-50 mb-3"><i class="bi bi-envelope me-1"></i> {{ user.email }}</p>
+                    <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3">
+                        <div class="bg-white bg-opacity-10 rounded-pill px-3 py-1 small">
+                            <i class="bi bi-calendar-check me-1"></i> {{ consultations|length }} {{ 'Appointments'|trans }}
+                        </div>
+                        <div class="bg-white bg-opacity-10 rounded-pill px-3 py-1 small">
+                            <i class="bi bi-shield-check me-1"></i> {{ 'Verified Account'|trans }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="row">
+            <!-- Left Sidebar -->
+            <div class="col-lg-4">
+                <!-- Quick Stats -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold text-muted text-uppercase small mb-4 tracking-wider">{{ 'Personal Information'|trans }}</h6>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary-subtle text-primary rounded-circle p-2 me-3">
+                                <i class="bi bi-person"></i>
                             </div>
+                            <div>
+                                <div class="small text-muted">{{ 'Full Name'|trans }}</div>
+                                <div class="fw-semibold">{{ user.firstName ~ ' ' ~ user.lastName }}</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center mb-0">
+                            <div class="bg-info-subtle text-info rounded-circle p-2 me-3">
+                                <i class="bi bi-telephone"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted">{{ 'Phone Number'|trans }}</div>
+                                <div class="fw-semibold">{{ user.phone|default('Not provided'|trans) }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer border-top-0 p-0" style="background: linear-gradient(135deg, var(--brand-color), var(--accent-color));">
+                        <a href="{{ path('app_logout') }}" class="btn btn-link w-100 py-3 text-white text-decoration-none border-top-0 rounded-0 fw-bold">
+                            <i class="bi bi-box-arrow-right me-1 text-white"></i> {{ 'Logout'|trans }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Content -->
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-header p-4 text-white text-center border-0" style="background: linear-gradient(135deg, var(--brand-color), var(--accent-color))">
+                        <h2 class="fw-bold mb-0 text-white">{{ 'Edit Profile'|trans }}</h2>
+                        <p class="opacity-75 mb-0">{{ 'Update your information and avatar'|trans }}</p>
+                    </div>
+                    <div class="card-body p-4 p-md-5">
+                        {% for label, messages in app.flashes %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ label == 'error' ? 'danger' : label }} rounded-pill px-4 mb-4">
+                                    {{ message|trans }}
+                                </div>
+                            {% endfor %}
                         {% endfor %}
-                    {% endfor %}
 
-                    {{ form_start(form) }}
-                        <div class="text-center mb-4">
-                            <div class="position-relative d-inline-block">
-                                <img src="{{ user.avatar ?: asset('img/default-avatar.png') }}" 
-                                     alt="Avatar" 
-                                     class="rounded-circle shadow-sm border border-4 border-white" 
-                                     style="width: 120px; height: 120px; object-fit: cover;">
-                                <div class="position-absolute bottom-0 end-0">
-                                    <label for="{{ form.avatar_file.vars.id }}" class="btn btn-primary btn-sm rounded-circle p-2 shadow">
-                                        <i class="bi bi-camera-fill"></i>
-                                    </label>
+                        {{ form_start(form) }}
+                            <div class="text-center mb-4">
+                                <div class="position-relative d-inline-block">
+                                    <img src="{{ user.avatar ?: asset('img/default-avatar.png') }}" 
+                                         alt="Avatar" 
+                                         class="rounded-circle shadow-sm border border-4 border-white" 
+                                         style="width: 120px; height: 120px; object-fit: cover;">
+                                    <div class="position-absolute bottom-0 end-0">
+                                        <label for="{{ form.avatar_file.vars.id }}" class="btn btn-primary btn-sm rounded-circle p-2 shadow">
+                                            <i class="bi bi-camera-fill"></i>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mt-2 small text-muted">{{ 'Click camera icon to change avatar'|trans }}</div>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        {{ form_widget(form.firstName, {'attr': {'placeholder': 'First Name'|trans, 'class': 'form-control rounded-pill px-4'}}) }}
+                                        {{ form_label(form.firstName) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        {{ form_widget(form.lastName, {'attr': {'placeholder': 'Last Name'|trans, 'class': 'form-control rounded-pill px-4'}}) }}
+                                        {{ form_label(form.lastName) }}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-floating mb-3">
-                                    {{ form_widget(form.firstName, {'attr': {'placeholder': 'First Name'|trans, 'class': 'form-control rounded-pill px-4'}}) }}
-                                    {{ form_label(form.firstName) }}
-                                </div>
+                            <div class="form-floating mb-4">
+                                {{ form_widget(form.email, {'attr': {'placeholder': 'Email Address'|trans, 'class': 'form-control rounded-pill px-4'}}) }}
+                                {{ form_label(form.email) }}
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-floating mb-3">
-                                    {{ form_widget(form.lastName, {'attr': {'placeholder': 'Last Name'|trans, 'class': 'form-control rounded-pill px-4'}}) }}
-                                    {{ form_label(form.lastName) }}
-                                </div>
+
+                            <div class="d-none">
+                                {{ form_widget(form.avatar_file) }}
                             </div>
-                        </div>
 
-                        <div class="form-floating mb-4">
-                            {{ form_widget(form.email, {'attr': {'placeholder': 'Email Address'|trans, 'class': 'form-control rounded-pill px-4'}}) }}
-                            {{ form_label(form.email) }}
-                        </div>
-
-                        <div class="d-none">
-                            {{ form_widget(form.avatar_file) }}
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg rounded-pill fw-bold shadow-sm transition-all hover-scale">
-                                {{ 'Save Changes'|trans }}
-                            </button>
-                            <a href="{{ is_granted('ROLE_DOCTOR') ? path('app_doctor_dashboard') : path('app_profile') }}" class="btn btn-light btn-lg rounded-pill text-muted">
-                                {{ 'Cancel'|trans }}
-                            </a>
-                        </div>
-                    {{ form_end(form) }}
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a href="{{ is_granted('ROLE_DOCTOR') ? path('app_doctor_dashboard') : path('app_profile') }}" class="btn btn-light rounded-pill px-4 fw-bold">
+                                    {{ 'Cancel'|trans }}
+                                </a>
+                                <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm transition-all hover-scale">
+                                    {{ 'Save Changes'|trans }}
+                                </button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -75,6 +139,20 @@
 </div>
 
 <style>
+    .profile-hero {
+        position: relative;
+        overflow: hidden;
+    }
+    .profile-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+                          radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+    }
     .form-floating > .form-control:focus ~ label,
     .form-floating > .form-control:not(:placeholder-shown) ~ label {
         transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
@@ -86,5 +164,30 @@
     .hover-scale:hover {
         transform: scale(1.02);
     }
+    .transition-all {
+        transition: all 0.3s ease;
+    }
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const avatarInput = document.getElementById('{{ form.avatar_file.vars.id }}');
+        const previewImages = document.querySelectorAll('img[alt="Profile"], img[alt="Avatar"]');
+
+        if (avatarInput) {
+            avatarInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImages.forEach(img => {
+                            img.src = e.target.result;
+                        });
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

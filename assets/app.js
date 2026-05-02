@@ -70,9 +70,11 @@ const ChatContainer = () => {
         window.openChat = () => setIsAiModalOpen(true);
     }, []);
     
+    const isChatPage = document.getElementById('doctor-patient-chat-root') !== null || document.getElementById('admin-chat-root') !== null;
+    
     return (
         <>
-            <SupportChatWidget locale={locale} user={window.APP_DATA?.user} />
+            {!isChatPage && <SupportChatWidget locale={locale} user={window.APP_DATA?.user} />}
             <AIChatModal 
                 isOpen={isAiModalOpen} 
                 onClose={() => setIsAiModalOpen(false)} 
@@ -169,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 doctor={JSON.parse(data.doctor || '{}')}
                 patient={JSON.parse(data.patient || '{}')}
                 user={JSON.parse(data.user || '{}')}
+                doctors={JSON.parse(data.doctors || '[]')}
                 locale={data.locale}
             />
         );

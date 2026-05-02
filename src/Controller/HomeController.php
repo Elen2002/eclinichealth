@@ -27,6 +27,7 @@ final class HomeController extends PAbstractController
         DepartmentRepository $departmentRepository,
         DoctorRepository $doctorRepository,
         EntityManagerInterface $entityManager,
+        \Symfony\Contracts\Translation\TranslatorInterface $translator,
         Request $request
     ): Response {
         if ($this->getUser()) {
@@ -61,7 +62,7 @@ final class HomeController extends PAbstractController
         $chartLabels = [];
         $chartData = [];
         foreach ($departments as $dept) {
-             $chartLabels[] = $dept->getName();
+             $chartLabels[] = $translator->trans($dept->getName());
              $chartData[] = rand(5, 20);
         }
 

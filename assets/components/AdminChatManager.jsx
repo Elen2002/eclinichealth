@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
 
 const AdminChatManager = ({ locale = 'en' }) => {
     const t = {
@@ -46,93 +45,63 @@ const AdminChatManager = ({ locale = 'en' }) => {
     const [chats, setChats] = useState({}); // { roomId: { messages: [], lastMessage: '' } }
     const [activeRoom, setActiveRoom] = useState(null);
     const [inputValue, setInputValue] = useState('');
-    const [socket, setSocket] = useState(null);
     const messagesEndRef = useRef(null);
 
+    // Polling for active sessions and messages
     useEffect(() => {
-        const socketUrl = `${window.location.protocol}//${window.location.hostname}`;
-        const newSocket = io(socketUrl);
-        setSocket(newSocket);
+        const fetchSessions = () => {
+            fetch('/api/chat/sessions') 
+                .then(res => res.json())
+                .then(data => {
+                    const newChats = { ...chats };
+                    data.forEach(session => {
+                        if (!newChats[session.roomId]) {
+                            newChats[session.roomId] = { messages: [], lastMessage: session.lastMessage };
+                        } else {
+                            newChats[session.roomId].lastMessage = session.lastMessage;
+                        }
+                    });
+                    setChats(newChats);
+                })
+                .catch(err => console.error('Failed to fetch sessions:', err));
+        };
 
-        newSocket.on('connect', () => {
-            newSocket.emit('join_support', { isAdmin: true });
-        });
+        const fetchActiveMessages = () => {
+            if (!activeRoom) return;
+            fetch(`/api/chat/history/${activeRoom}`)
+                .then(res => res.json())
+                .then(data => {
+                    const formatted = data.map(msg => ({
+                        sender: msg.sender.roles.includes('ROLE_ADMIN') || msg.sender.roles.includes('ROLE_DOCTOR') ? 'admin' : 'user',
+                        text: msg.content,
+                        time: msg.createdAt,
+                        email: msg.sender.email
+                    }));
 
-        // Listen for all existing active chats on refresh
-        newSocket.on('admin_all_active_chats', (activeChats) => {
-            const initialChats = {};
-            activeChats.forEach(chat => {
-                initialChats[chat.roomId] = { messages: [], lastMessage: chat.lastMessage };
-            });
-            setChats(initialChats);
-        });
+                    setChats(prev => ({
+                        ...prev,
+                        [activeRoom]: {
+                            ...prev[activeRoom],
+                            messages: formatted,
+                            lastMessage: formatted[formatted.length - 1]?.text || 'History loaded'
+                        }
+                    }));
+                })
+                .catch(err => console.error('Failed to load chat history:', err));
+        };
 
-        newSocket.on('message', (msg) => {
-            // Room ID is usually the user's ID or socket ID
-            const roomId = msg.roomId || 'global';
-            setChats(prev => {
-                const currentChat = prev[roomId] || { messages: [] };
-                return {
-                    ...prev,
-                    [roomId]: {
-                        ...currentChat,
-                        messages: [...currentChat.messages, msg],
-                        lastMessage: msg.text
-                    }
-                };
-            });
-        });
+        fetchSessions();
+        const interval = setInterval(() => {
+            fetchSessions();
+            fetchActiveMessages();
+        }, 5000);
 
-
-        // Listen for new users connecting
-        newSocket.on('admin_user_online', (user) => {
-            setChats(prev => {
-                if (prev[user.userId]) return prev;
-                return {
-                    ...prev,
-                    [user.userId]: { messages: [], lastMessage: 'New session started' }
-                };
-            });
-        });
-
-        return () => newSocket.close();
-    }, []);
+        return () => clearInterval(interval);
+    }, [activeRoom]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [chats, activeRoom]);
-
-    useEffect(() => {
-        if (activeRoom && socket) {
-            socket.emit('join_support', { roomId: activeRoom });
-        }
-    }, [activeRoom, socket]);
-
-    useEffect(() => {
-        if (!activeRoom) return;
-
-        // Load history from DB
-        fetch(`/api/chat/history/${activeRoom}`)
-            .then(res => res.json())
-            .then(data => {
-                const formatted = data.map(msg => ({
-                    sender: msg.sender.roles.includes('ROLE_ADMIN') || msg.sender.roles.includes('ROLE_DOCTOR') ? 'admin' : 'user',
-                    text: msg.content,
-                    time: msg.createdAt,
-                    email: msg.sender.email
-                }));
-
-                setChats(prev => ({
-                    ...prev,
-                    [activeRoom]: {
-                        ...prev[activeRoom],
-                        messages: formatted,
-                        lastMessage: formatted[formatted.length - 1]?.text || 'History loaded'
-                    }
-                }));
-            })
-            .catch(err => console.error('Failed to load chat history:', err));
-    }, [activeRoom]);
 
     const handleSend = () => {
         if (!inputValue.trim() || !activeRoom) return;
@@ -143,9 +112,6 @@ const AdminChatManager = ({ locale = 'en' }) => {
             time: new Date(),
             roomId: activeRoom
         };
-
-        // Emit via socket
-        socket?.emit('chat_message', newMessage);
 
         // Update local state immediately
         setChats(prev => {
@@ -237,7 +203,7 @@ const AdminChatManager = ({ locale = 'en' }) => {
                                         <div className={`p-3 rounded-4 shadow-sm`} style={{
                                             maxWidth: '70%',
                                             background: msg.sender === 'admin' ? 'var(--brand-color)' : 'white',
-                                            color: msg.sender === 'admin' ? 'white' : '#1e293b',
+                                            color: msg.sender === 'admin' ? '#ffffff' : '#1e293b',
                                             borderBottomRightRadius: msg.sender === 'admin' ? '4px' : '20px',
                                             borderBottomLeftRadius: msg.sender === 'user' ? '4px' : '20px',
                                         }}>

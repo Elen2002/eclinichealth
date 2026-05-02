@@ -11,6 +11,7 @@ nav:
   contact: "Կապ"
   login: "Մուտք"
   myProfile: "Իմ էջը"
+  goToPortal: "Անձնական էջ"
 
 footer:
   quickLinks: "Արագ հղումներ"
@@ -107,6 +108,8 @@ home:
     analytics:
       title: "Հարթակի ցուցանիշները"
       desc: "Մասնագետների բաշխումը ըստ բժշկական բաժանմունքների:"
+      registeredSpecialists: "Գրանցված մասնագետներ"
+      medicalDepartments: "Բժշկական բաժանմունքներ"
 
 Expert Doctors: "Փորձառու բժիշկներ"
 A dedicated team of specialized MDs.: "Մասնագիտացված բժիշկների թիմ:"

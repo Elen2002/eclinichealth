@@ -85,9 +85,49 @@ class ProfileController extends AbstractController
             $patient = $this->getUser();
         }
 
+        $user = $this->getUser();
+        $isDoctor = in_array('ROLE_DOCTOR', $user->getRoles());
+        $contacts = [];
+
+        if ($isDoctor) {
+            // For doctor: show their patients
+            $patientRelations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['doctor' => $user]);
+            foreach ($patientRelations as $relation) {
+                $p = $relation->getPacient();
+                $contacts[] = [
+                    'id' => $p->getId(),
+                    'dbId' => $p->getId(),
+                    'name' => $p->getFirstName() ? $p->getFirstName() . ' ' . $p->getLastName() : $p->getEmail(),
+                    'avatar' => $p->getAvatar(),
+                    'specialty' => 'Patient',
+                    'identifier' => $p->getEmail() ? explode('@', $p->getEmail())[0] : 'user_' . $p->getId()
+                ];
+            }
+        } else {
+            // For patient: show their doctors
+            $doctorRelations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['pacient' => $user]);
+            $seenDoctorIds = [];
+            foreach ($doctorRelations as $relation) {
+                $doctorUser = $relation->getDoctor();
+                $doctorProfile = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $doctorUser]);
+                if ($doctorProfile && !in_array($doctorProfile->getId(), $seenDoctorIds)) {
+                    $contacts[] = [
+                        'id' => $doctorProfile->getId(),
+                        'dbId' => $doctorProfile->getId(),
+                        'name' => $doctorUser->getFirstName() . ' ' . $doctorUser->getLastName(),
+                        'avatar' => $doctorUser->getAvatar(),
+                        'specialty' => $doctorProfile->getSpecialty() ?: ($doctorProfile->getDepartment() ? $doctorProfile->getDepartment()->getName() : 'Specialist'),
+                        'identifier' => $doctorUser->getEmail() ? explode('@', $doctorUser->getEmail())[0] : 'doctor_' . $doctorUser->getId()
+                    ];
+                    $seenDoctorIds[] = $doctorProfile->getId();
+                }
+            }
+        }
+
         return $this->render('profile/chat.html.twig', [
             'doctor' => $doctor,
             'patient' => $patient,
+            'contacts' => $contacts,
         ]);
     }
 
@@ -120,11 +160,12 @@ class ProfileController extends AbstractController
         ]);
     }
 
-    #[Route('/{_locale}/profile/edit', name: 'app_profile_edit')]
+    #[Route('/{_locale}/profile/edit', name: 'app_profile_edit', defaults: ['_locale' => 'hy'])]
     public function edit(
         \Symfony\Component\HttpFoundation\Request $request,
         \Doctrine\ORM\EntityManagerInterface $entityManager,
-        \Symfony\Component\String\Slugger\SluggerInterface $slugger
+        \Symfony\Component\String\Slugger\SluggerInterface $slugger,
+        ConsultationRepository $consultationRepository
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
@@ -160,9 +201,12 @@ class ProfileController extends AbstractController
             return $this->redirectToRoute('app_profile');
         }
 
+        $consultations = $consultationRepository->findBy(['patientEmail' => $user->getUserIdentifier()], ['requestedDate' => 'DESC']);
+
         return $this->render('profile/edit.html.twig', [
             'form' => $form->createView(),
             'user' => $user,
+            'consultations' => $consultations,
         ]);
     }
 }

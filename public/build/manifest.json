@@ -306,5 +306,9 @@
   "build/images/at.svg": "/build/images/at.d9c6c6ac.svg",
   "build/images/bd.svg": "/build/images/bd.0ad8c443.svg",
   "build/images/pe.svg": "/build/images/pe.d64e9732.svg",
-  "build/images/id.svg": "/build/images/id.f624e2c8.svg"
+  "build/images/id.svg": "/build/images/id.f624e2c8.svg",
+  "build/vendors-node_modules_select2_dist_css_select2_min_css-node_modules_select2_dist_js_select2_js-416492.css": "/build/vendors-node_modules_select2_dist_css_select2_min_css-node_modules_select2_dist_js_select2_js-416492.css",
+  "build/vendors-node_modules_select2_dist_css_select2_min_css-node_modules_select2_dist_js_select2_js-416492.js": "/build/vendors-node_modules_select2_dist_css_select2_min_css-node_modules_select2_dist_js_select2_js-416492.js",
+  "build/vendors-node_modules_select2_dist_css_select2_min_css-node_modules_select2_dist_js_select2_js-9e511f.css": "/build/vendors-node_modules_select2_dist_css_select2_min_css-node_modules_select2_dist_js_select2_js-9e511f.css",
+  "build/vendors-node_modules_select2_dist_css_select2_min_css-node_modules_select2_dist_js_select2_js-9e511f.js": "/build/vendors-node_modules_select2_dist_css_select2_min_css-node_modules_select2_dist_js_select2_js-9e511f.js"
 }

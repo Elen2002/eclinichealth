@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { io } from 'socket.io-client';
 import { t } from '../utils/translations.js';
 
 const SupportChatWidget = ({ locale = 'en', user = null }) => {
@@ -29,7 +28,6 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
         { id: '1', text: locale === 'hy' ? 'Ողջույն! Ինչպե՞ս կարող ենք օգնել Ձեզ:' : 'Hello! How can we help you today?', sender: 'support', time: new Date() }
     ]);
     const [inputValue, setInputValue] = useState('');
-    const [socket, setSocket] = useState(null);
     const messagesEndRef = useRef(null);
 
     const [userId] = useState(() => {
@@ -37,42 +35,29 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
         return 'Guest_' + Math.random().toString(36).substr(2, 5);
     });
 
-    // Compute room ID: if chatting with a doctor, use a pair-specific room
     const currentRoomId = chatTarget ? `pair_${userId}_${chatTarget.id}` : userId;
 
     useEffect(() => {
-        // Initialize socket connection to port 3001
-        const socketUrl = `${window.location.protocol}//${window.location.hostname}`;
-        const newSocket = io(socketUrl, {
-            transports: ['polling']
-        });
-        setSocket(newSocket);
+        // Simple polling instead of sockets
+        const fetchHistory = () => {
+            fetch(`/api/chat/history/${currentRoomId}`)
+                .then(res => res.json())
+                .then(data => {
+                    setMessages(data.map(msg => ({
+                        id: msg.id,
+                        text: msg.content,
+                        sender: msg.sender.identifier === userId ? 'user' : 'support',
+                        time: msg.createdAt
+                    })));
+                })
+                .catch(err => console.error('Polling failed:', err));
+        };
 
-        // Join appropriate room
-        newSocket.on('connect', () => {
-            console.log('Connected to socket server, joining room:', currentRoomId);
-            newSocket.emit('join_support', { userId: userId, roomId: currentRoomId });
-        });
+        fetchHistory(); // Initial load
+        const interval = setInterval(fetchHistory, 5000); // Poll every 5 seconds
 
-        newSocket.on('chat_history', (data) => {
-            if (data.roomId === currentRoomId) {
-                setMessages(data.messages);
-            }
-        });
-
-        newSocket.on('message', (msg) => {
-            if (msg.roomId === currentRoomId) {
-                setMessages(prev => [...prev, {
-                    id: Date.now().toString(),
-                    text: msg.text,
-                    sender: msg.sender || 'support',
-                    time: new Date()
-                }]);
-            }
-        });
-
-        return () => newSocket.close();
-    }, [userId, currentRoomId]); // Reconnect/Re-join when room changes
+        return () => clearInterval(interval);
+    }, [userId, currentRoomId]);
 
     useEffect(() => {
         if (messagesEndRef.current) {
@@ -142,23 +127,12 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
     };
 
     return (
-        <div className="support-chat-wrapper" style={{ position: 'fixed', bottom: '30px', right: '30px', zIndex: 10000 }}>
+        <div className="support-chat-wrapper">
             {/* Chat Window */}
             {isOpen && (
-                <div className="chat-window shadow-lg" style={{
-                    width: '380px',
-                    height: '520px',
-                    background: 'white',
-                    borderRadius: '24px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    overflow: 'hidden',
-                    marginBottom: '20px',
-                    border: '1px solid rgba(0,0,0,0.05)',
-                    animation: 'slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-                }}>
+                <div className="chat-window shadow-lg">
                     {/* Header */}
-                    <div className="chat-header p-3 px-4 d-flex align-items-center justify-content-between" style={{ background: 'var(--brand-gradient)', color: 'white' }}>
+                    <div className="chat-header p-3 px-4 d-flex align-items-center justify-content-between">
                         <div className="d-flex align-items-center gap-2">
                             <div className="online-indicator"></div>
                             <span className="fw-bold">
@@ -169,19 +143,12 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
                     </div>
 
                     {/* Messages Area */}
-                    <div className="chat-messages p-4 flex-grow-1 overflow-auto" style={{ background: '#f8fafc' }}>
+                    <div className="chat-messages p-4 flex-grow-1 overflow-auto">
                         {messages.map((msg) => (
                             <div key={msg.id} className={`d-flex mb-3 ${msg.sender === 'user' ? 'justify-content-end' : 'justify-content-start'}`}>
-                                <div className={`p-3 rounded-4 shadow-sm`} style={{
-                                    maxWidth: '80%',
-                                    background: msg.sender === 'user' ? 'var(--brand-color)' : 'white',
-                                    color: msg.sender === 'user' ? 'white' : '#1e293b',
-                                    borderBottomRightRadius: msg.sender === 'user' ? '4px' : '18px',
-                                    borderBottomLeftRadius: msg.sender === 'support' ? '4px' : '18px',
-                                    fontSize: '0.95rem'
-                                }}>
+                                <div className={`p-3 rounded-4 shadow-sm chat-bubble sender-${msg.sender}`}>
                                     {msg.text}
-                                    <div style={{ fontSize: '0.65rem', opacity: 0.7, textAlign: 'right', marginTop: '4px' }}>
+                                    <div className="chat-time">
                                         {new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </div>
                                 </div>
@@ -218,23 +185,111 @@ const SupportChatWidget = ({ locale = 'en', user = null }) => {
             <button
                 className={`chat-toggle-btn shadow-lg d-flex align-items-center justify-content-center ${isOpen ? 'active' : ''}`}
                 onClick={() => setIsOpen(!isOpen)}
-                style={{
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '50%',
-                    background: 'var(--brand-color)',
-                    color: 'white',
-                    border: 'none',
-                    fontSize: '1.8rem',
-                    transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                    position: 'relative'
-                }}
             >
                 <i className={`bi ${isOpen ? 'bi-x-lg' : 'bi-chat-dots-fill'}`}></i>
                 {!isOpen && hasUnread && <div className="notification-badge">1</div>}
             </button>
 
             <style dangerouslySetInnerHTML={{ __html: `
+                .support-chat-wrapper {
+                    position: fixed;
+                    bottom: 30px;
+                    right: 30px;
+                    z-index: 10000;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                }
+
+                .chat-window {
+                    width: 380px;
+                    height: 520px;
+                    background: white;
+                    border-radius: 24px;
+                    display: flex;
+                    flex-direction: column;
+                    overflow: hidden;
+                    margin-bottom: 20px;
+                    border: 1px solid rgba(0,0,0,0.05);
+                    animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+                }
+
+                .chat-header {
+                    background: var(--brand-gradient);
+                    color: white;
+                }
+
+                .chat-messages {
+                    background: #f8fafc;
+                }
+
+                .chat-bubble {
+                    max-width: 80%;
+                    font-size: 0.95rem;
+                }
+
+                .chat-bubble.sender-user {
+                    background: var(--brand-color);
+                    color: #ffffff !important;
+                    border-bottom-right-radius: 4px;
+                }
+
+                .chat-bubble.sender-user .chat-time {
+                    color: rgba(255, 255, 255, 0.8) !important;
+                }
+
+                .chat-bubble.sender-support {
+                    background: white;
+                    color: #1e293b;
+                    border-bottom-left-radius: 4px;
+                }
+
+                .chat-time {
+                    font-size: 0.65rem;
+                    opacity: 0.7;
+                    text-align: right;
+                    margin-top: 4px;
+                }
+
+                .chat-toggle-btn {
+                    width: 64px;
+                    height: 64px;
+                    border-radius: 50%;
+                    background: var(--brand-color);
+                    color: white;
+                    border: none;
+                    font-size: 1.8rem;
+                    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    position: relative;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                @media (max-width: 576px) {
+                    .support-chat-wrapper {
+                        bottom: 20px;
+                        right: 20px;
+                    }
+                    .chat-window {
+                        position: fixed;
+                        top: 20px;
+                        left: 20px;
+                        right: 20px;
+                        bottom: 90px;
+                        width: auto;
+                        height: auto;
+                        border-radius: 20px;
+                        margin-bottom: 0;
+                    }
+                    .chat-toggle-btn {
+                        width: 56px;
+                        height: 56px;
+                        font-size: 1.5rem;
+                    }
+                }
+
                 @keyframes slideUp {
                     from { transform: translateY(20px); opacity: 0; }
                     to { transform: translateY(0); opacity: 1; }

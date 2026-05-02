@@ -41,7 +41,13 @@ class RegistrationController extends PAbstractController
 
             // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
+            
+            // Set first name from email prefix
+            $emailParts = explode('@', $user->getEmail());
+            $user->setFirstName(ucfirst($emailParts[0]));
+            
             $user->setRoles(['ROLE_USER']);
+            $user->setApiToken(bin2hex(random_bytes(32)));
             $entityManager->persist($user);
             $entityManager->flush();
 

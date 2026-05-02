@@ -23,6 +23,7 @@
          roles: app.user.roles,
          name: app.user.firstName ? app.user.firstName ~ ' ' ~ app.user.lastName : app.user.email
      }|json_encode }}"
+     data-doctors="{{ contacts|json_encode }}"
      data-locale="{{ app.request.locale }}">
 </div>
 {% endblock %}

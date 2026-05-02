@@ -11,6 +11,7 @@ nav:
   contact: "Контакты"
   login: "Войти"
   myProfile: "Мой профиль"
+  goToPortal: "Перейти в портал"
 
 footer:
   quickLinks: "Быстрые ссылки"
@@ -23,7 +24,13 @@ footer:
   treatment: "Контроль лечения"
   preventive: "Программы профилактики"
   laboratory: "Лабораторные услуги"
-  
+  ecosystem:
+    analytics:
+      title: "Эффективность платформы"
+      desc: "Распределение специалистов по медицинским отделениям в реальном времени."
+      registeredSpecialists: "Зарегистрированные специалисты"
+      medicalDepartments: "Медицинские отделения"
+
 home:
   departments:
     title: "Медицинские Отделения"

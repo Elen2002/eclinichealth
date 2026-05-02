@@ -11,6 +11,7 @@ nav:
   contact: "Contact"
   login: "Login"
   myProfile: "My Profile"
+  goToPortal: "Go to Portal"
 
 footer:
   quickLinks: "Quick Links"
@@ -23,8 +24,31 @@ footer:
   treatment: "Treatment"
   preventive: "Preventive Programs"
   laboratory: "Laboratory Services"
+  
+"help.search.header.subtitle": "Find answers in the help center"
+"help.search.header.title": "Help & Support"
+"help.search.input.accessibility": "Search help documentation"
+"help.search.placeholder": "What are you looking for?"
+
+"Process Consultation": "Process Consultation"
+"Process Appointment Request": "Process Appointment Request"
+"Step 2: Provide Medical Details & Confirm Date": "Step 2: Provide Medical Details & Confirm Date"
+"Confirm Appointment Date & Time": "Confirm Appointment Date & Time"
+"You can adjust the time if necessary.": "You can adjust the time if necessary."
+"Prescription / Medical Advice": "Prescription / Medical Advice"
+"Enter prescription details...": "Enter prescription details..."
+"Required Medical Tests": "Required Medical Tests"
+"List any required tests before the visit...": "List any required tests before the visit..."
+"You must provide either a prescription or a list of tests.": "You must provide either a prescription or a list of tests."
+"Confirm & Accept Appointment": "Confirm & Accept Appointment"
+
 
 home:
+  hero:
+    title1: "Medical Care,"
+    title2: "Connected."
+    subtitle: "A unified ecosystem linking patients, smart hospitals, and AI diagnostics in real-time."
+    cta: "Find Nearest Clinic"
   howItWorks:
     subtitle: "HOW IT WORKS"
     title: "The Connected Care Loop"
@@ -83,6 +107,8 @@ home:
     analytics:
       title: "Platform Performance"
       desc: "Real-time distribution of specialists across medical departments."
+      registeredSpecialists: "Registered Specialists"
+      medicalDepartments: "Medical Departments"
 
 Professional Healthcare: "Professional Healthcare"
 Modern Care for Your: "Modern Care for Your"

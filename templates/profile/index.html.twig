@@ -6,7 +6,7 @@
 <div class="profile-page bg-light min-vh-100 mt-5 pt-4">
     <!-- Profile Header/Hero -->
     <div class="profile-hero py-5 mb-5" style="background: linear-gradient(135deg, var(--brand-color), var(--accent-color));">
-        <div class="container">
+        <div class="container position-relative" style="z-index: 1;">
             <div class="row align-items-center">
                 <div class="col-md-auto text-center text-md-start mb-3 mb-md-0">
                     <div class="position-relative d-inline-block">
@@ -66,9 +66,9 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer border-top-0 p-0" style="background: var(--surface-color);">
-                        <a href="{{ path('app_logout') }}" class="btn btn-link w-100 py-3 text-danger text-decoration-none border-top rounded-0">
-                            <i class="bi bi-box-arrow-right me-1"></i> {{ 'Logout'|trans }}
+                    <div class="card-footer border-top-0 p-0" style="background: linear-gradient(135deg, var(--brand-color), var(--accent-color));">
+                        <a href="{{ path('app_logout') }}" class="btn btn-link w-100 py-3 text-white text-decoration-none border-top-0 rounded-0 fw-bold">
+                            <i class="bi bi-box-arrow-right me-1 text-white"></i> {{ 'Logout'|trans }}
                         </a>
                     </div>
                 </div>

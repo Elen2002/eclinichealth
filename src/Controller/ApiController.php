@@ -105,14 +105,24 @@ class ApiController extends AbstractController
         $user->setPassword(
             $userPasswordHasher->hashPassword($user, $data['password'])
         );
-        $user->setFirstName($data['firstName'] ?? '');
+        
+        // Extract name from email if not provided
+        $emailParts = explode('@', $data['email']);
+        $nameFromEmail = ucfirst($emailParts[0]);
+        
+        $user->setFirstName($data['firstName'] ?? $nameFromEmail);
         $user->setLastName($data['lastName'] ?? '');
         $user->setRoles(['ROLE_USER']);
+        $user->setApiToken(bin2hex(random_bytes(32)));
 
         $entityManager->persist($user);
         $entityManager->flush();
 
-        return $this->json(['status' => 'success', 'message' => 'User registered successfully']);
+        return $this->json([
+            'status' => 'success', 
+            'message' => 'User registered successfully',
+            'token' => $user->getApiToken()
+        ]);
     }
 
     #[Route('/login', name: 'api_login', methods: ['POST'])]
@@ -129,12 +139,15 @@ class ApiController extends AbstractController
             return $this->json(['error' => 'Invalid credentials'], 401);
         }
 
-        // Generate a simple token for mobile use
-        $token = bin2hex(random_bytes(32));
+        // Get or generate a simple token for mobile use
+        if (!$user->getApiToken()) {
+            $user->setApiToken(bin2hex(random_bytes(32)));
+            $userRepository->save($user, true);
+        }
 
         return $this->json([
             'status' => 'success',
-            'token' => $token,
+            'token' => $user->getApiToken(),
             'user' => [
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
