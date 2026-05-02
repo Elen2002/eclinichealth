@@ -2,176 +2,6 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    <style>
-        .dashboard-wrapper {
-            display: flex;
-            min-height: 100vh;
-        }
-        .sidebar-nav {
-            width: 280px;
-            background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 100%);
-            color: white;
-            padding: 2.5rem 1.5rem;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-        .sidebar-logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--brand-color);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .nav-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        .nav-item-link {
-            color: #94a3b8;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.75rem 1rem;
-            border-radius: 12px;
-            font-weight: 500;
-        }
-        .nav-item-link:hover, .nav-item-link.active {
-            background: rgba(255, 255, 255, 0.08);
-            color: white;
-        }
-        .nav-item-link.active {
-            background: var(--brand-gradient);
-            color: white;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-        }
-        .sidebar-section-label {
-            color: #475569;
-            text-transform: uppercase;
-            font-size: 0.7rem;
-            letter-spacing: 1px;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            padding-left: 1rem;
-        }
-        .main-content {
-            flex-grow: 1;
-            padding: 2.5rem;
-            background: var(--background-color);
-            overflow-y: auto;
-        }
-        .top-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2.5rem;
-            padding-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-        }
-        .lang-switcher-btn {
-            background: var(--brand-gradient-soft);
-            color: var(--brand-color);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            padding: 0.6rem 1.2rem;
-            border-radius: 14px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            transition: all 0.3s ease;
-        }
-        .lang-switcher-btn:hover {
-            background: var(--brand-gradient);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-        }
-        .header-icon-btn {
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            border-radius: 14px;
-            color: #64748b;
-            font-size: 1.2rem;
-            position: relative;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .header-icon-btn:hover {
-            background: #f8fafc;
-            color: var(--brand-color);
-            transform: translateY(-2px);
-            border-color: rgba(99, 102, 241, 0.2);
-        }
-        .notification-dot {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 8px;
-            height: 8px;
-            background: #f43f5e;
-            border-radius: 50%;
-            border: 2px solid white;
-        }
-        .user-profile-pill {
-            background: white;
-            padding: 0.5rem 1rem;
-            border-radius: 16px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .user-profile-pill:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            border-color: rgba(99, 102, 241, 0.1);
-        }
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            background: var(--brand-gradient);
-            color: white;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9rem;
-        }
-        @media print {
-            .sidebar-nav, .top-header, .medical-btn, .btn, form, .no-print {
-                display: none !important;
-            }
-            .dashboard-wrapper {
-                display: block;
-            }
-            .main-content {
-                padding: 0;
-                background: white;
-            }
-            .medical-card {
-                box-shadow: none;
-                border: 1px solid #ddd;
-            }
-        }
-    </style>
 {% endblock %}
 
 {% block body %}
@@ -258,18 +88,18 @@
                         </ul>
                     </div>
 
-                    <div class="header-icon-btn">
-                        <i class="bi bi-bell"></i>
+                    <a href="{{ path('app_profile_notifications') }}" class="header-icon-btn text-decoration-none">
+                        <i class="bi bi-bell text-dark"></i>
                         <div class="notification-dot"></div>
-                    </div>
+                    </a>
 
                     <div class="user-profile-pill">
                         <div class="user-avatar">
                             <i class="bi bi-person-fill"></i>
                         </div>
                         <div class="d-none d-md-block">
-                            <div class="small fw-bold text-dark mb-0" style="line-height: 1;">{{ app.user.email|split('@')[0]|capitalize }}</div>
-                            <div class="text-muted" style="font-size: 0.65rem;">Administrator</div>
+                            <div class="small fw-bold text-dark mb-0" style="line-height: 1;">{{ app.user ? app.user.email|split('@')[0]|capitalize : 'Guest' }}</div>
+                            <div class="text-muted" style="font-size: 0.65rem;">{{ app.user ? 'Administrator' : 'Not Logged In' }}</div>
                         </div>
                         <i class="bi bi-chevron-down small text-muted ms-1"></i>
                     </div>
@@ -284,80 +114,4 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Use protocol-aware socket URL
-            const protocol = window.location.protocol;
-            const hostname = window.location.hostname;
-            const socketUrl = `${protocol}//${hostname}`;
-
-            const socket = io(socketUrl, {
-                transports: ['websocket', 'polling']
-            });
-
-            const dot = document.querySelector('.notification-dot');
-            const chatBadge = document.getElementById('chat-notification-badge');
-            let unreadCount = parseInt(localStorage.getItem('admin_unread_count') || '0');
-
-            function updateUI() {
-                if (unreadCount > 0) {
-                    if (dot) dot.style.display = 'block';
-                    if (chatBadge) {
-                        chatBadge.innerText = unreadCount;
-                        chatBadge.classList.remove('d-none');
-                    }
-                } else {
-                    if (dot) dot.style.display = 'none';
-                    if (chatBadge) chatBadge.classList.add('d-none');
-                }
-            }
-
-            // Initial UI update
-            updateUI();
-
-            socket.on('admin_notification', function(data) {
-                console.log('New Admin Notification:', data);
-                if (data.type === 'chat') {
-                    // Only increment if we're NOT on the support page OR if it's from a different user?
-                    // Actually, let's always increment and let the user clear it.
-                    unreadCount++;
-                    localStorage.setItem('admin_unread_count', unreadCount);
-                    updateUI();
-
-                    // Trigger a browser notification if supported
-                    if (Notification.permission === "granted") {
-                        new Notification(data.title, {
-                            body: data.message,
-                            icon: '/favicon.ico'
-                        });
-                    } else if (Notification.permission !== "denied") {
-                        Notification.requestPermission();
-                    }
-                }
-            });
-
-            // Clear notifications when entering the support chat
-            if (window.location.pathname.includes('/admin/support')) {
-                dot.addEventListener('click', () => {
-                    unreadCount = 0;
-                    localStorage.setItem('admin_unread_count', '0');
-                    updateUI();
-                });
-
-                // Also clear if they click the sidebar link again
-                const supportLink = document.querySelector('a[href*="/admin/support"]');
-                if (supportLink) {
-                    supportLink.addEventListener('click', () => {
-                        unreadCount = 0;
-                        localStorage.setItem('admin_unread_count', '0');
-                        updateUI();
-                    });
-                }
-
-                // Auto-clear if already on page and seeing the message?
-                // For now, let's leave it to user clicks to ensure they "saw" it.
-            }
-        });
-    </script>
 {% endblock %}

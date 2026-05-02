@@ -87,8 +87,8 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
     return (
         <div className="container-fluid pb-0" style={{ background: '#f8fafc', minHeight: 'calc(100vh - 80px)', marginTop: '80px', paddingTop: '20px', display: 'flex', flexDirection: 'column' }}>
             <div className="row flex-grow-1">
-                {/* Doctors Sidebar */}
-                <div className="col-lg-3 col-md-4 mb-4">
+                {/* Doctors Sidebar - Moves below chat on mobile */}
+                <div className="col-lg-3 col-md-4 mb-4 order-2 order-md-1">
                     <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100 bg-white">
                         <div className="card-header bg-white border-0 py-4 px-4 d-flex align-items-center justify-content-between">
                             <h5 className="fw-bold mb-0">
@@ -149,9 +149,9 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
                         </div>
                     </div>
                 </div>
-
-                {/* Main Chat Area */}
-                <div className="col-lg-9 col-md-8 d-flex flex-column mb-4">
+                
+                {/* Main Chat Area - Appears first on mobile */}
+                <div className="col-lg-9 col-md-8 d-flex flex-column mb-4 order-1 order-md-2">
                     <div className="card border-0 shadow-sm rounded-4 overflow-hidden d-flex flex-column flex-grow-1" style={{ minHeight: '600px', height: 'calc(100vh - 140px)' }}>
                         {/* Chat Header */}
                         <div className="card-header p-3 bg-white border-bottom d-flex align-items-center justify-content-between">

@@ -11,6 +11,7 @@
                 <div class="col-md-auto text-center text-md-start mb-3 mb-md-0">
                     <div class="position-relative d-inline-block">
                         <img src="{{ user.avatar|default('/img/default-avatar.png') }}" 
+                             data-profile-preview
                              class="rounded-circle border border-4 border-white shadow-lg" 
                              style="width: 130px; height: 130px; object-fit: cover;" alt="Profile">
                     </div>
@@ -87,6 +88,7 @@
                                 <div class="position-relative d-inline-block">
                                     <img src="{{ user.avatar ?: asset('img/default-avatar.png') }}" 
                                          alt="Avatar" 
+                                         data-profile-preview
                                          class="rounded-circle shadow-sm border border-4 border-white" 
                                          style="width: 120px; height: 120px; object-fit: cover;">
                                     <div class="position-absolute bottom-0 end-0">
@@ -119,7 +121,7 @@
                             </div>
 
                             <div class="d-none">
-                                {{ form_widget(form.avatar_file) }}
+                                {{ form_widget(form.avatar_file, {'attr': {'data-avatar-input': 'true'}}) }}
                             </div>
 
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -138,56 +140,4 @@
     </div>
 </div>
 
-<style>
-    .profile-hero {
-        position: relative;
-        overflow: hidden;
-    }
-    .profile-hero::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-                          radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
-    }
-    .form-floating > .form-control:focus ~ label,
-    .form-floating > .form-control:not(:placeholder-shown) ~ label {
-        transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
-        padding-left: 20px;
-    }
-    .form-floating > label {
-        padding-left: 20px;
-    }
-    .hover-scale:hover {
-        transform: scale(1.02);
-    }
-    .transition-all {
-        transition: all 0.3s ease;
-    }
-</style>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const avatarInput = document.getElementById('{{ form.avatar_file.vars.id }}');
-        const previewImages = document.querySelectorAll('img[alt="Profile"], img[alt="Avatar"]');
-
-        if (avatarInput) {
-            avatarInput.addEventListener('change', function() {
-                const file = this.files[0];
-                if (file) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        previewImages.forEach(img => {
-                            img.src = e.target.result;
-                        });
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        }
-    });
-</script>
 {% endblock %}
