@@ -473,6 +473,7 @@ class ApiController extends AbstractController
 
         $data = [];
         $currentUserId = $user->getId();
+        $seenPartnerIds = [];
         
         // Fetch Doctor entity to get the correct ID for links
         $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
@@ -500,6 +501,32 @@ class ApiController extends AbstractController
                 'link' => '/' . $locale . '/profile/chat/' . $ownerIdForLink . '/' . $partnerId,
                 'type' => 'chat',
                 'timestamp' => $m->getCreatedAt()->getTimestamp()
+            ];
+            $seenPartnerIds[$partnerId] = true;
+        }
+
+        // Include all established DoctorPacient relationships to allow starting new chats
+        $relations = $doctor 
+            ? $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['doctor' => $user])
+            : $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['pacient' => $user]);
+
+        foreach ($relations as $rel) {
+            $partner = $doctor ? $rel->getPacient() : $rel->getDoctor();
+            if (!$partner) continue;
+
+            $partnerId = $partner->getId();
+            if (isset($seenPartnerIds[$partnerId])) continue; // Already have messages with them
+
+            $partnerName = $partner->getFirstName() ? ($partner->getFirstName() . ' ' . $partner->getLastName()) : $partner->getEmail();
+            
+            $data[] = [
+                'id' => 'chat_new_' . $partnerId,
+                'title' => $partnerName,
+                'message' => 'Սկսել նոր զրույց...', // Start new conversation...
+                'time' => (new \DateTime())->format('Y-m-d H:i'),
+                'link' => '/' . $locale . '/profile/chat/' . $ownerIdForLink . '/' . $partnerId,
+                'type' => 'chat',
+                'timestamp' => (new \DateTime())->getTimestamp() - 86400 // Put them slightly lower than recent messages
             ];
         }
 
@@ -822,5 +849,72 @@ class ApiController extends AbstractController
         $entityManager->flush();
 
         return $this->json(['success' => true]);
+    }
+
+    #[Route('/api/chat/messages/{partnerId}', name: 'api_chat_messages_get', methods: ['GET'])]
+    public function getChatMessages(int $partnerId, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $partner = $entityManager->getRepository(User::class)->find($partnerId);
+        if (!$partner) return $this->json(['error' => 'Partner not found'], 404);
+
+        $messages = $entityManager->getRepository(ChatMessage::class)->createQueryBuilder('m')
+            ->where('(m.sender = :user AND m.recipient = :partner) OR (m.sender = :partner AND m.recipient = :user)')
+            ->setParameter('user', $user)
+            ->setParameter('partner', $partner)
+            ->orderBy('m.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        $data = [];
+        foreach ($messages as $m) {
+            $data[] = [
+                'id' => $m->getId(),
+                'senderId' => $m->getSender()->getId(),
+                'content' => $m->getContent(),
+                'createdAt' => $m->getCreatedAt()->format('Y-m-d H:i:s'),
+                'isMine' => $m->getSender()->getId() === $user->getId(),
+            ];
+        }
+
+        return $this->json($data);
+    }
+
+    #[Route('/api/chat/messages/{partnerId}', name: 'api_chat_messages_post', methods: ['POST'])]
+    public function sendChatMessage(int $partnerId, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $partner = $entityManager->getRepository(User::class)->find($partnerId);
+        if (!$partner) return $this->json(['error' => 'Partner not found'], 404);
+
+        $data = json_decode($request->getContent(), true);
+        if (empty($data['content'])) {
+            return $this->json(['error' => 'Content is required'], 400);
+        }
+
+        // Room ID is combination of both user IDs to keep it unique
+        $roomId = 'room_' . min($user->getId(), $partner->getId()) . '_' . max($user->getId(), $partner->getId());
+
+        $message = new ChatMessage();
+        $message->setSender($user);
+        $message->setRecipient($partner);
+        $message->setContent($data['content']);
+        $message->setRoomId($roomId);
+        $message->setCreatedAtValue();
+
+        $entityManager->persist($message);
+        $entityManager->flush();
+
+        return $this->json([
+            'id' => $message->getId(),
+            'senderId' => $message->getSender()->getId(),
+            'content' => $message->getContent(),
+            'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s'),
+            'isMine' => true,
+        ]);
     }
 }
