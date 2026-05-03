@@ -538,6 +538,7 @@ class ApiController extends AbstractController
             'email' => $user->getEmail(),
             'firstName' => $user->getFirstName(),
             'lastName' => $user->getLastName(),
+            'phone' => $user->getPhone(),
             'avatar' => $user->getAvatar(),
             'roles' => $user->getRoles(),
         ];
@@ -633,20 +634,44 @@ class ApiController extends AbstractController
         $user = $this->getUser();
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
 
+        $doctorsData = [];
+        $seenDoctorIds = [];
+
+        // 1. Get doctors from formal relations (DoctorPacient)
         $relations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['pacient' => $user]);
-        
-        $data = array_map(function($r) use ($entityManager) {
+        foreach ($relations as $r) {
             $doctorUser = $r->getDoctor();
             $doctorProfile = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $doctorUser]);
-            return [
-                'id' => $doctorProfile ? $doctorProfile->getId() : 0,
-                'name' => $doctorUser->getFirstName() . ' ' . $doctorUser->getLastName(),
-                'specialty' => $doctorProfile ? $doctorProfile->getSpecialty() : 'Specialist',
-                'hospital_name' => ($doctorProfile && $doctorProfile->getHospital()) ? $doctorProfile->getHospital()->getName() : 'Hospital',
-                'image' => $doctorUser->getAvatar(),
-            ];
-        }, $relations);
+            if ($doctorProfile && !isset($seenDoctorIds[$doctorProfile->getId()])) {
+                $seenDoctorIds[$doctorProfile->getId()] = true;
+                $doctorsData[] = [
+                    'id' => $doctorProfile->getId(),
+                    'name' => $doctorUser->getFirstName() . ' ' . $doctorUser->getLastName(),
+                    'specialty' => $doctorProfile->getSpecialty(),
+                    'hospital_name' => ($doctorProfile && $doctorProfile->getHospital()) ? $doctorProfile->getHospital()->getName() : 'Hospital',
+                    'image' => $doctorUser->getAvatar(),
+                ];
+            }
+        }
 
-        return $this->json($data);
+        // 2. Get doctors from consultations
+        $email = $user->getUserIdentifier();
+        $consultations = $entityManager->getRepository(Consultation::class)->findBy(['patientEmail' => $email]);
+        foreach ($consultations as $c) {
+            $doctorProfile = $c->getDoctor();
+            if ($doctorProfile && !isset($seenDoctorIds[$doctorProfile->getId()])) {
+                $seenDoctorIds[$doctorProfile->getId()] = true;
+                $doctorUser = $doctorProfile->getUser();
+                $doctorsData[] = [
+                    'id' => $doctorProfile->getId(),
+                    'name' => $doctorUser ? ($doctorUser->getFirstName() . ' ' . $doctorUser->getLastName()) : 'Unknown',
+                    'specialty' => $doctorProfile->getSpecialty(),
+                    'hospital_name' => $doctorProfile->getHospital() ? $doctorProfile->getHospital()->getName() : 'N/A',
+                    'image' => $doctorUser ? $doctorUser->getAvatar() : null,
+                ];
+            }
+        }
+
+        return $this->json($doctorsData);
     }
 }
