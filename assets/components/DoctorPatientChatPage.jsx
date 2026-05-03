@@ -82,7 +82,7 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
         setInputValue('');
     };
 
-    const chatPartner = isDoctorViewer ? patient : doctor;
+
 
     return (
         <div className="container-fluid pb-0" style={{ background: '#f8fafc', minHeight: 'calc(100vh - 80px)', marginTop: '80px', paddingTop: '20px', display: 'flex', flexDirection: 'column' }}>
