@@ -574,7 +574,7 @@ class ApiController extends AbstractController
             'patientName' => $c->getPatientName(),
             'patientPhone' => $c->getPatientPhone(),
             'patientEmail' => $c->getPatientEmail(),
-            'requestedDate' => $c->getRequestedDate()->format('Y-m-d H:i'),
+            'requestedDate' => $c->getRequestedDate() ? $c->getRequestedDate()->format('Y-m-d H:i') : 'N/A',
             'status' => $c->getStatus(),
             'message' => $c->getMessage(),
         ], $consultations);
@@ -591,17 +591,42 @@ class ApiController extends AbstractController
         $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
         if (!$doctor) return $this->json(['error' => 'Doctor profile not found'], 404);
 
-        $relations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['doctor' => $user]);
-        
-        $data = array_map(fn($r) => [
-            'id' => $r->getPacient()->getId(),
-            'name' => $r->getPacient()->getFirstName() . ' ' . $r->getPacient()->getLastName(),
-            'email' => $r->getPacient()->getEmail(),
-            'avatar' => $r->getPacient()->getAvatar(),
-            'lastVisit' => '2024-05-01', // Placeholder or fetch from history
-        ], $relations);
+        $patientsData = [];
+        $seenEmails = [];
 
-        return $this->json($data);
+        // 1. Get from formal relations
+        $relations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['doctor' => $user]);
+        foreach ($relations as $r) {
+            $p = $r->getPacient();
+            if ($p && !isset($seenEmails[$p->getEmail()])) {
+                $seenEmails[$p->getEmail()] = true;
+                $patientsData[] = [
+                    'id' => $p->getId(),
+                    'name' => $p->getFirstName() . ' ' . $p->getLastName(),
+                    'email' => $p->getEmail(),
+                    'avatar' => $p->getAvatar(),
+                    'lastVisit' => 'N/A',
+                ];
+            }
+        }
+
+        // 2. Get from consultations
+        $consultations = $entityManager->getRepository(Consultation::class)->findBy(['doctor' => $doctor]);
+        foreach ($consultations as $c) {
+            $email = $c->getPatientEmail();
+            if ($email && !isset($seenEmails[$email])) {
+                $seenEmails[$email] = true;
+                $patientsData[] = [
+                    'id' => $c->getId(), // Use consultation ID as a key if user not linked
+                    'name' => $c->getPatientName(),
+                    'email' => $email,
+                    'avatar' => null,
+                    'lastVisit' => $c->getRequestedDate() ? $c->getRequestedDate()->format('Y-m-d') : 'N/A',
+                ];
+            }
+        }
+
+        return $this->json($patientsData);
     }
 
     #[Route('/api/user/consultations', name: 'api_user_consultations', methods: ['GET'])]
