@@ -322,7 +322,11 @@ class ApiController extends AbstractController
             $consultation = new Consultation();
             $consultation->setPatientName($data['name']);
             $consultation->setPatientPhone($data['phone']);
-            $consultation->setPatientEmail($data['email'] ?? 'mobile@eclinic.int');
+            
+            // Link to authenticated user if available
+            $authUser = $this->getUser();
+            $consultation->setPatientEmail($authUser ? $authUser->getUserIdentifier() : ($data['email'] ?? 'mobile@eclinic.int'));
+            
             $consultation->setHospital($hospital);
             $consultation->setDepartment($department);
             $consultation->setDoctor($doctor);
@@ -390,6 +394,7 @@ class ApiController extends AbstractController
 
             if (!empty($data['firstName'])) $user->setFirstName($data['firstName']);
             if (!empty($data['lastName'])) $user->setLastName($data['lastName']);
+            if (!empty($data['phone'])) $user->setPhone($data['phone']);
             if (!empty($data['email'])) {
                 $existing = $entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']]);
                 if ($existing && $existing->getId() !== $user->getId()) {
@@ -426,7 +431,9 @@ class ApiController extends AbstractController
                     'email' => $user->getEmail(),
                     'firstName' => $user->getFirstName(),
                     'lastName' => $user->getLastName(),
-                    'avatar' => $user->getAvatar() ? $user->getAvatar() : null
+                    'phone' => $user->getPhone(),
+                    'avatar' => $user->getAvatar() ? $user->getAvatar() : null,
+                    'roles' => $user->getRoles()
                 ]
             ]);
         } catch (\Exception $e) {
@@ -602,7 +609,7 @@ class ApiController extends AbstractController
         $user = $this->getUser();
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
 
-        $email = $user->getEmail();
+        $email = $user->getUserIdentifier();
         $consultations = $entityManager->getRepository(Consultation::class)->findBy(
             ['patientEmail' => $email],
             ['requestedDate' => 'DESC']

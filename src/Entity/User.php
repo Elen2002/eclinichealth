@@ -52,6 +52,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read', 'chat:read'])]
     private ?string $avatar = null;
 
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Groups(['user:read', 'doctor:read', 'patient:read', 'department:read', 'chat:read'])]
+    private ?string $phone = null;
+
     #[ORM\Column(length: 255, nullable: true, unique: true)]
     #[Groups(['user:read'])]
     private ?string $apiToken = null;
@@ -192,6 +196,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setAvatar(?string $avatar): static
     {
         $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): static
+    {
+        $this->phone = $phone;
 
         return $this;
     }
