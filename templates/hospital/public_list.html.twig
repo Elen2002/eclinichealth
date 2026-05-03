@@ -158,6 +158,10 @@
             color: #6366f1 !important;
             transform: translateX(5px);
         }
+        .sort-dropdown-container {
+            position: relative;
+            z-index: 1070;
+        }
     </style>
 {% endblock %}
 
@@ -232,7 +236,7 @@
 
             <!-- Hospital Grid -->
             <div class="col-lg-9">
-                <div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down" data-aos-delay="500">
+                <div class="d-flex justify-content-between align-items-center mb-4 sort-dropdown-container" data-aos="fade-down" data-aos-delay="500">
                     <p class="text-muted mb-0 fw-medium"><i class="bi bi-grid-fill me-2"></i>{{ 'Showing'|trans }} <span id="resultCount" class="text-dark fw-bold">{{ hospitals|length }}</span> {{ 'premium facilities'|trans }}</p>
                     <div class="dropdown">
                         <button class="btn btn-purple btn-sm shadow-sm dropdown-toggle px-3" type="button" data-bs-toggle="dropdown">
