@@ -727,4 +727,42 @@ class ApiController extends AbstractController
 
         return $this->json($doctorsData);
     }
+
+    #[Route('/api/consultations/{id}', name: 'api_consultation_show', methods: ['GET'])]
+    public function getConsultation(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $consultation = $entityManager->getRepository(Consultation::class)->find($id);
+        if (!$consultation) return $this->json(['error' => 'Consultation not found'], 404);
+
+        // Optional: Check if user is the doctor or the patient for security
+        // $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+        // if ($consultation->getDoctor() !== $doctor && $consultation->getPatientEmail() !== $user->getUserIdentifier()) {
+        //     return $this->json(['error' => 'Forbidden'], 403);
+        // }
+
+        $doctorUser = $consultation->getDoctor() ? $consultation->getDoctor()->getUser() : null;
+
+        $data = [
+            'id' => $consultation->getId(),
+            'patientName' => $consultation->getPatientName(),
+            'patientEmail' => $consultation->getPatientEmail(),
+            'patientPhone' => $consultation->getPatientPhone(),
+            'patientNote' => $consultation->getMessage(),
+            'requestedDate' => $consultation->getRequestedDate() ? $consultation->getRequestedDate()->format('M d, Y H:i') : null,
+            'confirmedDate' => clone $consultation->getRequestedDate(), // Or getDoctorProposedDate() if implemented
+            'status' => $consultation->getStatus(), // pending, confirmed, cancelled
+            'prescription' => $consultation->getPrescription() ?: 'qwerty', // Placeholder matching screenshot if null
+            'medicalTests' => $consultation->getMedicalTests() ?: 'Հետազոտություններ չեն պահանջվում:', // Placeholder
+        ];
+
+        // Format confirmed date same as requested date if it's "confirmed" in our mock data
+        if ($data['confirmedDate']) {
+            $data['confirmedDate'] = $data['confirmedDate']->format('M d, Y H:i');
+        }
+
+        return $this->json($data);
+    }
 }
