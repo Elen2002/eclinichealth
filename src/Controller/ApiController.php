@@ -506,6 +506,8 @@ class ApiController extends AbstractController
         }
 
         return $this->json($finalData);
+    }
+
     #[Route('/api/user/profile', name: 'api_user_profile', methods: ['GET'])]
     public function getProfile(EntityManagerInterface $entityManager): JsonResponse
     {
@@ -531,6 +533,8 @@ class ApiController extends AbstractController
         }
 
         return $this->json($data);
+    }
+
     #[Route('/api/doctor/consultations', name: 'api_doctor_consultations', methods: ['GET'])]
     public function getDoctorConsultations(EntityManagerInterface $entityManager): JsonResponse
     {
@@ -578,6 +582,8 @@ class ApiController extends AbstractController
         ], $relations);
 
         return $this->json($data);
+    }
+
     #[Route('/api/user/consultations', name: 'api_user_consultations', methods: ['GET'])]
     public function getUserConsultations(EntityManagerInterface $entityManager): JsonResponse
     {
