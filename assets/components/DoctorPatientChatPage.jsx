@@ -32,7 +32,7 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
         };
 
         fetchHistory(); // Initial load
-        const interval = setInterval(fetchHistory, 5000); // Poll every 5 seconds
+        const interval = setInterval(fetchHistory, 2000); // Poll every 2 seconds
 
         return () => clearInterval(interval);
     }, [partnerUserId, isDoctorViewer, user.id]);

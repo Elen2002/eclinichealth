@@ -489,7 +489,7 @@ class ApiController extends AbstractController
             $partner = ($sender->getId() === $currentUserId) ? $recipient : $sender;
             $partnerId = $partner->getId();
 
-            if ($partnerId === $currentUserId) continue;
+            if ($partnerId === $currentUserId || isset($seenPartnerIds[$partnerId])) continue;
 
             $partnerName = $partner->getFirstName() ? ($partner->getFirstName() . ' ' . $partner->getLastName()) : $partner->getEmail();
             
@@ -870,6 +870,17 @@ class ApiController extends AbstractController
              
              $confirmMsg->setContent($text);
              $entityManager->persist($confirmMsg);
+
+             // Also create a formal Notification entity
+             $notification = new Notification();
+             $notification->setUser($patientUser);
+             $notification->setTitle("Consultation Confirmed");
+             $notification->setMessage("Dr. " . ($user->getFirstName() ?: $user->getEmail()) . " has accepted your request.");
+             $notification->setType('consultation');
+             $notification->setCreatedAt(new \DateTime());
+             $notification->setIsRead(false);
+             $entityManager->persist($notification);
+
              $entityManager->flush();
              
              // TODO: Integrate real SMS provider (Twilio/Nexmo) here
