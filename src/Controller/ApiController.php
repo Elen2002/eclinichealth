@@ -192,6 +192,18 @@ class ApiController extends AbstractController
         ]);
     }
 
+    private function getApiUser(Request $request, EntityManagerInterface $entityManager): ?User
+    {
+        $token = $request->headers->get('Authorization');
+        if ($token) {
+            $token = str_replace('Bearer ', '', $token);
+            if ($user = $entityManager->getRepository(User::class)->findOneBy(['apiToken' => $token])) {
+                return $user;
+            }
+        }
+        return $this->getUser();
+    }
+
     #[Route('/api/hospitals', name: 'api_hospitals', methods: ['GET'])]
 
     public function getHospitals(HospitalRepository $hospitalRepository, UploadFileInterface $uploadFileService): JsonResponse
@@ -444,7 +456,7 @@ class ApiController extends AbstractController
     #[Route('/api/chat/recent-communications', name: 'api_recent_communications', methods: ['GET'])]
     public function getRecentCommunications(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $user = $this->getUser();
+        $user = $this->getApiUser($request, $entityManager);
         if (!$user) {
             return $this->json([], 200);
         }
@@ -528,9 +540,9 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/user/profile', name: 'api_user_profile', methods: ['GET'])]
-    public function getProfile(EntityManagerInterface $entityManager): JsonResponse
+    public function getProfile(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $user = $this->getUser();
+        $user = $this->getApiUser($request, $entityManager);
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
 
         $data = [
@@ -556,13 +568,28 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/doctor/consultations', name: 'api_doctor_consultations', methods: ['GET'])]
-    public function getDoctorConsultations(EntityManagerInterface $entityManager): JsonResponse
+    public function getDoctorConsultations(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $user = $this->getUser();
+        $user = $this->getApiUser($request, $entityManager);
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
 
         $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
-        if (!$doctor) return $this->json(['error' => 'Doctor profile not found'], 404);
+        if (!$doctor) {
+            // Debug info
+            $allDoctors = $entityManager->getRepository(Doctor::class)->findAll();
+            $docInfo = array_map(fn($d) => ['id' => $d->getId(), 'user_id' => $d->getUser() ? $d->getUser()->getId() : null], $allDoctors);
+            $allCons = $entityManager->getRepository(Consultation::class)->findAll();
+            $consInfo = array_map(fn($c) => ['id' => $c->getId(), 'doc_id' => $c->getDoctor() ? $c->getDoctor()->getId() : null, 'pat' => $c->getPatientName()], $allCons);
+            
+            return $this->json([
+                'debug' => true,
+                'message' => 'No Doctor entity linked to this User.',
+                'user_id' => $user->getId(),
+                'user_email' => $user->getUserIdentifier(),
+                'doctors_in_db' => $docInfo,
+                'consultations_in_db' => $consInfo
+            ]);
+        }
 
         $consultations = $entityManager->getRepository(Consultation::class)->findBy(
             ['doctor' => $doctor],
@@ -583,13 +610,12 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/doctor/patients', name: 'api_doctor_patients', methods: ['GET'])]
-    public function getDoctorPatients(EntityManagerInterface $entityManager): JsonResponse
+    public function getDoctorPatients(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $user = $this->getUser();
+        $user = $this->getApiUser($request, $entityManager);
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
 
         $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
-        if (!$doctor) return $this->json(['error' => 'Doctor profile not found'], 404);
 
         $patientsData = [];
         $seenEmails = [];
@@ -611,18 +637,20 @@ class ApiController extends AbstractController
         }
 
         // 2. Get from consultations
-        $consultations = $entityManager->getRepository(Consultation::class)->findBy(['doctor' => $doctor]);
-        foreach ($consultations as $c) {
-            $email = $c->getPatientEmail();
-            if ($email && !isset($seenEmails[$email])) {
-                $seenEmails[$email] = true;
-                $patientsData[] = [
-                    'id' => $c->getId(), // Use consultation ID as a key if user not linked
-                    'name' => $c->getPatientName(),
-                    'email' => $email,
-                    'avatar' => null,
-                    'lastVisit' => $c->getRequestedDate() ? $c->getRequestedDate()->format('Y-m-d') : 'N/A',
-                ];
+        if ($doctor) {
+            $consultations = $entityManager->getRepository(Consultation::class)->findBy(['doctor' => $doctor]);
+            foreach ($consultations as $c) {
+                $email = $c->getPatientEmail();
+                if ($email && !isset($seenEmails[$email])) {
+                    $seenEmails[$email] = true;
+                    $patientsData[] = [
+                        'id' => $c->getId(), // Use consultation ID as a key if user not linked
+                        'name' => $c->getPatientName(),
+                        'email' => $email,
+                        'avatar' => null,
+                        'lastVisit' => $c->getRequestedDate() ? $c->getRequestedDate()->format('Y-m-d') : 'N/A',
+                    ];
+                }
             }
         }
 
@@ -630,9 +658,9 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/user/consultations', name: 'api_user_consultations', methods: ['GET'])]
-    public function getUserConsultations(EntityManagerInterface $entityManager): JsonResponse
+    public function getUserConsultations(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $user = $this->getUser();
+        $user = $this->getApiUser($request, $entityManager);
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
 
         $email = $user->getUserIdentifier();
@@ -654,9 +682,9 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/user/doctors', name: 'api_user_doctors', methods: ['GET'])]
-    public function getUserDoctors(EntityManagerInterface $entityManager): JsonResponse
+    public function getUserDoctors(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $user = $this->getUser();
+        $user = $this->getApiUser($request, $entityManager);
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
 
         $doctorsData = [];
