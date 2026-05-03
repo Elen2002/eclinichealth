@@ -32,9 +32,10 @@
                     <!-- Card Header: Avatar + Name + Badge -->
                     <div class="d-flex align-items-center gap-3 p-3 border-bottom" style="background: linear-gradient(135deg, rgba(99,102,241,0.05), rgba(139,92,246,0.05));">
                         <div class="position-relative flex-shrink-0">
-                            <img src="{{ dr.user.avatar|default('/img/default-doctor.png') }}"
+                            <img src="{{ dr.user.avatar ? (dr.user.avatar|slice(0, 4) == 'http' or dr.user.avatar|slice(0, 1) == '/' ? dr.user.avatar : '/uploads/avatars/' ~ dr.user.avatar) : '/img/default-doctor.png' }}"
                                  class="rounded-circle shadow-sm border border-2 border-white"
-                                 style="width: 60px; height: 60px; object-fit: cover;" alt="">
+                                 style="width: 60px; height: 60px; object-fit: cover;" alt=""
+                                 onerror="this.src='/img/default-doctor.png'">
                             <span class="position-absolute bottom-0 end-0 {{ dr.isActive ? 'bg-success' : 'bg-secondary' }} border border-2 border-white rounded-circle"
                                   style="width: 14px; height: 14px;"></span>
                         </div>
@@ -126,9 +127,10 @@
                                         <td class="ps-4">
                                             <div class="d-flex align-items-center gap-3 py-2">
                                                 <div class="position-relative">
-                                                    <img src="{{ dr.user.avatar|default('/img/default-doctor.png') }}"
-                                                         class="rounded-circle shadow-sm border border-2 border-white"
-                                                         style="width: 50px; height: 50px; object-fit: cover;" alt="">
+                                                    <img src="{{ dr.user.avatar ? (dr.user.avatar|slice(0, 4) == 'http' or dr.user.avatar|slice(0, 1) == '/' ? dr.user.avatar : '/uploads/avatars/' ~ dr.user.avatar) : '/img/default-doctor.png' }}"
+                                                          class="rounded-circle shadow-sm border border-2 border-white"
+                                                          style="width: 50px; height: 50px; object-fit: cover;" alt=""
+                                                          onerror="this.src='/img/default-doctor.png'">
                                                     <span class="position-absolute bottom-0 end-0 {{ dr.isActive ? 'bg-success' : 'bg-secondary' }} border border-2 border-white rounded-circle"
                                                           style="width: 12px; height: 12px;"></span>
                                                 </div>

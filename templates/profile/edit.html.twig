@@ -114,6 +114,11 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <div class="form-floating mb-3">
+                                {{ form_widget(form.phone, {'attr': {'placeholder': 'Phone Number'|trans, 'class': 'form-control rounded-pill px-4'}}) }}
+                                {{ form_label(form.phone) }}
+                            </div>
 
                             <div class="form-floating mb-4">
                                 {{ form_widget(form.email, {'attr': {'placeholder': 'Email Address'|trans, 'class': 'form-control rounded-pill px-4'}}) }}

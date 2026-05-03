@@ -10,9 +10,10 @@
             <div class="row align-items-center">
                 <div class="col-md-auto text-center text-md-start mb-3 mb-md-0">
                     <div class="position-relative d-inline-block">
-                        <img src="{{ user.avatar|default('/img/default-avatar.png') }}" 
+                        <img src="{{ user.avatar ? (user.avatar|slice(0, 4) == 'http' or user.avatar|slice(0, 1) == '/' ? user.avatar : '/uploads/avatars/' ~ user.avatar) : '/img/default-avatar.png' }}" 
                              class="rounded-circle border border-4 border-white shadow-lg" 
-                             style="width: 130px; height: 130px; object-fit: cover;" alt="Profile">
+                             style="width: 130px; height: 130px; object-fit: cover;" alt="Profile"
+                             onerror="this.src='/img/default-avatar.png'">
                         <a href="{{ path('app_profile_edit') }}" class="position-absolute bottom-0 end-0 bg-white rounded-circle p-2 shadow-sm border" style="width: 38px; height: 38px; line-height: 22px; text-align: center; background: var(--surface-color) !important;">
                             <i class="bi bi-camera-fill text-primary small"></i>
                         </a>
@@ -101,7 +102,11 @@
                                         <tr class="transition-all">
                                             <td class="ps-4">
                                                 <div class="d-flex align-items-center gap-3">
-                                                    <img src="{{ dr.user.avatar|default('/img/default-doctor.png') }}" class="rounded-circle shadow-sm" style="width: 40px; height: 40px; object-fit: cover;" alt="">
+                                                    <img src="{{ dr.user.avatar ? (dr.user.avatar|slice(0, 4) == 'http' or dr.user.avatar|slice(0, 1) == '/' ? dr.user.avatar : '/uploads/avatars/' ~ dr.user.avatar) : '/img/default-doctor.png' }}" 
+                                                         class="rounded-circle shadow-sm" 
+                                                         style="width: 40px; height: 40px; object-fit: cover;" 
+                                                         alt=""
+                                                         onerror="this.src='/img/default-doctor.png'">
                                                     <div class="fw-bold small">{{ dr.user.firstName ~ ' ' ~ dr.user.lastName }}</div>
                                                 </div>
                                             </td>

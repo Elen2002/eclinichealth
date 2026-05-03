@@ -30,6 +30,11 @@ class ProfileType extends AbstractType
                 'label' => 'Email Address',
                 'attr' => ['class' => 'form-control rounded-pill']
             ])
+            ->add('phone', TextType::class, [
+                'label' => 'Phone Number',
+                'required' => false,
+                'attr' => ['class' => 'form-control rounded-pill']
+            ])
             ->add('avatar_file', FileType::class, [
                 'label' => 'Profile Picture (JPG/PNG)',
                 'mapped' => false,

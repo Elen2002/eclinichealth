@@ -172,8 +172,8 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
                                 </div>
                             </div>
                             <div className="d-flex gap-2">
-                                <button className="btn btn-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px', background: 'white', border: '1px solid #eee' }}><i className="bi bi-telephone text-primary small"></i></button>
-                                <button className="btn btn-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px', background: 'white', border: '1px solid #eee' }}><i className="bi bi-three-dots-vertical text-muted small"></i></button>
+                                <button className="btn btn-white rounded-circle shadow-sm d-none d-md-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px', background: 'white', border: '1px solid #eee' }}><i className="bi bi-telephone text-primary small"></i></button>
+                                <button className="btn btn-white rounded-circle shadow-sm d-none d-md-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px', background: 'white', border: '1px solid #eee' }}><i className="bi bi-three-dots-vertical text-muted small"></i></button>
                             </div>
                         </div>
 
@@ -208,7 +208,7 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
                         {/* Input Area */}
                         <div className="card-footer p-3 bg-white border-top">
                             <div className="input-group gap-2">
-                                <button className="btn btn-light rounded-circle" style={{ width: '45px', height: '45px' }}><i className="bi bi-plus-lg"></i></button>
+                                <button className="btn btn-light rounded-circle d-none d-md-inline-block" style={{ width: '45px', height: '45px' }}><i className="bi bi-plus-lg"></i></button>
                                 <input
                                     type="text"
                                     className="form-control border-0 bg-light rounded-pill px-4"
