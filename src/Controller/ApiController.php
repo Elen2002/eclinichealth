@@ -765,4 +765,41 @@ class ApiController extends AbstractController
 
         return $this->json($data);
     }
+
+    #[Route('/api/consultations/{id}/accept', name: 'api_consultation_accept', methods: ['POST'])]
+    public function acceptConsultation(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $consultation = $entityManager->getRepository(Consultation::class)->find($id);
+        if (!$consultation) return $this->json(['error' => 'Consultation not found'], 404);
+
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+        if (!$doctor || $consultation->getDoctor() !== $doctor) {
+            return $this->json(['error' => 'Forbidden'], 403);
+        }
+
+        $data = json_decode($request->getContent(), true);
+
+        if (isset($data['prescription'])) {
+            $consultation->setPrescription($data['prescription']);
+        }
+        if (isset($data['medicalTests'])) {
+            $consultation->setMedicalTests($data['medicalTests']);
+        }
+        if (isset($data['confirmedDate'])) {
+            try {
+                $date = new \DateTime($data['confirmedDate']);
+                $consultation->setDoctorProposedDate($date);
+            } catch (\Exception $e) {
+                // Ignore date parse errors, fall back to requested date
+            }
+        }
+
+        $consultation->setStatus('confirmed');
+        $entityManager->flush();
+
+        return $this->json(['success' => true]);
+    }
 }
