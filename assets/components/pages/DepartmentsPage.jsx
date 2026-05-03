@@ -77,7 +77,7 @@ const DepartmentsPage = ({ departments, departmentImages = {} }) => {
                                             <div className="dept-stats">
                                                 <div className="stat-badge">
                                                     <i className="bi bi-person-check-fill"></i>
-                                                    <span>{dept.doctors ? dept.doctors.length : Math.floor(Math.random() * 15) + 3}</span>
+                                                    <span>{dept.doctorsCount ?? 0}</span>
                                                 </div>
                                                 <span className="stat-label">{locale === 'hy' ? 'Մասնագետ' : 'Specialists'}</span>
                                             </div>

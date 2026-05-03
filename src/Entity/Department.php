@@ -108,4 +108,9 @@ class Department
 
         return $this;
     }
+    #[Groups(['department:read'])]
+    public function getDoctorsCount(): int
+    {
+        return $this->doctors->count();
+    }
 }
