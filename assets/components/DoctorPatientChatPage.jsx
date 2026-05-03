@@ -7,20 +7,23 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
     // Detect if the logged-in user is the doctor in this conversation
     const isDoctorViewer = user && (user.id === doctor.user?.id || user.roles.includes('ROLE_DOCTOR'));
 
-    // The Room ID must be consistent for both parties: pair_PATIENT_DOCTOR
-    const userId = patient?.identifier || 'Patient';
-    const drId = doctor?.id || 'Doctor';
-    const roomId = `pair_${userId}_${drId}`;
+    // The Room ID must be consistent for both parties: room_minID_maxID (using User IDs)
+    const drUserId = doctor.userId || doctor.user?.id;
+    const ptUserId = patient.id;
+    const roomId = `room_${Math.min(drUserId, ptUserId)}_${Math.max(drUserId, ptUserId)}`;
+
+    const chatPartner = isDoctorViewer ? patient : doctor;
+    const partnerUserId = isDoctorViewer ? patient.id : (doctor.userId || doctor.user?.id);
 
     useEffect(() => {
         const fetchHistory = () => {
-            fetch(`/api/chat/history/${roomId}`)
+            fetch(`/api/chat/messages/${partnerUserId}`)
                 .then(res => res.json())
                 .then(data => {
                     const formatted = data.map(msg => ({
                         id: msg.id,
                         text: msg.content,
-                        sender: msg.sender.id === (isDoctorViewer ? patient.id : user.id) ? 'user' : 'doctor',
+                        sender: msg.senderId === user.id ? (isDoctorViewer ? 'doctor' : 'user') : (isDoctorViewer ? 'user' : 'doctor'),
                         time: msg.createdAt
                     }));
                     setMessages(formatted);
@@ -32,7 +35,7 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
         const interval = setInterval(fetchHistory, 5000); // Poll every 5 seconds
 
         return () => clearInterval(interval);
-    }, [userId, roomId, patient.id, isDoctorViewer, user.id, user.identifier]);
+    }, [partnerUserId, isDoctorViewer, user.id]);
 
     const messagesContainerRef = useRef(null);
 
@@ -49,20 +52,17 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
             id: 'temp-' + Date.now(),
             text: inputValue,
             sender: isDoctorViewer ? 'doctor' : 'user',
-            time: new Date(),
-            roomId: roomId
+            time: new Date()
         };
 
         setMessages(prev => [...prev, newMessage]);
 
-        // Save to DB
-        fetch('/api/chat/save', {
+        // Save to DB using the new unified endpoint
+        fetch(`/api/chat/messages/${partnerUserId}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                text: inputValue,
-                roomId: roomId,
-                targetId: isDoctorViewer ? patient.id : doctor.id
+                content: inputValue
             })
         }).catch(err => console.error('Failed to save message to DB:', err));
 
@@ -72,7 +72,7 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 targetIdentifier: isDoctorViewer ? patient.identifier : doctor.identifier,
-                title: user.name || 'New Chat Message',
+                title: user.name || (locale === 'hy' ? 'Նոր հաղորդագրություն' : 'New Chat Message'),
                 message: inputValue.substring(0, 100),
                 type: 'chat',
                 link: '/' + locale + '/profile/chat/' + doctor.id + (isDoctorViewer ? '' : '/' + patient.id)
@@ -168,13 +168,10 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
                                 </div>
                                 <div>
                                     <h6 className="fw-bold mb-0">{chatPartner.name || chatPartner.identifier}</h6>
-                                    <p className="text-primary small mb-0" style={{ fontSize: '0.7rem', fontWeight: '600' }}>{isDoctorViewer ? 'Patient' : (chatPartner.specialty || 'Medical Specialist')}</p>
+                                    <p className="text-primary small mb-0" style={{ fontSize: '0.7rem', fontWeight: '600' }}>{isDoctorViewer ? (locale === 'hy' ? 'Պացիենտ' : 'Patient') : (chatPartner.specialty || (locale === 'hy' ? 'Բժշկական մասնագետ' : 'Medical Specialist'))}</p>
                                 </div>
                             </div>
-                            <div className="d-flex gap-2">
-                                <button className="btn btn-white rounded-circle shadow-sm d-none d-md-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px', background: 'white', border: '1px solid #eee' }}><i className="bi bi-telephone text-primary small"></i></button>
-                                <button className="btn btn-white rounded-circle shadow-sm d-none d-md-flex align-items-center justify-content-center" style={{ width: '36px', height: '36px', background: 'white', border: '1px solid #eee' }}><i className="bi bi-three-dots-vertical text-muted small"></i></button>
-                            </div>
+
                         </div>
 
                         {/* Messages Area */}
@@ -183,7 +180,7 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
                                 <div className="h-100 d-flex flex-column align-items-center justify-content-center text-muted opacity-50 py-5">
                                     <i className="bi bi-chat-heart display-1 mb-3"></i>
                                     <h5>{locale === 'hy' ? 'Սկսեք զրույցը' : 'Start a conversation'}</h5>
-                                    <p className="small">{locale === 'hy' ? 'Ողջույն ասեք ձեր բժշկին' : 'Say hello to your doctor'}</p>
+                                    <p className="small">{isDoctorViewer ? (locale === 'hy' ? 'Ողջունեք ձեր պացիենտին' : 'Say hello to your patient') : (locale === 'hy' ? 'Ողջույն ասեք ձեր բժշկին' : 'Say hello to your doctor')}</p>
                                 </div>
                             ) : (
                                 messages.map((msg, i) => (
@@ -208,7 +205,7 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
                         {/* Input Area */}
                         <div className="card-footer p-3 bg-white border-top">
                             <div className="input-group gap-2">
-                                <button className="btn btn-light rounded-circle d-none d-md-inline-block" style={{ width: '45px', height: '45px' }}><i className="bi bi-plus-lg"></i></button>
+
                                 <input
                                     type="text"
                                     className="form-control border-0 bg-light rounded-pill px-4"

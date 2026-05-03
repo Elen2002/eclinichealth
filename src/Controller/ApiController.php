@@ -847,6 +847,34 @@ class ApiController extends AbstractController
         }
 
         $entityManager->flush();
+        
+        // Send a "System/SMS" message in the chat as confirmation
+        if ($patientUser) {
+             $roomId = 'room_' . min($user->getId(), $patientUser->getId()) . '_' . max($user->getId(), $patientUser->getId());
+             $confirmMsg = new ChatMessage();
+             $confirmMsg->setSender($user);
+             $confirmMsg->setRecipient($patientUser);
+             $confirmMsg->setRoomId($roomId);
+             $confirmMsg->setCreatedAtValue();
+             
+             $text = "I have accepted your consultation request.\n";
+             if ($consultation->getPrescription()) {
+                 $text .= "Prescription: " . $consultation->getPrescription() . "\n";
+             }
+             if ($consultation->getMedicalTests()) {
+                 $text .= "Required Tests: " . $consultation->getMedicalTests() . "\n";
+             }
+             if ($consultation->getDoctorProposedDate()) {
+                 $text .= "Date: " . $consultation->getDoctorProposedDate()->format('M d, Y H:i');
+             }
+             
+             $confirmMsg->setContent($text);
+             $entityManager->persist($confirmMsg);
+             $entityManager->flush();
+             
+             // TODO: Integrate real SMS provider (Twilio/Nexmo) here
+             // SmsService::send($consultation->getPatientPhone(), $text);
+        }
 
         return $this->json(['success' => true]);
     }

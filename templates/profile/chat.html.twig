@@ -6,6 +6,7 @@
 <div id="doctor-patient-chat-root" 
      data-doctor="{{ {
          id: doctor.id,
+         userId: doctor.user.id,
          identifier: doctor.user.email|split('@')[0]|capitalize,
          name: doctor.user.firstName or doctor.user.lastName ? doctor.user.firstName ~ ' ' ~ doctor.user.lastName : doctor.user.email|split('@')[0]|capitalize,
          avatar: doctor.user.avatar,
