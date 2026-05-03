@@ -296,47 +296,59 @@ class ApiController extends AbstractController
     #[Route('/api/consultation', name: 'api_consultation_create', methods: ['POST'])]
     public function createConsultation(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        try {
+            $data = json_decode($request->getContent(), true);
 
-        if (!$data) {
-             return $this->json(['error' => 'Invalid JSON'], 400);
-        }
-
-        // Robust validation
-        $required = ['name', 'phone', 'hospital_id', 'department_id', 'doctor_id', 'date'];
-        foreach ($required as $field) {
-            if (empty($data[$field])) {
-                return $this->json(['error' => "Missing field: $field"], 400);
+            if (!$data) {
+                 return $this->json(['error' => 'Invalid JSON'], 400);
             }
+
+            // Robust validation
+            $required = ['name', 'phone', 'hospital_id', 'department_id', 'doctor_id', 'date'];
+            foreach ($required as $field) {
+                if (empty($data[$field])) {
+                    return $this->json(['error' => "Missing field: $field"], 400);
+                }
+            }
+
+            $hospital = $entityManager->getRepository(Hospital::class)->find($data['hospital_id']);
+            $department = $entityManager->getRepository(\App\Entity\Department::class)->find($data['department_id']);
+            $doctor = $entityManager->getRepository(Doctor::class)->find($data['doctor_id']);
+
+            if (!$hospital || !$department || !$doctor) {
+                return $this->json(['error' => 'Invalid hospital, department or doctor ID'], 404);
+            }
+
+            $consultation = new Consultation();
+            $consultation->setPatientName($data['name']);
+            $consultation->setPatientPhone($data['phone']);
+            $consultation->setPatientEmail($data['email'] ?? 'mobile@eclinic.int');
+            $consultation->setHospital($hospital);
+            $consultation->setDepartment($department);
+            $consultation->setDoctor($doctor);
+            
+            // Handle various date formats (DD.MM.YYYY HH:MM or ISO)
+            $dateStr = str_replace('.', '-', $data['date']);
+            try {
+                $consultation->setRequestedDate(new \DateTime($dateStr));
+            } catch (\Exception $e) {
+                return $this->json(['error' => 'Invalid date format. Use YYYY-MM-DD or DD-MM-YYYY'], 400);
+            }
+
+            $consultation->setMessage($data['message'] ?? '');
+            $consultation->setStatus('pending');
+
+            $entityManager->persist($consultation);
+            $entityManager->flush();
+
+            return $this->json([
+                'status' => 'success',
+                'message' => 'Consultation requested successfully',
+                'id' => $consultation->getId()
+            ]);
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'Server Error: ' . $e->getMessage()], 500);
         }
-
-        $hospital = $entityManager->getRepository(Hospital::class)->find($data['hospital_id']);
-        $department = $entityManager->getRepository(\App\Entity\Department::class)->find($data['department_id']);
-        $doctor = $entityManager->getRepository(Doctor::class)->find($data['doctor_id']);
-
-        if (!$hospital || !$department || !$doctor) {
-            return $this->json(['error' => 'Invalid hospital, department or doctor ID'], 404);
-        }
-
-        $consultation = new Consultation();
-        $consultation->setPatientName($data['name']);
-        $consultation->setPatientPhone($data['phone']);
-        $consultation->setPatientEmail($data['email'] ?? 'mobile@eclinic.int');
-        $consultation->setHospital($hospital);
-        $consultation->setDepartment($department);
-        $consultation->setDoctor($doctor);
-        $consultation->setRequestedDate(new \DateTime($data['date']));
-        $consultation->setMessage($data['message'] ?? '');
-        $consultation->setStatus('pending');
-
-        $entityManager->persist($consultation);
-        $entityManager->flush();
-
-        return $this->json([
-            'status' => 'success',
-            'message' => 'Consultation requested successfully',
-            'id' => $consultation->getId()
-        ]);
     }
 
     #[Route('/api/notifications/unread-count', name: 'api_notifications_unread_count', methods: ['GET'])]
