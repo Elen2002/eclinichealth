@@ -29,6 +29,8 @@ footer:
 "help.search.header.title": "Help & Support"
 "help.search.input.accessibility": "Search help documentation"
 "help.search.placeholder": "What are you looking for?"
+"help.users.email.title": "User Email Information"
+"help.users.email.content": "You can find and manage your email address in the Profile section of your dashboard. For support regarding email verification or account access, please contact info@eclinic.health."
 
 "Process Consultation": "Process Consultation"
 "Process Appointment Request": "Process Appointment Request"

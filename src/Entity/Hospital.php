@@ -59,6 +59,7 @@ class Hospital
     private Collection $hospitalDepartments;
 
     #[ORM\OneToMany(mappedBy: 'hospital', targetEntity: Doctor::class)]
+    #[Groups(['hospital:read'])]
     private Collection $doctors;
 
     #[Groups(['hospital:read'])]

@@ -41,7 +41,6 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
 
     const currentT = translations[locale] || translations.en;
 
-    // Polling for active sessions
     useEffect(() => {
         const fetchSessions = () => {
             fetch('/api/admin/chat/sessions') 
@@ -67,7 +66,6 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
         return () => clearInterval(interval);
     }, []);
 
-    // Fetch messages for active room
     useEffect(() => {
         if (!activeRoom || activeRoom === 'System Check' || activeRoom === 'Debug') return;
 
@@ -76,16 +74,13 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
                 .then(res => res.json())
                 .then(data => {
                     const formatted = data.map(msg => {
-                        // Direct access to global data for maximum reliability
                         const globalUser = window.APP_DATA?.user;
                         const currentAdmin = user || globalUser;
                         
-                        // Exhaustive check for sender identity
                         const senderEmail = (typeof msg.sender === 'string') ? msg.sender : 
                                            (msg.sender?.email || msg.sender?.identifier || msg.sender?.username || msg.sender?.user_identifier);
                         const senderId = msg.sender?.id;
                         
-                        // Exhaustive check for our own identity
                         const myIdentities = [
                             currentAdmin?.email,
                             currentAdmin?.identifier,
@@ -101,9 +96,10 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
                         
                         const roles = msg.sender?.roles || [];
                         const hasAdminRole = Array.isArray(roles) && (roles.includes('ROLE_ADMIN') || roles.includes('ROLE_SUPER_ADMIN'));
+                        const isAdminByEmail = senderEmail && String(senderEmail).toLowerCase().includes('admin');
                         
                         return {
-                            sender: (isFromMe || hasAdminRole) ? 'admin' : 'user',
+                            sender: (isFromMe || hasAdminRole || isAdminByEmail) ? 'admin' : 'user',
                             text: msg.content,
                             time: msg.createdAt,
                             email: senderEmail || 'Guest'
@@ -135,7 +131,6 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
 
         let targetId = activeRoom.startsWith('pair_') ? activeRoom.split('_')[1] : activeRoom;
         
-        // If room is like "Doctor (email@mail.ru)", extract the email prefix
         if (targetId.includes('(') && targetId.includes(')')) {
             const match = targetId.match(/\((.*?)\)/);
             if (match && match[1]) {
@@ -168,7 +163,6 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
         .then(data => {
             if (data.success) {
                 setInputValue('');
-                // Optimistic update
                 setChats(prev => {
                     const room = prev[activeRoom] || { messages: [] };
                     return {
@@ -198,13 +192,11 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
         if (showAll) return matchesSearch;
         return matchesSearch && !roomId.startsWith('pair_');
     }).sort((a, b) => {
-        // Sort by presence of messages first
         return (chats[b].messages?.length || 0) - (chats[a].messages?.length || 0);
     });
 
     return (
         <div className="d-flex h-100 bg-white shadow-sm rounded-4 overflow-hidden" style={{ minHeight: '700px' }}>
-            {/* Sidebar */}
             <div className="border-end d-flex flex-column" style={{ width: '320px', background: '#f8fafc' }}>
                 <div className="p-4 border-bottom bg-white">
                     <div className="fw-bold text-uppercase small tracking-wider text-primary mb-3">
@@ -267,7 +259,6 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
                 </div>
             </div>
 
-            {/* Chat Area */}
             <div className="flex-grow-1 d-flex flex-column bg-white">
                 {activeRoom ? (
                     <>
@@ -295,7 +286,7 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
                                         borderBottomLeftRadius: msg.sender === 'user' ? '4px' : '20px',
                                     }}>
                                         <div className="small mb-1 fw-bold opacity-75">
-                                            {msg.sender === 'admin' ? currentT.support : activeRoom}
+                                            {msg.sender === 'admin' ? (msg.email?.toLowerCase().includes('admin') ? 'Admin' : currentT.support) : activeRoom}
                                             {msg.email && <span className="ms-2 fw-normal opacity-50">({msg.email})</span>}
                                         </div>
                                         <div>{msg.text}</div>

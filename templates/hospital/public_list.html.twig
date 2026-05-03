@@ -217,7 +217,7 @@
                         <button class="btn btn-purple btn-sm shadow-sm dropdown-toggle px-3" type="button" data-bs-toggle="dropdown">
                             {{ 'Sort Options'|trans }}
                         </button>
-                        <ul class="dropdown-menu border-0 shadow-lg p-2">
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg p-2" id="hospitalSortMenu">
                             <li><a class="dropdown-item rounded-2 small py-2" href="#" data-sort="alphabetical">{{ 'Alphabetical'|trans }}</a></li>
                             <li><a class="dropdown-item rounded-2 small py-2" href="#" data-sort="priority">{{ 'Priority'|trans }}</a></li>
                         </ul>
@@ -301,41 +301,51 @@
         const hospitalGrid = document.getElementById('hospitalGrid');
         const clearBtn = document.getElementById('clearFilters');
         const resetAllBtn = document.getElementById('resetAll');
-        const sortOptions = document.querySelectorAll('.dropdown-item');
+        const sortOptions = document.querySelectorAll('#hospitalSortMenu .dropdown-item');
 
         let activeFilter = 'all';
         let searchQuery = '';
 
         function filterList() {
             let visibleCount = 0;
-            searchQuery = searchInput.value.toLowerCase();
-            const isOpen247Only = open247Checkbox.checked;
+            searchQuery = (searchInput ? searchInput.value : '').toLowerCase();
+            const isOpen247Only = open247Checkbox ? open247Checkbox.checked : false;
 
             hospitalItems.forEach(item => {
-                const name = item.dataset.name;
-                const address = item.dataset.address;
-                const departments = item.dataset.departments;
+                const name = item.dataset.name || '';
+                const address = item.dataset.address || '';
+                const departments = item.dataset.departments || '';
                 const isOpen247 = item.dataset.open247 === 'true';
 
-                const matchesSearch = name.includes(searchQuery) || address.includes(searchQuery) || departments.includes(searchQuery);
+                const matchesSearch = searchQuery === '' || name.includes(searchQuery) || address.includes(searchQuery) || departments.includes(searchQuery);
                 const matchesDept = activeFilter === 'all' || departments.includes(activeFilter.toLowerCase());
                 const matchesAvailability = !isOpen247Only || isOpen247;
 
                 if (matchesSearch && matchesDept && matchesAvailability) {
                     item.classList.remove('d-none');
+                    // Force AOS animation and remove delays when filtering to ensure immediate feedback
+                    item.classList.add('aos-animate');
+                    item.style.transitionDelay = '0s';
+                    item.style.animationDelay = '0s';
                     visibleCount++;
                 } else {
                     item.classList.add('d-none');
                 }
             });
 
-            resultCount.textContent = visibleCount;
+            if (resultCount) resultCount.textContent = visibleCount;
+            
             if (visibleCount === 0) {
-                hospitalGrid.classList.add('d-none');
-                emptyState.classList.remove('d-none');
+                if (hospitalGrid) hospitalGrid.classList.add('d-none');
+                if (emptyState) emptyState.classList.remove('d-none');
             } else {
-                hospitalGrid.classList.remove('d-none');
-                emptyState.classList.add('d-none');
+                if (hospitalGrid) hospitalGrid.classList.remove('d-none');
+                if (emptyState) emptyState.classList.add('d-none');
+            }
+
+            // Refresh AOS to recalculate positions for visible elements
+            if (window.AOS) {
+                window.AOS.refresh();
             }
         }
 
@@ -343,14 +353,16 @@
             const sortedItems = [...hospitalItems];
             
             if (criteria === 'alphabetical') {
-                sortedItems.sort((a, b) => a.dataset.name.localeCompare(b.dataset.name));
+                sortedItems.sort((a, b) => (a.dataset.name || '').localeCompare(b.dataset.name || ''));
             } else if (criteria === 'priority') {
-                // Mock priority sorting by name reverse for now
-                sortedItems.sort((a, b) => b.dataset.name.localeCompare(a.dataset.name));
+                sortedItems.sort((a, b) => (b.dataset.name || '').localeCompare(a.dataset.name || ''));
             }
 
-            hospitalGrid.innerHTML = '';
-            sortedItems.forEach(item => hospitalGrid.appendChild(item));
+            if (hospitalGrid) {
+                sortedItems.forEach(item => hospitalGrid.appendChild(item));
+            }
+            
+            filterList();
         }
 
         // Search inputs
@@ -377,7 +389,7 @@
                 const criteria = opt.dataset.sort;
                 const label = opt.textContent.trim();
                 const dropdownBtn = document.querySelector('.dropdown-toggle');
-                dropdownBtn.innerHTML = `${label}`;
+                if (dropdownBtn) dropdownBtn.innerHTML = `${label}`;
                 sortList(criteria);
             });
         });
@@ -387,12 +399,16 @@
             if (open247Checkbox) open247Checkbox.checked = false;
             activeFilter = 'all';
             filterItems.forEach(i => i.classList.remove('active'));
-            document.querySelector('.filter-item[data-filter="all"]').classList.add('active');
+            const allFilter = document.querySelector('.filter-item[data-filter="all"]');
+            if (allFilter) allFilter.classList.add('active');
             filterList();
         };
 
         if (clearBtn) clearBtn.addEventListener('click', resetActions);
         if (resetAllBtn) resetAllBtn.addEventListener('click', resetActions);
+
+        // Initial call to set correct state
+        filterList();
     });
     </script>
 {% endblock %}

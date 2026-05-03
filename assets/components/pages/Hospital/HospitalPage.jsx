@@ -131,7 +131,12 @@ const HospitalPage = ({ hospitalData }) => {
                                                             <i className="bi bi-person-fill fs-3 text-secondary"></i>
                                                         </div>
                                                         <div>
-                                                            <h5 className="fw-bold mb-1">{doctor.user && doctor.user.email ? doctor.user.email.split('@')[0] : 'Doctor'}</h5>
+                                                            <h5 className="fw-bold mb-1">
+                                                                {doctor.user ? (
+                                                                    doctor.user.firstName ? `${doctor.user.firstName} ${doctor.user.lastName || ''}` : 
+                                                                    (doctor.user.email ? doctor.user.email.split('@')[0].replace(/\./g, ' ') : 'Doctor')
+                                                                ) : 'Doctor'}
+                                                            </h5>
                                                             <span className="badge bg-info-subtle text-info-emphasis rounded-pill">{doctor.specialty || t('hospital.specialist', locale)}</span>
                                                         </div>
                                                     </div>

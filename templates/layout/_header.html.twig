@@ -2,7 +2,7 @@
 {% set user = app.user %}
 {% set dashboard_url = user ? (is_granted('ROLE_SUPER_ADMIN') ? path('app_super_admin_dashboard') : (is_granted('ROLE_ADMIN') ? path('app_admin_dashboard') : (is_granted('ROLE_DOCTOR') ? path('app_doctor_dashboard') : path('app_profile', {'_locale': locale})))) : path('app_login', {'_locale': locale}) %}
 
-<header id="header" class="header fixed-top transition-all py-0" style="transition: all 0.3s ease; background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(10px);">
+<header id="header" class="header fixed-top transition-all py-0">
     <div class="container-fluid px-4 d-flex align-items-center justify-content-between">
         <a href="{{ path('app_home') }}" class="logo d-flex align-items-center me-auto me-xl-0 text-decoration-none">
             <img src="{{ asset('build/img/header-logo.png') }}" alt="Logo" class="img-fluid" style="max-height: 42px;">

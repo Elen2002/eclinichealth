@@ -1,0 +1,74 @@
+{% extends 'dashboard_base.html.twig' %}
+
+{% block dashboard_title %}{{ 'Edit Doctor'|trans }}{% endblock %}
+{% block dashboard_subtitle %}{{ 'Update profile and assignments for'|trans }} {{ doctor.user.email }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="medical-card p-4 shadow-sm border-0" style="border-radius: 20px; background: white;">
+            {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                <div class="row g-4">
+                    <div class="col-md-12">
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-secondary small">{{ 'Full Name'|trans }}</label>
+                            {{ form_widget(form.name, {'attr': {'class': 'form-control rounded-3 py-2 bg-light border-0', 'readonly': 'readonly'}}) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-secondary small">{{ 'Email Address'|trans }}</label>
+                            {{ form_widget(form.email, {'attr': {'class': 'form-control rounded-3 py-2 bg-light border-0', 'readonly': 'readonly'}}) }}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-secondary small">{{ 'Phone Number'|trans }}</label>
+                            {{ form_widget(form.phone, {'attr': {'class': 'form-control rounded-3 py-2 border-1'}}) }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-secondary small">{{ 'Specialty'|trans }}</label>
+                            {{ form_widget(form.specialty, {'attr': {'class': 'form-select rounded-3 py-2 border-1'}}) }}
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-secondary small">{{ 'Hospital'|trans }}</label>
+                            {{ form_widget(form.hospital, {'attr': {'class': 'form-select rounded-3 py-2 border-1'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-secondary small">{{ 'Department'|trans }}</label>
+                            {{ form_widget(form.department, {'attr': {'class': 'form-select rounded-3 py-2 border-1'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            <label class="form-label fw-bold text-secondary small">{{ 'Role Type'|trans }}</label>
+                            {{ form_widget(form.roleType, {'attr': {'class': 'form-control rounded-3 py-2 border-1'}}) }}
+                        </div>
+                    </div>
+
+                    <div class="col-12 mt-4">
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary rounded-pill px-5 py-2 fw-bold shadow-sm">
+                                {{ 'Save Changes'|trans }}
+                            </button>
+                            <a href="{{ path('app_admin_dashboard') }}" class="btn btn-light rounded-pill px-5 py-2 fw-bold">
+                                {{ 'Cancel'|trans }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -199,17 +199,19 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/doctors', name: 'api_doctors', methods: ['GET'])]
-    public function getDoctors(DoctorRepository $doctorRepository): JsonResponse
+    public function getDoctors(DoctorRepository $doctorRepository, UploadFileInterface $uploadFileService): JsonResponse
     {
         $doctors = $doctorRepository->findAll();
 
         $data = array_map(fn($d) => [
             'id' => $d->getId(),
             'email' => $d->getUser() ? $d->getUser()->getEmail() : 'Unknown', // Using email as name proxy if needed
+            'name' => $d->getUser() ? ($d->getUser()->getFirstName() . ' ' . $d->getUser()->getLastName()) : 'Unknown',
             'specialty' => $d->getSpecialty(),
             'roleType' => $d->getRoleType(),
             'hospital' => $d->getHospital() ? $d->getHospital()->getName() : null,
             'department' => $d->getDepartment() ? $d->getDepartment()->getName() : null,
+            'image' => $uploadFileService->getImage(Doctor::class, $d->getId(), '223x200'),
         ], $doctors);
 
         return $this->json($data);
@@ -229,16 +231,18 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/hospitals/{id}/doctors', name: 'api_hospital_doctors', methods: ['GET'])]
-    public function getHospitalDoctors(int $id, HospitalRepository $hospitalRepository): JsonResponse
+    public function getHospitalDoctors(int $id, HospitalRepository $hospitalRepository, UploadFileInterface $uploadFileService): JsonResponse
     {
         $hospital = $hospitalRepository->find($id);
         if (!$hospital) return $this->json(['error' => 'Hospital not found'], 404);
 
         $data = array_map(fn($d) => [
             'id' => $d->getId(),
-            'name' => $d->getUser() ? $d->getUser()->getEmail() : 'Unknown',
+            'name' => $d->getUser() ? ($d->getUser()->getFirstName() . ' ' . $d->getUser()->getLastName()) : 'Unknown',
+            'email' => $d->getUser() ? $d->getUser()->getEmail() : 'Unknown',
             'specialty' => $d->getSpecialty(),
             'departmentId' => $d->getDepartment() ? $d->getDepartment()->getId() : null,
+            'image' => $uploadFileService->getImage(Doctor::class, $d->getId(), '223x200'),
         ], $hospital->getDoctors()->toArray());
 
         return $this->json($data);
@@ -305,7 +309,7 @@ class ApiController extends AbstractController
         $user = $this->getUser();
         if (!$user) return $this->json(['success' => false, 'error' => 'Not authenticated'], 401);
         $notifications = $entityManager->getRepository(Notification::class)->findBy(['user' => $user, 'isRead' => false]);
-        foreach ($notifications as $n) $n->setRead(true);
+        foreach ($notifications as $n) $n->setIsRead(true);
         $entityManager->flush();
         return $this->json(['success' => true]);
     }
@@ -371,5 +375,83 @@ class ApiController extends AbstractController
         } catch (\Exception $e) {
             return $this->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    #[Route('/api/chat/recent-communications', name: 'api_recent_communications', methods: ['GET'])]
+    public function getRecentCommunications(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->json([], 200);
+        }
+
+        $locale = $request->getLocale() ?: 'hy';
+
+        // Fetch recent ChatMessages to identify unique chat partners
+        $allMessages = $entityManager->getRepository(ChatMessage::class)->createQueryBuilder('m')
+            ->where('m.sender = :user OR m.recipient = :user')
+            ->setParameter('user', $user)
+            ->orderBy('m.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        $data = [];
+        $uniquePartners = [];
+        $currentUserId = $user->getId();
+
+        foreach ($allMessages as $m) {
+            $sender = $m->getSender();
+            $recipient = $m->getRecipient();
+            
+            if (!$sender || !$recipient) continue;
+
+            $partner = ($sender->getId() === $currentUserId) ? $recipient : $sender;
+            $partnerId = $partner->getId();
+
+            // Strictly exclude current user and avoid duplicates
+            if ($partnerId === $currentUserId || isset($uniquePartners[$partnerId])) {
+                continue;
+            }
+
+            $uniquePartners[$partnerId] = true;
+            $partnerName = $partner->getFirstName() ? ($partner->getFirstName() . ' ' . $partner->getLastName()) : $partner->getEmail();
+            
+            $data[] = [
+                'id' => 'chat_' . $partnerId,
+                'title' => $partnerName,
+                'message' => $m->getContent(),
+                'time' => $m->getCreatedAt()->format('Y-m-d H:i'),
+                'link' => '/' . $locale . '/profile/chat/' . $currentUserId . '/' . $partnerId,
+                'type' => 'chat',
+                'timestamp' => $m->getCreatedAt()->getTimestamp()
+            ];
+
+            if (count($uniquePartners) >= 5) break;
+        }
+
+        // Fetch recent Notifications
+        $notifications = $entityManager->getRepository(Notification::class)->findBy(
+            ['user' => $user],
+            ['createdAt' => 'DESC'],
+            3
+        );
+
+        foreach ($notifications as $n) {
+            $data[] = [
+                'id' => 'notif_' . $n->getId(),
+                'title' => $n->getTitle(),
+                'message' => $n->getMessage(),
+                'time' => $n->getCreatedAt()->format('Y-m-d H:i'),
+                'link' => $n->getLink(),
+                'type' => 'notification',
+                'timestamp' => $n->getCreatedAt()->getTimestamp()
+            ];
+        }
+
+        // Sort combined list by timestamp
+        usort($data, fn($a, $b) => $b['timestamp'] <=> $a['timestamp']);
+
+        // Return top 5
+        return $this->json(array_slice($data, 0, 5));
     }
 }

@@ -109,12 +109,12 @@
                                     </td>
                                     <td class="text-end pe-4">
                                         <div class="d-flex justify-content-end gap-2">
-                                            <button class="btn-table-action view" title="{{ 'View'|trans }}" onclick="alert('Viewing doctor details...')">
+                                            <a href="{{ path('app_doctor_show', {'id': doctor.id}) }}" class="btn-table-action view" title="{{ 'View'|trans }}">
                                                 <i class="bi bi-eye"></i>
-                                            </button>
-                                            <button class="btn-table-action edit" title="{{ 'Edit'|trans }}" onclick="alert('Editing doctor...')">
+                                            </a>
+                                            <a href="{{ path('app_doctor_edit', {'id': doctor.id}) }}" class="btn-table-action edit" title="{{ 'Edit'|trans }}">
                                                 <i class="bi bi-pencil"></i>
-                                            </button>
+                                            </a>
                                         </div>
                                     </td>
                                 </tr>

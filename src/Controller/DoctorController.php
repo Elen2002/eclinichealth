@@ -42,6 +42,49 @@ class DoctorController extends AbstractController
         return $this->redirectToRoute('app_admin_dashboard');
     }
 
+    #[Route('/{id}', name: 'app_doctor_show', methods: ['GET'])]
+    public function show(Doctor $doctor): Response
+    {
+        return $this->render('doctor/public_show.html.twig', [
+            'doctor' => $doctor,
+        ]);
+    }
+
+    #[Route('/{id}/edit', name: 'app_doctor_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Doctor $doctor, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createForm(DoctorType::class, $doctor);
+        
+        // Pre-populate unmapped fields
+        $form->get('email')->setData($doctor->getUser()?->getEmail());
+        $form->get('name')->setData($doctor->getUser()?->getFirstName() . ' ' . $doctor->getUser()?->getLastName());
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+            $this->addFlash('success', 'Doctor updated successfully.');
+            return $this->redirectToRoute('app_admin_dashboard');
+        }
+
+        return $this->render('doctor/admin_edit.html.twig', [
+            'doctor' => $doctor,
+            'form' => $form,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'app_doctor_delete', methods: ['POST'])]
+    public function delete(Request $request, Doctor $doctor, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$doctor->getId(), $request->getPayload()->getString('_token'))) {
+            $entityManager->remove($doctor);
+            $entityManager->flush();
+            $this->addFlash('success', 'Doctor deleted successfully.');
+        }
+
+        return $this->redirectToRoute('app_admin_dashboard');
+    }
+
     #[Route('/export/{type}', name: 'app_doctor_export', methods: ['GET'])]
     public function export(string $type, DoctorRepository $repository): Response
     {

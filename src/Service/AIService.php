@@ -123,6 +123,31 @@ class AIService
             }
         }
 
+        // Help & Email Intents
+        $helpKeywords = ['help', 'info', 'support', 'օգնություն', 'помощь', 'инфо', 'տեղեկություն'];
+        foreach ($helpKeywords as $word) {
+            if (str_contains($input, $word)) {
+                return [
+                    'status' => 'conversational',
+                    'intent' => 'help',
+                    'translationKey' => 'home.aiChat.response.help',
+                    'image' => '/img/help/support.png'
+                ];
+            }
+        }
+
+        $emailKeywords = ['email', 'mail', 'փոստ', 'почта', 'էլեկտրոնային'];
+        foreach ($emailKeywords as $word) {
+            if (str_contains($input, $word)) {
+                return [
+                    'status' => 'conversational',
+                    'intent' => 'email',
+                    'translationKey' => 'home.aiChat.response.mail',
+                    'image' => '/img/help/contact.png'
+                ];
+            }
+        }
+
         return [
             'status' => 'unknown',
             'translationKey' => 'home.aiChat.response.default',

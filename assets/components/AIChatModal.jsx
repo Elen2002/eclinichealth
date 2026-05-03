@@ -64,6 +64,7 @@ const AIChatModal = ({ isOpen, onClose, locale }) => {
                     aiMsg = {
                         sender: 'ai',
                         text: t(data.translationKey, locale),
+                        image: data.image,
                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     };
                 } else {
@@ -162,6 +163,11 @@ const AIChatModal = ({ isOpen, onClose, locale }) => {
                                     borderBottomLeftRadius: msg.sender === 'ai' ? '4px' : '20px',
                                 }}>
                                     <p className="mb-1 small">{msg.text}</p>
+                                    {msg.image && (
+                                        <div className="mt-2 mb-1 overflow-hidden rounded-3">
+                                            <img src={msg.image} alt="Support" className="img-fluid" style={{ maxHeight: '200px', objectFit: 'cover', width: '100%' }} />
+                                        </div>
+                                    )}
                                     <div className="text-end" style={{ fontSize: '0.65rem', opacity: 0.7 }}>{msg.time}</div>
                                 </div>
                             )}

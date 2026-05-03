@@ -1,0 +1,44 @@
+/* Global Header Styles */
+.header {
+    transition: all 0.3s ease;
+    background: rgba(248, 250, 252, 0.95);
+    backdrop-filter: blur(10px);
+    
+    &.shadow-sm {
+        background: rgba(248, 250, 252, 0.98) !important;
+    }
+
+    @media (max-width: 991.98px) {
+        padding-top: 10px !important;
+        padding-bottom: 5px !important;
+    }
+}
+
+.logo img {
+    transition: transform 0.3s ease;
+    &:hover {
+        transform: scale(1.05);
+    }
+}
+
+.navmenu {
+    .nav-link {
+        &::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--brand-gradient);
+            transition: width 0.3s ease;
+        }
+        &:hover::after, &.active::after {
+            width: 100%;
+        }
+    }
+}
+
+.mobile-nav-overlay {
+    transition: all 0.3s ease-in-out;
+}

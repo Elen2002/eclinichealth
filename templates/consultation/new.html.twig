@@ -79,11 +79,24 @@
                                             <option value="">{{ 'booking.select_hospital_first'|trans }}</option>
                                             {% for d in departments %}
                                                 {% set hos_ids = [] %}
+                                                {# Check formal hospital-department associations #}
                                                 {% for hd in hospitalDepartments %}
-                                                    {% if hd.department.id == d.id %}
-                                                        {% set hos_ids = hos_ids|merge([hd.hospital.id]) %}
+                                                    {% if hd.department and hd.hospital and hd.department.id == d.id %}
+                                                        {% if hd.hospital.id not in hos_ids %}
+                                                            {% set hos_ids = hos_ids|merge([hd.hospital.id]) %}
+                                                        {% endif %}
                                                     {% endif %}
                                                 {% endfor %}
+                                                
+                                                {# Also check if any doctors are assigned to this department at a specific hospital #}
+                                                {% for doc in doctors %}
+                                                    {% if doc.department and doc.hospital and doc.department.id == d.id %}
+                                                        {% if doc.hospital.id not in hos_ids %}
+                                                            {% set hos_ids = hos_ids|merge([doc.hospital.id]) %}
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+
                                                 <option value="{{ d.id }}" data-hospitals="{{ hos_ids|join(',') }}" {{ d.id == app.request.query.get('department') ? 'selected' : '' }}>
                                                     {{ d.name|trans }}
                                                 </option>
@@ -95,7 +108,20 @@
                                         <select name="doctor" id="doctorSelect" class="form-select medical-input select2-enable" required {{ app.request.query.get('department') ? '' : 'disabled' }}>
                                             <option value="">{{ 'booking.select_department_first'|trans }}</option>
                                             {% for doc in doctors %}
-                                                <option value="{{ doc.id }}" data-hospital="{{ doc.hospital ? doc.hospital.id : '' }}" data-department="{{ doc.department ? doc.department.id : '' }}" {{ doc.id == app.request.query.get('doctor') ? 'selected' : '' }}>
+                                                {% set docHospitals = [] %}
+                                                {% set docDepts = [] %}
+                                                {% for hd in hospitalDepartments %}
+                                                    {% if hd.doctor and doc.user and hd.doctor.id == doc.user.id %}
+                                                        {% set docHospitals = docHospitals|merge([hd.hospital.id]) %}
+                                                        {% set docDepts = docDepts|merge([hd.department.id]) %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <option value="{{ doc.id }}" 
+                                                        data-hospitals="{{ docHospitals|join(',') }}" 
+                                                        data-departments="{{ docDepts|join(',') }}"
+                                                        data-hospital-direct="{{ doc.hospital ? doc.hospital.id : '' }}" 
+                                                        data-department-direct="{{ doc.department ? doc.department.id : '' }}" 
+                                                        {{ doc.id == app.request.query.get('doctor') ? 'selected' : '' }}>
                                                     {{ doc.user.firstName ? doc.user.firstName ~ ' ' ~ doc.user.lastName : doc.user.email|split('@')[0]|capitalize }} ({{ doc.specialty|trans }})
                                                 </option>
                                             {% endfor %}
@@ -168,73 +194,96 @@ document.addEventListener('DOMContentLoaded', function() {
     const allDeptOptions = Array.from(departmentSelect.querySelectorAll('option:not([value=""])')).map(opt => ({
         id: opt.value,
         text: opt.textContent,
-        hospitals: opt.dataset.hospitals ? opt.dataset.hospitals.split(',') : []
+        hospitals: opt.dataset.hospitals ? opt.dataset.hospitals.split(',').map(s => s.trim()).filter(s => s !== '') : []
     }));
 
     const allDocOptions = Array.from(doctorSelect.querySelectorAll('option:not([value=""])')).map(opt => ({
         id: opt.value,
         text: opt.textContent,
-        hospital: opt.dataset.hospital,
-        department: opt.dataset.department
+        hospitals: opt.dataset.hospitals ? opt.dataset.hospitals.split(',').map(s => s.trim()).filter(s => s !== '') : [],
+        departments: opt.dataset.departments ? opt.dataset.departments.split(',').map(s => s.trim()).filter(s => s !== '') : [],
+        hospitalDirect: opt.dataset.hospitalDirect ? opt.dataset.hospitalDirect.trim() : '',
+        departmentDirect: opt.dataset.departmentDirect ? opt.dataset.departmentDirect.trim() : ''
     }));
+
+    console.log('All Options captured:', { departments: allDeptOptions.length, doctors: allDocOptions.length });
 
     function refreshSelect2(element) {
         if ($(element).data('select2')) {
-            $(element).trigger('change.select2');
+            $(element).trigger('change');
         }
     }
 
     function filterDepartments(hospitalId) {
+        const hId = hospitalId ? hospitalId.toString().trim() : '';
+        console.log('Filtering departments for hospital:', hId);
         const currentVal = $d.val();
-        $d.empty().append(new Option(hospitalId ? "{{ 'booking.choose_department'|trans }}" : "{{ 'booking.select_hospital_first'|trans }}", ""));
+        $d.empty().append(new Option(hId ? "{{ 'booking.choose_department'|trans }}" : "{{ 'booking.select_hospital_first'|trans }}", ""));
         
+        let matchCount = 0;
         allDeptOptions.forEach(opt => {
-            if (!hospitalId || opt.hospitals.includes(hospitalId)) {
+            if (!hId || opt.hospitals.includes(hId)) {
                 const newOpt = new Option(opt.text, opt.id);
                 if (opt.id === currentVal) newOpt.selected = true;
                 $d.append(newOpt);
-            }
-        });
-        
-        $d.prop('disabled', !hospitalId);
-        refreshSelect2(departmentSelect);
-    }
-
-    function filterDoctors(hospitalId, departmentId) {
-        const currentVal = $doc.val();
-        $doc.empty().append(new Option(departmentId ? "{{ 'booking.choose_specialist'|trans }}" : "{{ 'booking.select_department_first'|trans }}", ""));
-        
-        let matchCount = 0;
-        allDocOptions.forEach(opt => {
-            // Strict match: must match both hospital and department
-            if (opt.hospital == hospitalId && opt.department == departmentId) {
-                const newOpt = new Option(opt.text, opt.id);
-                if (opt.id === currentVal) newOpt.selected = true;
-                $doc.append(newOpt);
                 matchCount++;
             }
         });
         
-        $doc.prop('disabled', !departmentId || matchCount === 0);
-        if (matchCount === 0 && departmentId) {
+        console.log('Found departments:', matchCount);
+        $d.prop('disabled', !hId || matchCount === 0);
+        refreshSelect2(departmentSelect);
+    }
+
+    function filterDoctors(hospitalId, departmentId) {
+        const hId = hospitalId ? hospitalId.toString().trim() : '';
+        const dId = departmentId ? departmentId.toString().trim() : '';
+        console.log('Filtering doctors for hospital:', hId, 'department:', dId);
+        
+        const currentVal = $doc.val();
+        $doc.empty().append(new Option(dId ? "{{ 'booking.choose_specialist'|trans }}" : "{{ 'booking.select_department_first'|trans }}", ""));
+        
+        let matches = [];
+
+        allDocOptions.forEach(opt => {
+            const matchesHospital = opt.hospitals.includes(hId) || opt.hospitalDirect === hId;
+            const matchesDept = opt.departments.includes(dId) || opt.departmentDirect === dId;
+
+            if (matchesHospital && matchesDept) {
+                matches.push(opt);
+            }
+        });
+        
+        matches.forEach(opt => {
+            const newOpt = new Option(opt.text, opt.id);
+            if (opt.id === currentVal) newOpt.selected = true;
+            $doc.append(newOpt);
+        });
+
+        const matchCount = matches.length;
+        console.log('Found doctors:', matchCount);
+        $doc.prop('disabled', !dId || matchCount === 0);
+        
+        if (matchCount === 0 && dId) {
             $doc.find('option:first').text("{{ 'booking.no_doctors_found'|trans }}");
+        } else if (matchCount === 1) {
+            // Auto-select the only available doctor
+            $doc.val(matches[0].id);
         }
+
         refreshSelect2(doctorSelect);
     }
 
     // Listeners using jQuery to catch Select2 events
     $h.on('change', function() {
-        const hospitalId = this.value;
-        filterDepartments(hospitalId);
+        filterDepartments(this.value);
         // Reset doctor select
         $doc.empty().append(new Option("{{ 'booking.select_department_first'|trans }}", "")).prop('disabled', true);
         refreshSelect2(doctorSelect);
     });
 
     $d.on('change', function() {
-        const departmentId = this.value;
-        const hospitalId = $h.val();
-        filterDoctors(hospitalId, departmentId);
+        filterDoctors($h.val(), this.value);
     });
 
     // Initial load handling

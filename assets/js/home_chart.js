@@ -1,4 +1,4 @@
-// Expecting Chart.js to be loaded via CDN as global Chart
+import Chart from 'chart.js/auto';
 
 
 document.addEventListener("DOMContentLoaded", function () {
