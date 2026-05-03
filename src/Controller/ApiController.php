@@ -798,6 +798,27 @@ class ApiController extends AbstractController
         }
 
         $consultation->setStatus('confirmed');
+
+        // Automatically create a DoctorPacient relationship if the patient is a registered user
+        $patientEmail = $consultation->getPatientEmail();
+        if ($patientEmail) {
+            $patientUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $patientEmail]);
+            if ($patientUser) {
+                // Check if relationship already exists
+                $existingRelation = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findOneBy([
+                    'doctor' => $user,
+                    'pacient' => $patientUser
+                ]);
+
+                if (!$existingRelation) {
+                    $relation = new \App\Entity\DoctorPacient();
+                    $relation->setDoctor($user);
+                    $relation->setPacient($patientUser);
+                    $entityManager->persist($relation);
+                }
+            }
+        }
+
         $entityManager->flush();
 
         return $this->json(['success' => true]);
