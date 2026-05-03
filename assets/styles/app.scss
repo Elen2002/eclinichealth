@@ -1,3 +1,11 @@
+@use 'layout/dashboard';
+@use 'layout/header';
+@use 'components/bento_grid';
+@use 'pages/auth';
+@use 'pages/profile';
+@use 'pages/home';
+@use 'pages/notifications';
+
 /**
 * Template Name: Medilab
 * Template URL: https://bootstrapmade.com/medilab-free-medical-bootstrap-theme/
@@ -2287,11 +2295,3 @@ section,
     background: #0f172a;
     color: white;
 }
-
-@import 'layout/dashboard';
-@import 'layout/header';
-@import 'components/bento_grid';
-@import 'pages/auth';
-@import 'pages/profile';
-@import 'pages/home';
-@import 'pages/notifications';

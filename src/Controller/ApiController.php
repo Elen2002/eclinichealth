@@ -149,7 +149,7 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/login', name: 'api_login', methods: ['POST'])]
-    public function login(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasher): JsonResponse
+    public function login(Request $request, UserRepository $userRepository, UserPasswordHasherInterface $userPasswordHasher, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         if (!$data || empty($data['email']) || empty($data['password'])) {
@@ -168,16 +168,27 @@ class ApiController extends AbstractController
             $userRepository->save($user, true);
         }
 
+        $userData = [
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'firstName' => $user->getFirstName(),
+            'lastName' => $user->getLastName(),
+            'roles' => $user->getRoles(),
+            'avatar' => $user->getAvatar()
+        ];
+
+        if (in_array('ROLE_DOCTOR', $user->getRoles())) {
+            $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+            if ($doctor) {
+                $userData['hospital_name'] = $doctor->getHospital() ? $doctor->getHospital()->getName() : null;
+                $userData['specialty'] = $doctor->getSpecialty();
+            }
+        }
+
         return $this->json([
             'status' => 'success',
             'token' => $user->getApiToken(),
-            'user' => [
-                'id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'firstName' => $user->getFirstName(),
-                'lastName' => $user->getLastName(),
-                'roles' => $user->getRoles()
-            ]
+            'user' => $userData
         ]);
     }
 
@@ -226,6 +237,40 @@ class ApiController extends AbstractController
             'name' => $d->getName(),
             'description' => $d->getDescription(),
         ], $departments);
+
+        return $this->json($data);
+    }
+
+    #[Route('/api/departments/{id}', name: 'api_department_details', methods: ['GET'])]
+    public function getDepartmentDetails(int $id, DepartmentRepository $departmentRepository, UploadFileInterface $uploadFileService): JsonResponse
+    {
+        $department = $departmentRepository->find($id);
+        if (!$department) return $this->json(['error' => 'Department not found'], 404);
+
+        return $this->json([
+            'id' => $department->getId(),
+            'name' => $department->getName(),
+            'description' => $department->getDescription(),
+            'longDescription' => $department->getDescription(), // Using same description as placeholder
+            'image' => $uploadFileService->getImage(\App\Entity\Department::class, $department->getId(), '800x600') ?: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800',
+        ]);
+    }
+
+    #[Route('/api/departments/{id}/doctors', name: 'api_department_doctors', methods: ['GET'])]
+    public function getDepartmentDoctors(int $id, DepartmentRepository $departmentRepository, UploadFileInterface $uploadFileService): JsonResponse
+    {
+        $department = $departmentRepository->find($id);
+        if (!$department) return $this->json(['error' => 'Department not found'], 404);
+
+        $data = array_map(fn($d) => [
+            'id' => $d->getId(),
+            'name' => $d->getUser() ? ($d->getUser()->getFirstName() . ' ' . $d->getUser()->getLastName()) : 'Unknown',
+            'specialty' => $d->getSpecialty(),
+            'image' => $uploadFileService->getImage(Doctor::class, $d->getId(), '223x200'),
+            'rating' => 4.9, // Professional fallback
+            'reviews' => 120, // Professional fallback
+            'role' => $d->getRoleType() ?: 'Specialist',
+        ], $department->getDoctors()->toArray());
 
         return $this->json($data);
     }
@@ -461,5 +506,122 @@ class ApiController extends AbstractController
         }
 
         return $this->json($finalData);
+    #[Route('/api/user/profile', name: 'api_user_profile', methods: ['GET'])]
+    public function getProfile(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $data = [
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'firstName' => $user->getFirstName(),
+            'lastName' => $user->getLastName(),
+            'avatar' => $user->getAvatar(),
+            'roles' => $user->getRoles(),
+        ];
+
+        if (in_array('ROLE_DOCTOR', $user->getRoles())) {
+            $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+            if ($doctor) {
+                $data['hospital_name'] = $doctor->getHospital() ? $doctor->getHospital()->getName() : null;
+                $data['department_name'] = $doctor->getDepartment() ? $doctor->getDepartment()->getName() : null;
+                $data['specialty'] = $doctor->getSpecialty();
+            }
+        }
+
+        return $this->json($data);
+    #[Route('/api/doctor/consultations', name: 'api_doctor_consultations', methods: ['GET'])]
+    public function getDoctorConsultations(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+        if (!$doctor) return $this->json(['error' => 'Doctor profile not found'], 404);
+
+        $consultations = $entityManager->getRepository(Consultation::class)->findBy(
+            ['doctor' => $doctor],
+            ['requestedDate' => 'DESC']
+        );
+
+        $data = array_map(fn($c) => [
+            'id' => $c->getId(),
+            'patientName' => $c->getPatientName(),
+            'patientPhone' => $c->getPatientPhone(),
+            'patientEmail' => $c->getPatientEmail(),
+            'requestedDate' => $c->getRequestedDate()->format('Y-m-d H:i'),
+            'status' => $c->getStatus(),
+            'message' => $c->getMessage(),
+        ], $consultations);
+
+        return $this->json($data);
+    }
+
+    #[Route('/api/doctor/patients', name: 'api_doctor_patients', methods: ['GET'])]
+    public function getDoctorPatients(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+        if (!$doctor) return $this->json(['error' => 'Doctor profile not found'], 404);
+
+        $relations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['doctor' => $user]);
+        
+        $data = array_map(fn($r) => [
+            'id' => $r->getPacient()->getId(),
+            'name' => $r->getPacient()->getFirstName() . ' ' . $r->getPacient()->getLastName(),
+            'email' => $r->getPacient()->getEmail(),
+            'avatar' => $r->getPacient()->getAvatar(),
+            'lastVisit' => '2024-05-01', // Placeholder or fetch from history
+        ], $relations);
+
+        return $this->json($data);
+    #[Route('/api/user/consultations', name: 'api_user_consultations', methods: ['GET'])]
+    public function getUserConsultations(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $email = $user->getEmail();
+        $consultations = $entityManager->getRepository(Consultation::class)->findBy(
+            ['patientEmail' => $email],
+            ['requestedDate' => 'DESC']
+        );
+
+        $data = array_map(fn($c) => [
+            'id' => $c->getId(),
+            'date' => $c->getRequestedDate()->format('Y-m-d H:i'),
+            'hospital_name' => $c->getHospital() ? $c->getHospital()->getName() : 'N/A',
+            'department_name' => $c->getDepartment() ? $c->getDepartment()->getName() : 'N/A',
+            'doctor_name' => $c->getDoctor() && $c->getDoctor()->getUser() ? ($c->getDoctor()->getUser()->getFirstName() . ' ' . $c->getDoctor()->getUser()->getLastName()) : 'N/A',
+            'status' => $c->getStatus(),
+        ], $consultations);
+
+        return $this->json($data);
+    }
+
+    #[Route('/api/user/doctors', name: 'api_user_doctors', methods: ['GET'])]
+    public function getUserDoctors(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $relations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['pacient' => $user]);
+        
+        $data = array_map(function($r) use ($entityManager) {
+            $doctorUser = $r->getDoctor();
+            $doctorProfile = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $doctorUser]);
+            return [
+                'id' => $doctorProfile ? $doctorProfile->getId() : 0,
+                'name' => $doctorUser->getFirstName() . ' ' . $doctorUser->getLastName(),
+                'specialty' => $doctorProfile ? $doctorProfile->getSpecialty() : 'Specialist',
+                'hospital_name' => ($doctorProfile && $doctorProfile->getHospital()) ? $doctorProfile->getHospital()->getName() : 'Hospital',
+                'image' => $doctorUser->getAvatar(),
+            ];
+        }, $relations);
+
+        return $this->json($data);
     }
 }
