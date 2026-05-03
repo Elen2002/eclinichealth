@@ -17,6 +17,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function fetchAdminNotifications() {
+        // Only poll if user is logged in and is an admin
+        const user = window.APP_DATA?.user;
+        if (!user || !user.roles || (!user.roles.includes('ROLE_ADMIN') && !user.roles.includes('ROLE_SUPER_ADMIN'))) {
+            return;
+        }
+
         const storedCount = parseInt(localStorage.getItem('admin_unread_count') || '0');
         
         fetch('/api/admin/chat/sessions')

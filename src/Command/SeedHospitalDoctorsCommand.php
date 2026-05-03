@@ -32,7 +32,7 @@ class SeedHospitalDoctorsCommand extends Command
 
     protected function configure(): void
     {
-        $this->addArgument('id', InputArgument::REQUIRED, 'Hospital ID');
+        $this->addArgument('id', InputArgument::OPTIONAL, 'Hospital ID (optional, seeds all if omitted)');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -40,32 +40,51 @@ class SeedHospitalDoctorsCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $hospitalId = $input->getArgument('id');
 
-        $hospital = $this->entityManager->getRepository(Hospital::class)->find($hospitalId);
-        if (!$hospital) {
-            $io->error(sprintf('Hospital with ID %s not found.', $hospitalId));
-            return Command::FAILURE;
+        if ($hospitalId) {
+            $hospital = $this->entityManager->getRepository(Hospital::class)->find($hospitalId);
+            if (!$hospital) {
+                $io->error(sprintf('Hospital with ID %s not found.', $hospitalId));
+                return Command::FAILURE;
+            }
+            $this->seedForHospital($hospital, $io);
+        } else {
+            $hospitals = $this->entityManager->getRepository(Hospital::class)->findAll();
+            $io->info(sprintf('Checking %d hospitals for missing doctors...', count($hospitals)));
+            foreach ($hospitals as $hospital) {
+                if ($hospital->getDoctors()->count() === 0) {
+                    $this->seedForHospital($hospital, $io);
+                } else {
+                    $io->text(sprintf('Skipping %s (already has %d doctors)', $hospital->getName(), $hospital->getDoctors()->count()));
+                }
+            }
         }
 
-        if ($hospital->getDoctors()->count() > 0) {
-            $io->note(sprintf('Hospital %s already has %d doctors.', $hospital->getName(), $hospital->getDoctors()->count()));
-            return Command::SUCCESS;
-        }
+        $this->entityManager->flush();
+        $io->success('Seeding process completed!');
 
-        $io->info(sprintf('Seeding 2 doctors for hospital: %s', $hospital->getName()));
+        return Command::SUCCESS;
+    }
+
+    private function seedForHospital(Hospital $hospital, SymfonyStyle $io): void
+    {
+        $io->info(sprintf('Seeding 4 doctors for hospital: %s', $hospital->getName()));
 
         $depts = $hospital->getHospitalDepartments();
         if ($depts->count() === 0) {
-            $io->warning('Hospital has no departments. Doctors will be assigned to a general pool.');
+            $io->warning(sprintf('Hospital %s has no departments. Doctors will be assigned to a general pool.', $hospital->getName()));
         }
 
         $doctorData = [
             ['Armen', 'Sargsyan', 'Cardiologist'],
-            ['Ani', 'Hovhannisyan', 'Neurologist']
+            ['Ani', 'Hovhannisyan', 'Neurologist'],
+            ['Karen', 'Grigoryan', 'Surgeon'],
+            ['Mariam', 'Abrahamyan', 'Therapist']
         ];
 
         foreach ($doctorData as $index => [$first, $last, $spec]) {
             $user = new User();
-            $user->setEmail(strtolower($first . '.' . $last . '.' . $hospitalId . '.' . $index . '@eclinic.health'));
+            // Use random suffix to avoid unique constraint violations if running multiple times
+            $user->setEmail(strtolower($first . '.' . $last . '.' . $hospital->getId() . '.' . bin2hex(random_bytes(2)) . '@eclinic.health'));
             $user->setFirstName($first);
             $user->setLastName($last);
             $user->setRoles(['ROLE_DOCTOR']);
@@ -77,16 +96,13 @@ class SeedHospitalDoctorsCommand extends Command
             $doctor->setUser($user);
             $doctor->setHospital($hospital);
             if ($depts->count() > 0) {
-                $doctor->setDepartment($depts->first()->getDepartment());
+                // Distribute doctors across available departments
+                $deptIndex = $index % $depts->count();
+                $doctor->setDepartment($depts->get($deptIndex)->getDepartment());
             }
             $doctor->setSpecialty($spec);
             $doctor->setIsActive(true);
             $this->entityManager->persist($doctor);
         }
-
-        $this->entityManager->flush();
-        $io->success('Doctors seeded successfully for hospital ' . $hospital->getName());
-
-        return Command::SUCCESS;
     }
 }

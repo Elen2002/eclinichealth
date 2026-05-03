@@ -21,6 +21,7 @@
             user: {{ app.user ? {
                 'identifier': app.user.email|split('@')[0]|capitalize,
                 'email': app.user.email,
+                'roles': app.user.roles,
                 'dashboard_url': is_granted('ROLE_SUPER_ADMIN') ? path('app_super_admin_dashboard') : (is_granted('ROLE_ADMIN') ? path('app_admin_dashboard') : (is_granted('ROLE_DOCTOR') ? path('app_doctor_dashboard') : path('app_profile')))
             }|json_encode|raw : 'null' }},
             locale: '{{ app.request.locale }}',

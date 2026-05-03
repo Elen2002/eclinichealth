@@ -118,7 +118,7 @@ const Header = () => {
                 </div>
             </div>
 
-            <style jsx>{`
+            <style dangerouslySetInnerHTML={{ __html: `
                 .nav-link {
                     transition: color 0.3s ease;
                 }
@@ -153,7 +153,7 @@ const Header = () => {
                 .animate-fade-in {
                     animation: fade-in 0.3s ease-out forwards;
                 }
-            `}</style>
+            ` }} />
 
             {isMenuOpen && (
                 <div className="mobile-nav-overlay position-fixed top-0 start-0 w-100 h-100 bg-white d-xl-none" style={{ zIndex: 2000, paddingTop: '80px', paddingLeft: '20px', paddingRight: '20px', paddingBottom: '120px', overflowY: 'auto' }}>

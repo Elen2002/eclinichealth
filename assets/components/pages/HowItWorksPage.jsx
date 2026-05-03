@@ -110,14 +110,14 @@ const HowItWorksPage = () => {
                 </div>
             </div>
 
-            <style jsx>{`
+            <style dangerouslySetInnerHTML={{ __html: `
                 .hover-translate-y:hover {
                     transform: translateY(-10px);
                 }
                 .transition-all {
                     transition: all 0.3s ease;
                 }
-            `}</style>
+            ` }} />
         </div>
     );
 };

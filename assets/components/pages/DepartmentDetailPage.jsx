@@ -6,11 +6,24 @@ const DepartmentDetailPage = ({ department, image }) => {
 
     if (!department) return <div className="py-5 mt-5 text-center">Loading...</div>;
 
+    // Helper to get a relevant high-quality image based on department name
+    const getDeptImage = (name) => {
+        const lowerName = name?.toLowerCase() || '';
+        if (lowerName.includes('նյարդ') || lowerName.includes('neuro')) return 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&q=80&w=1200';
+        if (lowerName.includes('սրտ') || lowerName.includes('cardio')) return 'https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&q=80&w=1200';
+        if (lowerName.includes('ատամ') || lowerName.includes('dent')) return 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=1200';
+        if (lowerName.includes('մանկ') || lowerName.includes('pediatr')) return 'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?auto=format&fit=crop&q=80&w=1200';
+        if (lowerName.includes('օրթո') || lowerName.includes('ortho')) return 'https://images.unsplash.com/photo-1579154235602-3c2c2aa59ace?auto=format&fit=crop&q=80&w=1200';
+        if (lowerName.includes('թերապ') || lowerName.includes('therap')) return 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1200';
+        if (lowerName.includes('դիագ') || lowerName.includes('diagn')) return 'https://images.unsplash.com/photo-1579154236605-e325091726a5?auto=format&fit=crop&q=80&w=1200';
+        return 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200';
+    };
+
     return (
         <div className="department-detail-page">
             {/* Premium Hero Section */}
             <div className="hero-section text-center py-5 mt-5 position-relative overflow-hidden" style={{ 
-                background: image ? `url(${image})` : 'linear-gradient(135deg, #6f42c1, var(--brand-color))', 
+                background: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5)), url(${image || getDeptImage(department.name)})`, 
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 color: 'white', 
@@ -59,15 +72,24 @@ const DepartmentDetailPage = ({ department, image }) => {
                                 <div className="row g-4">
                                     {department.doctors && department.doctors.length > 0 ? (
                                         department.doctors.map((doctor, i) => (
-                                            <div key={i} className="col-md-6" data-aos="fade-up" data-aos-delay={i * 100}>
+                                            <div key={doctor.id || `doctor-${i}`} className="col-md-6" data-aos="fade-up" data-aos-delay={i * 100}>
                                                 <div className="card border-0 shadow-sm rounded-4 overflow-hidden h-100 hover-lift transition-all border-bottom border-3 border-transparent hover-border-primary">
                                                     <div className="card-body p-4">
                                                         <div className="d-flex align-items-center gap-4">
                                                             <div className="avatar-wrapper flex-shrink-0" style={{ width: '90px', height: '90px' }}>
                                                                 <img 
-                                                                    src={doctor.user?.avatar ? (doctor.user.avatar.startsWith('/') ? doctor.user.avatar : `/uploads/avatars/${doctor.user.avatar}`) : 'https://cdn-icons-png.flaticon.com/512/3774/3774299.png'} 
+                                                                    src={doctor.user?.avatar && !doctor.user.avatar.includes('demo/')
+                                                                        ? (doctor.user.avatar.startsWith('http') || doctor.user.avatar.startsWith('/') 
+                                                                            ? doctor.user.avatar 
+                                                                            : `/uploads/${doctor.user.avatar}`) 
+                                                                        : `https://i.pravatar.cc/150?u=${doctor.user?.id || i}`} 
                                                                     className="rounded-circle w-100 h-100 object-fit-cover shadow-sm border border-2 border-white"
                                                                     alt={doctor.user?.firstName}
+                                                                    onError={(e) => {
+                                                                        if (!e.target.src.includes('pravatar.cc')) {
+                                                                            e.target.src = `https://i.pravatar.cc/150?u=${doctor.user?.id || i}`;
+                                                                        }
+                                                                    }}
                                                                 />
                                                             </div>
                                                             <div>
@@ -153,7 +175,7 @@ const DepartmentDetailPage = ({ department, image }) => {
                 </div>
             </section>
 
-            <style jsx>{`
+            <style>{`
                 .leading-relaxed { line-height: 1.8; }
                 .hover-bg-light:hover { background-color: #f8fafc; }
                 .transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }

@@ -3,10 +3,10 @@ import { t } from '../../../utils/translations.js';
 
 const HospitalPage = ({ hospitalData }) => {
     const hospital = hospitalData.hospital;
-    const heroImage = hospitalData.images && hospitalData.images.length > 0 ? hospitalData.images[0] : '/assets/img/hero-bg.jpg';
+    const heroImage = hospitalData.images && hospitalData.images.length > 0 
+        ? hospitalData.images[0] 
+        : `https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200&sig=${hospital?.id || 1}`;
     const locale = window.APP_DATA?.locale || 'en';
-    debugger
-    console.log(heroImage)
     return (
         <div className="hospital-page">
             {/* Hero Section */}
@@ -127,8 +127,21 @@ const HospitalPage = ({ hospitalData }) => {
                                             <div className="card border-0 shadow-sm h-100 rounded-4 transition-hover">
                                                 <div className="card-body p-4">
                                                     <div className="d-flex align-items-center mb-3">
-                                                        <div className="bg-light rounded-circle d-flex align-items-center justify-content-center me-3" style={{ width: '60px', height: '60px' }}>
-                                                            <i className="bi bi-person-fill fs-3 text-secondary"></i>
+                                                        <div className="avatar-wrapper flex-shrink-0 me-3" style={{ width: '60px', height: '60px' }}>
+                                                            <img 
+                                                                src={doctor.user?.avatar && !doctor.user.avatar.includes('demo/')
+                                                                    ? (doctor.user.avatar.startsWith('http') || doctor.user.avatar.startsWith('/') 
+                                                                        ? doctor.user.avatar 
+                                                                        : `/uploads/${doctor.user.avatar}`) 
+                                                                    : `https://i.pravatar.cc/150?u=${doctor.user?.id || index}`} 
+                                                                className="rounded-circle w-100 h-100 object-fit-cover shadow-sm border border-2 border-white"
+                                                                alt={doctor.user?.firstName}
+                                                                onError={(e) => {
+                                                                    if (!e.target.src.includes('pravatar.cc')) {
+                                                                        e.target.src = `https://i.pravatar.cc/150?u=${doctor.user?.id || index}`;
+                                                                    }
+                                                                }}
+                                                            />
                                                         </div>
                                                         <div>
                                                             <h5 className="fw-bold mb-1">
@@ -167,7 +180,15 @@ const HospitalPage = ({ hospitalData }) => {
                 </div>
             </section>
 
-            <style jsx>{`
+            <style>{`
+                .hospital-page { background: #fdfdff; }
+                .hover-scale:hover { transform: scale(1.05); transition: all 0.3s ease; }
+                .hover-shadow:hover { box-shadow: 0 1rem 3rem rgba(0,0,0,0.1) !important; }
+                .transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+                .btn-primary { background: var(--brand-color); border: none; }
+                .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+                .dept-card { border: 1px solid rgba(0,0,0,0.05); }
+                .dept-card:hover { border-color: var(--brand-color); }
                 .transition-hover {
                     transition: transform 0.2s ease, box-shadow 0.2s ease;
                 }
@@ -200,4 +221,5 @@ const HospitalPage = ({ hospitalData }) => {
 };
 
 export default HospitalPage;
+
 

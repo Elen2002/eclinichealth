@@ -7,6 +7,7 @@ use App\Entity\Department;
 use App\Entity\Doctor;
 use App\Entity\User;
 use App\Entity\HospitalDepartment;
+use App\Entity\Images;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -36,6 +37,9 @@ class SeedArmenianContentCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Seeding Armenian Medical Content');
 
+        // Clear existing demo images (remote URLs)
+        $this->entityManager->createQuery('DELETE FROM App\Entity\Images i WHERE i.title LIKE \'https://images.unsplash.com/%\'')->execute();
+
         // 1. Seed Departments
         $departments = $this->seedDepartments($io);
 
@@ -46,9 +50,24 @@ class SeedArmenianContentCommand extends Command
         $this->seedDoctors($io, $hospitals, $departments);
 
         $io->success('All Armenian content seeded successfully!');
-        $io->note('Demo images are located in public/uploads/demo/');
+        $io->note('Demo images are now stored in the database as remote URLs.');
 
         return Command::SUCCESS;
+    }
+
+    private function addImage(object $entity, string $url): void
+    {
+        $className = get_class($entity);
+        if ($className === 'Proxies\__CG__\App\Entity\Hospital' || $className === 'Proxies\__CG__\App\Entity\Department') {
+            $className = str_replace('Proxies\__CG__\\', '', $className);
+        }
+        
+        $image = new Images();
+        $image->setParentClass($className);
+        $image->setEntityId($entity->getId());
+        $image->setTitle($url);
+        $image->setSize('original');
+        $this->entityManager->persist($image);
     }
 
     private function seedDepartments(SymfonyStyle $io): array
@@ -56,13 +75,13 @@ class SeedArmenianContentCommand extends Command
         $io->section('Seeding Departments');
         
         $deptData = [
-            ['Կարդիոլոգիա', 'Սրտանոթային համակարգի հիվանդությունների ախտորոշում և բուժում:'],
-            ['Նյարդաբանություն', 'Կենտրոնական և ծայրամասային նյարդային համակարգի խանգարումների բուժում:'],
-            ['Օրթոպեդիա', 'Հենաշարժողական համակարգի վնասվածքների և հիվանդությունների բուժում:'],
-            ['Մանկաբարձություն', 'Հղիության ընթացքի հսկողություն և ծննդաբերության կազմակերպում:'],
-            ['Թերապիա', 'Ընդհանուր հիվանդությունների ախտորոշում և թերապևտիկ բուժում:'],
-            ['Ատամնաբուժություն', 'Բերանի խոռոչի հիվանդությունների կանխարգելում և բուժում:'],
-            ['Դիագնոստիկա', 'Բարձր ճշգրտության լաբորատոր և գործիքային հետազոտություններ:'],
+            ['Կարդիոլոգիա', 'Սրտանոթային համակարգի հիվանդությունների բարձրակարգ ախտորոշում և բուժում՝ օգտագործելով վերջին սերնդի սարքավորումները:'],
+            ['Նյարդաբանություն', 'Կենտրոնական և ծայրամասային նյարդային համակարգի խանգարումների մասնագիտացված բժշկական օգնություն և վերականգնում:'],
+            ['Օրթոպեդիա', 'Հենաշարժողական համակարգի վնասվածքների, հոդերի և ողնաշարի հիվանդությունների ժամանակակից վիրաբուժական և թերապևտիկ բուժում:'],
+            ['Մանկաբարձություն', 'Ապահով հղիություն և ծննդաբերություն. մենք հոգ ենք տանում Ձեր և Ձեր փոքրիկի առողջության մասին ամենաբարձր մակարդակով:'],
+            ['Թերապիա', 'Ընդհանուր հիվանդությունների համապարփակ ախտորոշում, կանխարգելում և անհատականացված բուժման պլանների մշակում:'],
+            ['Ատամնաբուժություն', 'Ժամանակակից ստոմատոլոգիական ծառայություններ՝ սկսած պրոֆեսիոնալ մաքրումից մինչև բարդ վիրաբուժական միջամտություններ:'],
+            ['Դիագնոստիկա', 'Ճշգրիտ լաբորատոր հետազոտություններ և գործիքային ախտորոշում (KT, MRT, Ռենտգեն) արագ և որակյալ արդյունքներով:'],
         ];
 
         $entities = [];
@@ -78,6 +97,21 @@ class SeedArmenianContentCommand extends Command
             $dept->setName($name);
             $dept->setDescription($desc);
             $this->entityManager->persist($dept);
+            $this->entityManager->flush(); // Flush to get ID
+
+            // Add unique image
+            $imgUrl = match($name) {
+                'Կարդիոլոգիա' => 'https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&q=80&w=800',
+                'Նյարդաբանություն' => 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&q=80&w=800',
+                'Ատամնաբուժություն' => 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800',
+                'Մանկաբարձություն' => 'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?auto=format&fit=crop&q=80&w=800',
+                'Օրթոպեդիա' => 'https://images.unsplash.com/photo-1579154235602-3c2c2aa59ace?auto=format&fit=crop&q=80&w=800',
+                'Թերապիա' => 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800',
+                'Դիագնոստիկա' => 'https://images.unsplash.com/photo-1579154236605-e325091726a5?auto=format&fit=crop&q=80&w=800',
+                default => 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800'
+            };
+            $this->addImage($dept, $imgUrl);
+            
             $entities[] = $dept;
         }
 
@@ -117,6 +151,12 @@ class SeedArmenianContentCommand extends Command
             $hospital->setHasAmbulance(true);
             $hospital->setStaffCount(rand(50, 200));
             
+            $this->entityManager->persist($hospital);
+            $this->entityManager->flush(); // Flush to get ID
+
+            // Add unique image
+            $this->addImage($hospital, 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200&sig=' . $hospital->getId());
+
             // Assign some departments
             $randomDepts = (array) array_rand($departments, rand(3, 5));
             foreach ($randomDepts as $idx) {
@@ -126,7 +166,6 @@ class SeedArmenianContentCommand extends Command
                 $this->entityManager->persist($hd);
             }
 
-            $this->entityManager->persist($hospital);
             $entities[] = $hospital;
         }
 

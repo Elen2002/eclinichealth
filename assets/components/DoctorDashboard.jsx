@@ -86,10 +86,19 @@ const DoctorDashboard = ({
                 <div className="col">
                     <div className="d-flex align-items-center gap-3">
                         <img
-                            src={doctor?.user?.avatar || '/img/default-avatar.png'}
+                            src={doctor?.user?.avatar && !doctor.user.avatar.includes('demo/')
+                                ? (doctor.user.avatar.startsWith('http') || doctor.user.avatar.startsWith('/') 
+                                    ? doctor.user.avatar 
+                                    : `/uploads/${doctor.user.avatar}`) 
+                                : `https://i.pravatar.cc/150?u=${doctor.user?.id || 'doc'}`}
                             alt="Avatar"
                             className="rounded-circle shadow-sm border border-2 border-white"
                             style={{ width: '60px', height: '60px', objectFit: 'cover' }}
+                            onError={(e) => {
+                                if (!e.target.src.includes('pravatar.cc')) {
+                                    e.target.src = `https://i.pravatar.cc/150?u=${doctor.user?.id || 'doc'}`;
+                                }
+                            }}
                         />
                         <div>
                             <h1 className="h3 fw-bold mb-0">
@@ -331,9 +340,14 @@ const DoctorDashboard = ({
                     </div>
 
                     <div className="card border-0 shadow-sm rounded-4 mt-4">
-                        <div className="card-header bg-white border-0 py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
-                            <h5 className="fw-bold mb-0">{t('dashboard.communications', locale)}</h5>
-                            <span className="badge bg-light text-primary rounded-pill small">{t('dashboard.chatsAndSms', locale)}</span>
+                        <div className="card-header bg-white border-0 py-3">
+                            <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                                <h5 className="fw-bold mb-0">{t('dashboard.communications', locale)}</h5>
+                                <span className="badge bg-light text-primary rounded-pill small">{t('dashboard.chatsAndSms', locale)}</span>
+                            </div>
+                            <a href={urlPatterns.chatsList || '#'} className="text-primary small text-decoration-none hover-underline">
+                                {t('dashboard.chatsAndSms', locale)}
+                            </a>
                         </div>
                         <div className="card-body p-0">
                             <div className="list-group list-group-flush">
@@ -380,7 +394,7 @@ const DoctorDashboard = ({
                         </div>
                         {liveCommunications && liveCommunications.length > 0 && (
                              <div className="card-footer bg-white border-0 text-center pb-3">
-                                <button className="btn btn-sm btn-light rounded-pill px-4 small w-100">{t('dashboard.viewAll', locale)}</button>
+                                <a href={urlPatterns.chatsList || '#'} className="btn btn-sm btn-light rounded-pill px-4 small w-100">{t('dashboard.viewAll', locale)}</a>
                              </div>
                         )}
                     </div>

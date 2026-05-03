@@ -25,7 +25,7 @@ class Department
     protected Collection $hospitalDepartments;
 
     #[ORM\OneToMany(mappedBy: 'department', targetEntity: Doctor::class)]
-    #[Groups(['department:read'])]
+    #[Groups(['department:doctors'])]
     protected Collection $doctors;
 
 

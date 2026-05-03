@@ -13,9 +13,23 @@ const DepartmentsPage = ({ departments, departmentImages = {} }) => {
         if (lowerName.includes('գինեկոլ') || lowerName.includes('gynecol')) return 'bi-gender-female';
         if (lowerName.includes('ատամ') || lowerName.includes('dent')) return 'bi-mouth';
         if (lowerName.includes('մանկ') || lowerName.includes('pediatr')) return 'bi-baby';
-        if (lowerName.includes('nerses') || lowerName.includes('խնամք')) return 'bi-heart-fill';
+        if (lowerName.includes('խնամք')) return 'bi-heart-fill';
         if (lowerName.includes('աչք') || lowerName.includes('ophth')) return 'bi-eye';
+        if (lowerName.includes('թերապ') || lowerName.includes('therap')) return 'bi-capsule';
         return 'bi-hospital';
+    };
+
+    // Helper to get a relevant high-quality image based on department name
+    const getDeptImage = (name) => {
+        const lowerName = name.toLowerCase();
+        if (lowerName.includes('նյարդ') || lowerName.includes('neuro')) return 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&q=80&w=800';
+        if (lowerName.includes('սրտ') || lowerName.includes('cardio')) return 'https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&q=80&w=800';
+        if (lowerName.includes('ատամ') || lowerName.includes('dent')) return 'https://images.unsplash.com/photo-1606811841689-23dfddce3e95?auto=format&fit=crop&q=80&w=800';
+        if (lowerName.includes('մանկ') || lowerName.includes('pediatr')) return 'https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?auto=format&fit=crop&q=80&w=800';
+        if (lowerName.includes('օրթո') || lowerName.includes('ortho')) return 'https://images.unsplash.com/photo-1579154235602-3c2c2aa59ace?auto=format&fit=crop&q=80&w=800';
+        if (lowerName.includes('թերապ') || lowerName.includes('therap')) return 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=800';
+        if (lowerName.includes('դիագ') || lowerName.includes('diagn')) return 'https://images.unsplash.com/photo-1579154236605-e325091726a5?auto=format&fit=crop&q=80&w=800';
+        return 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800';
     };
 
     return (
@@ -38,13 +52,11 @@ const DepartmentsPage = ({ departments, departmentImages = {} }) => {
                 <div className="row g-5 mt-2">
                     {departments && departments.length > 0 ? (
                         departments.map((dept, index) => (
-                            <div key={dept.id} className="col-md-6 col-lg-4" data-aos="zoom-in-up" data-aos-delay={index * 150}>
+                            <div key={dept.id || `dept-${index}`} className="col-md-6 col-lg-4" data-aos="zoom-in-up" data-aos-delay={index * 150}>
                                 <div className="dept-card border-0">
                                     <div className="dept-card-image-wrapper">
                                         <div className="dept-card-image" style={{
-                                            backgroundImage: departmentImages[dept.id]
-                                                ? `url('${departmentImages[dept.id]}')`
-                                                : 'linear-gradient(135deg, #6366f1, #a855f7)',
+                                            backgroundImage: `url('${departmentImages[dept.id] || getDeptImage(dept.name)}')`,
                                         }}></div>
                                         <div className="dept-card-overlay">
                                             <div className="dept-icon-float">
@@ -90,7 +102,7 @@ const DepartmentsPage = ({ departments, departmentImages = {} }) => {
                 </div>
             </div>
 
-            <style jsx>{`
+            <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
 
                 .departments-page {

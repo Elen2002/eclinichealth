@@ -396,9 +396,13 @@ class ApiController extends AbstractController
             ->getResult();
 
         $data = [];
-        $uniquePartners = [];
         $currentUserId = $user->getId();
+        
+        // Fetch Doctor entity to get the correct ID for links
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+        $ownerIdForLink = $doctor ? $doctor->getId() : $currentUserId;
 
+        // Process chat messages
         foreach ($allMessages as $m) {
             $sender = $m->getSender();
             $recipient = $m->getRecipient();
@@ -408,12 +412,8 @@ class ApiController extends AbstractController
             $partner = ($sender->getId() === $currentUserId) ? $recipient : $sender;
             $partnerId = $partner->getId();
 
-            // Strictly exclude current user and avoid duplicates
-            if ($partnerId === $currentUserId || isset($uniquePartners[$partnerId])) {
-                continue;
-            }
+            if ($partnerId === $currentUserId) continue;
 
-            $uniquePartners[$partnerId] = true;
             $partnerName = $partner->getFirstName() ? ($partner->getFirstName() . ' ' . $partner->getLastName()) : $partner->getEmail();
             
             $data[] = [
@@ -421,19 +421,17 @@ class ApiController extends AbstractController
                 'title' => $partnerName,
                 'message' => $m->getContent(),
                 'time' => $m->getCreatedAt()->format('Y-m-d H:i'),
-                'link' => '/' . $locale . '/profile/chat/' . $currentUserId . '/' . $partnerId,
+                'link' => '/' . $locale . '/profile/chat/' . $ownerIdForLink . '/' . $partnerId,
                 'type' => 'chat',
                 'timestamp' => $m->getCreatedAt()->getTimestamp()
             ];
-
-            if (count($uniquePartners) >= 5) break;
         }
 
         // Fetch recent Notifications
         $notifications = $entityManager->getRepository(Notification::class)->findBy(
             ['user' => $user],
             ['createdAt' => 'DESC'],
-            3
+            10 // Fetch more to allow for deduplication
         );
 
         foreach ($notifications as $n) {
@@ -451,7 +449,17 @@ class ApiController extends AbstractController
         // Sort combined list by timestamp
         usort($data, fn($a, $b) => $b['timestamp'] <=> $a['timestamp']);
 
-        // Return top 5
-        return $this->json(array_slice($data, 0, 5));
+        // Final deduplication by title (user)
+        $finalData = [];
+        $seenTitles = [];
+        foreach ($data as $item) {
+            if (!isset($seenTitles[$item['title']])) {
+                $seenTitles[$item['title']] = true;
+                $finalData[] = $item;
+            }
+            if (count($finalData) >= 5) break;
+        }
+
+        return $this->json($finalData);
     }
 }

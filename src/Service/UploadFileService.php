@@ -234,13 +234,22 @@ class UploadFileService implements UploadFileInterface
         $entityNameLow = strtolower($entityName);
         if (!empty($size)) {
             $objs = $this->em->getRepository(Images::class)->findBy(['parentClass' => $className, 'entityId' => $id, 'size' => $size]);
+            // If no images found for specific size, try any size
+            if (empty($objs)) {
+                $objs = $this->em->getRepository(Images::class)->findBy(['parentClass' => $className, 'entityId' => $id]);
+            }
         } else {
             $objs = $this->em->getRepository(Images::class)->findBy(['parentClass' => $className, 'entityId' => $id]);
         }
         $imgUrls = [];
         foreach ($objs as $obj) {
             if (!empty($obj)) {
-                $img = $this->urlGenerator->generate('app_files', ['class_name' => $entityNameLow, 'class_id' => $id, 'size_name' => !empty($size) ? $size : $obj->getSize(), 'file_type' => UploadFileInterface::TYPE_IMAGE, 'file_name' => $obj->getTitle()]);
+                $title = $obj->getTitle();
+                if (str_starts_with($title, 'http://') || str_starts_with($title, 'https://')) {
+                    $imgUrls[] = $title;
+                    continue;
+                }
+                $img = $this->urlGenerator->generate('app_files', ['class_name' => $entityNameLow, 'class_id' => $id, 'size_name' => !empty($size) ? $size : $obj->getSize(), 'file_type' => UploadFileInterface::TYPE_IMAGE, 'file_name' => $title]);
 
                 $imgUrls[] = $img;
             }
@@ -256,7 +265,12 @@ class UploadFileService implements UploadFileInterface
         $objs = $this->em->getRepository(Images::class)->findBy(['parentClass' => $className, 'entityId' => $id, 'size' => $size]);
         $img = [];
         foreach ($objs as $obj) {
-            $img[] = $this->urlGenerator->generate('app_files', ['class_name' => $entityNameLow, 'class_id' => $id, 'size_name' => !empty($size) ? $size : $obj->getSize(), 'file_type' => UploadFileInterface::TYPE_IMAGE, 'file_name' => $obj->getTitle()]);
+            $title = $obj->getTitle();
+            if (str_starts_with($title, 'http://') || str_starts_with($title, 'https://')) {
+                $img[] = $title;
+                continue;
+            }
+            $img[] = $this->urlGenerator->generate('app_files', ['class_name' => $entityNameLow, 'class_id' => $id, 'size_name' => !empty($size) ? $size : $obj->getSize(), 'file_type' => UploadFileInterface::TYPE_IMAGE, 'file_name' => $title]);
 
         }
         return $img;

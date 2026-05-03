@@ -43,9 +43,16 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
 
     useEffect(() => {
         const fetchSessions = () => {
+            // Only poll if user is admin
+            const roles = currentUser?.roles || window.APP_DATA?.user?.roles || [];
+            if (!roles.includes('ROLE_ADMIN') && !roles.includes('ROLE_SUPER_ADMIN')) {
+                return;
+            }
+
             fetch('/api/admin/chat/sessions') 
                 .then(res => res.json())
                 .then(data => {
+                    if (data.error) return;
                     setChats(prev => {
                         const next = { ...prev };
                         data.forEach(session => {
@@ -64,7 +71,7 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
         fetchSessions();
         const interval = setInterval(fetchSessions, 5000);
         return () => clearInterval(interval);
-    }, []);
+    }, [currentUser]);
 
     useEffect(() => {
         if (!activeRoom || activeRoom === 'System Check' || activeRoom === 'Debug') return;

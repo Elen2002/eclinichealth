@@ -80,7 +80,6 @@ class Doctor
     private ?Department $department = null;
 
     #[ORM\ManyToOne]
-    #[Groups(['doctor:read'])]
     private ?Hospital $hospital = null;
 
     public function getId(): ?int

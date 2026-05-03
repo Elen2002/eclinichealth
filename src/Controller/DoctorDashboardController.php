@@ -68,42 +68,55 @@ class DoctorDashboardController extends AbstractController
         ->setMaxResults(50) // Fetch more to filter unique partners
         ->getResult();
 
-        $communications = [];
-        $uniquePartners = [];
+        $allData = [];
         
         foreach ($recentMessages as $msg) {
             $partner = ($msg->getSender()->getId() === $user->getId()) ? $msg->getRecipient() : $msg->getSender();
             $partnerId = $partner->getId();
             
-            if (!isset($uniquePartners[$partnerId]) && count($communications) < 5) {
-                $uniquePartners[$partnerId] = true;
-                
-                $communications[] = [
-                    'id' => $msg->getId(),
-                    'title' => $partner->getFirstName() ? $partner->getFirstName() . ' ' . $partner->getLastName() : $partner->getEmail(),
-                    'message' => $msg->getContent(),
-                    'time' => $msg->getCreatedAt()->format('H:i'),
-                    'link' => '/' . ($request->getLocale() ?: 'hy') . '/profile/chat/' . $doctor->getId() . '/' . $partnerId
-                ];
-            }
+            if ($partnerId === $user->getId()) continue;
+
+            $partnerName = $partner->getFirstName() ? $partner->getFirstName() . ' ' . $partner->getLastName() : $partner->getEmail();
+            
+            $allData[] = [
+                'id' => $msg->getId(),
+                'title' => $partnerName,
+                'message' => $msg->getContent(),
+                'time' => $msg->getCreatedAt()->format('H:i'),
+                'link' => '/' . ($request->getLocale() ?: 'hy') . '/profile/chat/' . $doctor->getId() . '/' . $partnerId,
+                'timestamp' => $msg->getCreatedAt()->getTimestamp()
+            ];
         }
 
-        // If no messages, fall back to notifications or empty
-        if (empty($communications)) {
-            $notifications = $entityManager->getRepository(\App\Entity\Notification::class)->findBy(
-                ['user' => $user, 'type' => 'chat'],
-                ['createdAt' => 'DESC'],
-                5
-            );
-            foreach ($notifications as $notif) {
-                $communications[] = [
-                    'id' => $notif->getId(),
-                    'title' => $notif->getTitle(),
-                    'message' => $notif->getMessage(),
-                    'time' => $notif->getCreatedAt()->format('H:i'),
-                    'link' => $notif->getLink()
-                ];
+        // Add notifications as well to be consistent with API
+        $notifications = $entityManager->getRepository(\App\Entity\Notification::class)->findBy(
+            ['user' => $user],
+            ['createdAt' => 'DESC'],
+            10
+        );
+
+        foreach ($notifications as $notif) {
+            $allData[] = [
+                'id' => $notif->getId(),
+                'title' => $notif->getTitle(),
+                'message' => $notif->getMessage(),
+                'time' => $notif->getCreatedAt()->format('H:i'),
+                'link' => $notif->getLink(),
+                'timestamp' => $notif->getCreatedAt()->getTimestamp()
+            ];
+        }
+
+        // Deduplicate by title
+        usort($allData, fn($a, $b) => $b['timestamp'] <=> $a['timestamp']);
+        
+        $communications = [];
+        $seenTitles = [];
+        foreach ($allData as $item) {
+            if (!isset($seenTitles[$item['title']])) {
+                $seenTitles[$item['title']] = true;
+                $communications[] = $item;
             }
+            if (count($communications) >= 5) break;
         }
 
         return $this->render('dashboard/doctor.html.twig', [

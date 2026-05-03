@@ -137,6 +137,27 @@
             background-color: rgba(99, 102, 241, 0.1) !important;
             color: #6366f1 !important;
         }
+        .dropdown-menu {
+            z-index: 1060 !important;
+            background: white !important;
+            border-radius: 16px !important;
+            padding: 8px !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15) !important;
+            border: 1px solid rgba(0,0,0,0.08) !important;
+            margin-top: 10px !important;
+        }
+        .dropdown-item {
+            border-radius: 10px !important;
+            padding: 10px 15px !important;
+            font-weight: 600 !important;
+            color: #475569 !important;
+            transition: all 0.2s ease !important;
+        }
+        .dropdown-item:hover {
+            background-color: #f8fafc !important;
+            color: #6366f1 !important;
+            transform: translateX(5px);
+        }
     </style>
 {% endblock %}
 
@@ -240,7 +261,7 @@
                                 {% else %}
                                     <div class="badge bg-primary position-absolute top-0 end-0 m-3 rounded-pill px-3 py-2 fw-bold" style="z-index: 5; font-size: 0.65rem; letter-spacing: 0.5px;">{{ hospital.workingHours }}</div>
                                 {% endif %}
-                                <img src="{{ hospital.image ? hospital.image : asset('img/about-img.jpg') }}" alt="{{ hospital.name }}" class="w-100 h-100" style="object-fit: cover;">
+                                <img src="{{ hospital.image ? hospital.image : 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=800&sig=' ~ hospital.id }}" alt="{{ hospital.name }}" class="w-100 h-100" style="object-fit: cover;">
                             </div>
                             <div class="card-body p-4">
                                 <span class="badge bg-primary-soft mb-2" style="font-size: 0.7rem; letter-spacing: 0.5px;">{{ hospital.deptList|first|default('General Medicine')|trans }}</span>
