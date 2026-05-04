@@ -207,7 +207,6 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/hospitals', name: 'api_hospitals', methods: ['GET'])]
-
     public function getHospitals(HospitalRepository $hospitalRepository, UploadFileInterface $uploadFileService): JsonResponse
     {
         $hospitals = $hospitalRepository->findAll();
@@ -223,6 +222,33 @@ class ApiController extends AbstractController
             'emergency' => $h->isHasAmbulance(),
             'departmentIds' => array_values($h->getHospitalDepartments()->map(fn($hd) => $hd->getDepartment() ? $hd->getDepartment()->getId() : null)->filter(fn($id) => $id !== null)->toArray()),
         ], $hospitals);
+
+        return $this->json($data);
+    }
+
+    #[Route('/api/hospitals/{id}', name: 'api_hospital_details', methods: ['GET'])]
+    public function getHospitalDetails(int $id, HospitalRepository $hospitalRepository, UploadFileInterface $uploadFileService): JsonResponse
+    {
+        $h = $hospitalRepository->find($id);
+        if (!$h) return $this->json(['error' => 'Hospital not found'], 404);
+
+        $data = [
+            'id' => $h->getId(),
+            'name' => $h->getName(),
+            'address' => $h->getAddress(),
+            'description' => $h->getAbout(),
+            'phone' => $h->getPhone(),
+            'email' => $h->getEmail(),
+            'workingHours' => $h->getWorkingHours() ?: '24/7',
+            'image' => $uploadFileService->getImage(Hospital::class, $h->getId(), '970x440'),
+            'beds' => $h->getBedsCount(),
+            'staff' => $h->getStaffCount(),
+            'emergency' => $h->isHasAmbulance(),
+            'departments' => array_values($h->getHospitalDepartments()->map(fn($hd) => $hd->getDepartment() ? [
+                'id' => $hd->getDepartment()->getId(),
+                'name' => $hd->getDepartment()->getName(),
+            ] : null)->filter(fn($d) => $d !== null)->toArray()),
+        ];
 
         return $this->json($data);
     }

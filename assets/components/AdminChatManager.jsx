@@ -93,7 +93,7 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
     }, [currentUser]);
 
     useEffect(() => {
-        if (!activeRoom || activeRoom === 'System Check' || activeRoom === 'Debug') return;
+        if (!activeRoom) return;
 
         const fetchHistory = () => {
             fetch(`/api/chat/history/${activeRoom}`)

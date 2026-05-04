@@ -14,6 +14,31 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
 class NotificationController extends AbstractController
 {
+    #[Route('/api/notifications/unread', name: 'app_api_notifications_unread', methods: ['GET'])]
+    public function unread(EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['error' => 'Unauthorized'], 401);
+        }
+
+        $notifications = $entityManager->getRepository(Notification::class)->findBy([
+            'user' => $user,
+            'isRead' => false
+        ], ['id' => 'DESC']);
+
+        $data = array_map(fn($n) => [
+            'id' => $n->getId(),
+            'title' => $n->getTitle(),
+            'message' => $n->getMessage(),
+            'type' => $n->getType(),
+            'link' => $n->getLink(),
+            'createdAt' => $n->getCreatedAt()->format('Y-m-d H:i:s'),
+        ], $notifications);
+
+        return new JsonResponse($data);
+    }
+
     #[Route('/api/notifications/create', name: 'app_api_notification_create', methods: ['POST'])]
     public function create(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {

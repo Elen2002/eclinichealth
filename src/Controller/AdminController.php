@@ -37,20 +37,24 @@ final class AdminController extends AbstractController
             ->getResult();
 
         $data = [];
-        $data[] = [
-            'roomId' => 'System Check',
-            'lastMessage' => 'If you see this, the API is working.',
-            'lastDate' => (new \DateTime())->format('c')
-        ];
-
+        
         foreach ($rooms as $room) {
+            $roomId = $room['roomId'];
+            
+            // Filter to show only support chats
+            // Support chats use the userId/GuestId directly as roomId
+            // Doctor-patient chats use 'room_' or 'pair_' prefixes
+            if (str_starts_with($roomId, 'room_') || str_starts_with($roomId, 'pair_')) {
+                continue;
+            }
+
             $lastMsg = $chatMessageRepository->findOneBy(
-                ['roomId' => $room['roomId']],
+                ['roomId' => $roomId],
                 ['createdAt' => 'DESC']
             );
             
             $data[] = [
-                'roomId' => $room['roomId'],
+                'roomId' => $roomId,
                 'lastMessage' => $lastMsg ? $lastMsg->getContent() : '',
                 'lastDate' => $room['lastDate']
             ];
