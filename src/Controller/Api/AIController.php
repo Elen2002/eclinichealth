@@ -15,7 +15,7 @@ class AIController extends AbstractController
 
     public function __construct(AIService $aiService)
     {
-        $this->aiService = new AIService();
+        $this->aiService = $aiService;
     }
 
     #[Route('/analyze', name: 'api_ai_analyze', methods: ['POST'])]

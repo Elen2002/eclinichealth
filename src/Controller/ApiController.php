@@ -521,9 +521,6 @@ class ApiController extends AbstractController
             return $this->json([], 200);
         }
 
-        $locale = $request->getLocale() ?: 'hy';
-
-        // Fetch recent ChatMessages to identify unique chat partners
         $allMessages = $entityManager->getRepository(ChatMessage::class)->createQueryBuilder('m')
             ->where('m.sender = :user OR m.recipient = :user')
             ->setParameter('user', $user)
@@ -535,15 +532,9 @@ class ApiController extends AbstractController
         $currentUserId = $user->getId();
         $seenPartnerIds = [];
         
-        // Fetch Doctor entity to get the correct ID for links
-        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
-        $ownerIdForLink = $doctor ? $doctor->getId() : $currentUserId;
-
-        // Process chat messages
         foreach ($allMessages as $m) {
             $sender = $m->getSender();
             $recipient = $m->getRecipient();
-            
             if (!$sender || !$recipient) continue;
 
             $partner = ($sender->getId() === $currentUserId) ? $recipient : $sender;
@@ -551,21 +542,25 @@ class ApiController extends AbstractController
 
             if ($partnerId === $currentUserId || isset($seenPartnerIds[$partnerId])) continue;
 
-            $partnerName = $partner->getFirstName() ? ($partner->getFirstName() . ' ' . $partner->getLastName()) : $partner->getEmail();
+            $partnerName = trim(($partner->getFirstName() ?? '') . ' ' . ($partner->getLastName() ?? ''));
+            if (empty($partnerName)) {
+                $partnerName = $partner->getEmail();
+            }
             
             $data[] = [
-                'id' => 'chat_' . $partnerId,
+                'id' => $partnerId,
                 'title' => $partnerName,
+                'avatar' => $partner->getAvatar(),
                 'message' => $m->getContent(),
                 'time' => $m->getCreatedAt()->format('Y-m-d H:i'),
-                'link' => '/' . $locale . '/profile/chat/' . $ownerIdForLink . '/' . $partnerId,
                 'type' => 'chat',
                 'timestamp' => $m->getCreatedAt()->getTimestamp()
             ];
             $seenPartnerIds[$partnerId] = true;
         }
 
-        // Include all established DoctorPacient relationships to allow starting new chats
+        // Include established relationships without messages
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
         $relations = $doctor 
             ? $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['doctor' => $user])
             : $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['pacient' => $user]);
@@ -575,55 +570,28 @@ class ApiController extends AbstractController
             if (!$partner) continue;
 
             $partnerId = $partner->getId();
-            if (isset($seenPartnerIds[$partnerId])) continue; // Already have messages with them
+            if (isset($seenPartnerIds[$partnerId])) continue;
 
-            $partnerName = $partner->getFirstName() ? ($partner->getFirstName() . ' ' . $partner->getLastName()) : $partner->getEmail();
+            $partnerName = trim(($partner->getFirstName() ?? '') . ' ' . ($partner->getLastName() ?? ''));
+            if (empty($partnerName)) {
+                $partnerName = $partner->getEmail();
+            }
             
             $data[] = [
-                'id' => 'chat_new_' . $partnerId,
+                'id' => $partnerId,
                 'title' => $partnerName,
-                'message' => 'Սկսել նոր զրույց...', // Start new conversation...
+                'avatar' => $partner->getAvatar(),
+                'message' => 'Սկսել նոր զրույց...',
                 'time' => (new \DateTime())->format('Y-m-d H:i'),
-                'link' => '/' . $locale . '/profile/chat/' . $ownerIdForLink . '/' . $partnerId,
                 'type' => 'chat',
-                'timestamp' => (new \DateTime())->getTimestamp() - 86400 // Put them slightly lower than recent messages
+                'timestamp' => (new \DateTime())->getTimestamp() - 86400
             ];
+            $seenPartnerIds[$partnerId] = true;
         }
 
-        // Fetch recent Notifications
-        $notifications = $entityManager->getRepository(Notification::class)->findBy(
-            ['user' => $user],
-            ['createdAt' => 'DESC'],
-            10 // Fetch more to allow for deduplication
-        );
-
-        foreach ($notifications as $n) {
-            $data[] = [
-                'id' => 'notif_' . $n->getId(),
-                'title' => $n->getTitle(),
-                'message' => $n->getMessage(),
-                'time' => $n->getCreatedAt()->format('Y-m-d H:i'),
-                'link' => $n->getLink(),
-                'type' => 'notification',
-                'timestamp' => $n->getCreatedAt()->getTimestamp()
-            ];
-        }
-
-        // Sort combined list by timestamp
         usort($data, fn($a, $b) => $b['timestamp'] <=> $a['timestamp']);
 
-        // Final deduplication by title (user)
-        $finalData = [];
-        $seenTitles = [];
-        foreach ($data as $item) {
-            if (!isset($seenTitles[$item['title']])) {
-                $seenTitles[$item['title']] = true;
-                $finalData[] = $item;
-            }
-            if (count($finalData) >= 5) break;
-        }
-
-        return $this->json($finalData);
+        return $this->json($data);
     }
 
     #[Route('/api/user/profile', name: 'api_user_profile', methods: ['GET'])]
@@ -1106,6 +1074,59 @@ class ApiController extends AbstractController
                 'totalPatients' => $entityManager->getRepository(\App\Entity\DoctorPacient::class)->count(['doctor' => $user]),
                 'pendingRequests' => $entityManager->getRepository(Consultation::class)->count(['doctor' => $doctor, 'status' => 'pending']),
                 'completedVisits' => $entityManager->getRepository(Consultation::class)->count(['doctor' => $doctor, 'status' => 'completed']),
+            ]
+        ]);
+    }
+
+    #[Route('/api/doctor/check-in', name: 'api_doctor_check_in', methods: ['POST'])]
+    public function checkIn(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $doctorUser = $this->getApiUser($request, $entityManager);
+        if (!$doctorUser) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $data = json_decode($request->getContent(), true);
+        if (!$data || empty($data['patientData'])) {
+            return $this->json(['error' => 'Invalid data'], 400);
+        }
+
+        // patientData is usually "id-email"
+        $parts = explode('-', $data['patientData']);
+        $patientId = (int)$parts[0];
+        
+        $patient = $entityManager->getRepository(User::class)->find($patientId);
+        if (!$patient) return $this->json(['error' => 'Patient not found'], 404);
+
+        // Check if relationship exists in doctor_pacient table
+        $dpRepo = $entityManager->getRepository(\App\Entity\DoctorPacient::class);
+        $relation = $dpRepo->findOneBy(['doctor' => $doctorUser, 'pacient' => $patient]);
+
+        if (!$relation) {
+            $relation = new \App\Entity\DoctorPacient();
+            $relation->setDoctor($doctorUser);
+            $relation->setPacient($patient);
+            $relation->setCreatedAtValue();
+            $entityManager->persist($relation);
+        }
+
+        // Notify Patient about check-in
+        $notification = new Notification();
+        $notification->setUser($patient);
+        $notification->setTitle("Clinic Check-in");
+        $notification->setMessage("You have been checked-in by Dr. " . ($doctorUser->getFirstName() ?: 'Specialist') . " at " . (new \DateTime())->format('H:i'));
+        $notification->setType('info');
+        $notification->setCreatedAt(new \DateTime());
+        $notification->setIsRead(false);
+        $notification->setLink('/profile');
+        $entityManager->persist($notification);
+
+        $entityManager->flush();
+
+        return $this->json([
+            'status' => 'success',
+            'patient' => [
+                'id' => $patient->getId(),
+                'name' => $patient->getFirstName() . ' ' . $patient->getLastName(),
+                'email' => $patient->getEmail()
             ]
         ]);
     }

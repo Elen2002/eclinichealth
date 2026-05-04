@@ -1,0 +1,117 @@
+{% extends 'frontend_layout/index.html.twig' %}
+
+{% block title %}{{ 'Patient Profile'|trans }} - {{ patient.firstName }} {{ patient.lastName }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5 pt-5 pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Patient Header -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-body p-5" style="background: linear-gradient(135deg, var(--brand-color), var(--accent-color)); color: white;">
+                    <div class="row align-items-center">
+                        <div class="col-md-auto text-center mb-3 mb-md-0">
+                            <img src="{{ patient.avatar ? (patient.avatar|slice(0, 4) == 'http' ? patient.avatar : '/uploads/avatars/' ~ patient.avatar) : '/img/default-avatar.png' }}" 
+                                 class="rounded-circle border border-4 border-white shadow" 
+                                 style="width: 120px; height: 120px; object-fit: cover;" alt="Patient">
+                        </div>
+                        <div class="col text-center text-md-start">
+                            <div class="badge bg-white bg-opacity-25 rounded-pill px-3 py-1 mb-2 small text-uppercase fw-bold">{{ 'Digital Health ID'|trans }}</div>
+                            <h2 class="fw-bold mb-1 text-white">{{ patient.firstName }} {{ patient.lastName }}</h2>
+                            <p class="mb-3 opacity-75"><i class="bi bi-envelope me-1"></i> {{ patient.email }}</p>
+                            <div class="d-flex flex-wrap justify-content-center justify-content-md-start gap-3">
+                                <div class="bg-white bg-opacity-10 rounded-pill px-3 py-1 small">
+                                    <i class="bi bi-telephone me-1"></i> {{ patient.phone|default('Not provided'|trans) }}
+                                </div>
+                                <div class="bg-white bg-opacity-10 rounded-pill px-3 py-1 small">
+                                    <i class="bi bi-calendar-check me-1"></i> {{ consultations|length }} {{ 'Total Consultations'|trans }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-auto mt-4 mt-md-0">
+                            <a href="{{ path('app_chat_start', {'id': patient.id}) }}" class="btn btn-white rounded-pill px-4 py-2 fw-bold shadow-sm">
+                                <i class="bi bi-chat-dots-fill me-2"></i> {{ 'Open Chat'|trans }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consultation History -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-white border-0 py-4 px-4">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-clock-history text-primary me-2"></i>{{ 'Consultation History'|trans }}</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-muted small text-uppercase tracking-wider">
+                                <tr>
+                                    <th class="ps-4 border-0">{{ 'Date'|trans }}</th>
+                                    <th class="border-0">{{ 'Hospital'|trans }}</th>
+                                    <th class="border-0">{{ 'Status'|trans }}</th>
+                                    <th class="border-0 pe-4 text-end">{{ 'Action'|trans }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for consultation in consultations %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold">{{ consultation.requestedDate|date('M d, Y') }}</div>
+                                        <div class="small text-muted">{{ consultation.requestedDate|date('H:i') }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="small"><i class="bi bi-hospital me-1"></i> {{ consultation.hospital.name|default('N/A') }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill px-3 py-1 small 
+                                            {% if consultation.status == 'confirmed' %}bg-success-subtle text-success
+                                            {% elseif consultation.status == 'cancelled' %}bg-danger-subtle text-danger
+                                            {% else %}bg-warning-subtle text-warning{% endif %}">
+                                            {{ consultation.status|capitalize|trans }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        <a href="{{ path('app_doctor_consultation_process', {'id': consultation.id}) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                            {{ 'View Records'|trans }}
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted italic">
+                                        {{ 'No consultation history found for this patient.'|trans }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Area -->
+            <div class="text-center mt-5">
+                <a href="{{ path('app_doctor_dashboard') }}" class="btn btn-link text-muted text-decoration-none">
+                    <i class="bi bi-arrow-left me-1"></i> {{ 'Back to Dashboard'|trans }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .btn-white {
+        background: white;
+        color: var(--brand-color);
+        border: none;
+    }
+    .btn-white:hover {
+        background: #f8f9fa;
+        transform: translateY(-2px);
+    }
+    .transition-all {
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}

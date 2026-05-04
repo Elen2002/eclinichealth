@@ -60,6 +60,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(['user:read'])]
     private ?string $apiToken = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:read', 'patient:read'])]
+    private ?string $qrPath = null;
+
     /**
      * @var \Doctrine\Common\Collections\Collection<int, Notification>
      */
@@ -250,6 +254,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setApiToken(?string $apiToken): static
     {
         $this->apiToken = $apiToken;
+
+        return $this;
+    }
+
+    public function getQrPath(): ?string
+    {
+        return $this->qrPath;
+    }
+
+    public function setQrPath(?string $qrPath): static
+    {
+        $this->qrPath = $qrPath;
 
         return $this;
     }

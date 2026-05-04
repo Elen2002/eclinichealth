@@ -61,9 +61,10 @@ const AIChatModal = ({ isOpen, onClose, locale }) => {
                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     };
                 } else if (data.status === 'conversational' || data.status === 'unknown') {
+                    const translationKey = data.redirect ? 'home.aiChat.response.redirecting' : data.translationKey;
                     aiMsg = {
                         sender: 'ai',
-                        text: t(data.translationKey, locale),
+                        text: t(translationKey, locale),
                         image: data.image,
                         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
                     };
@@ -77,6 +78,13 @@ const AIChatModal = ({ isOpen, onClose, locale }) => {
 
                 setMessages(prev => [...prev, aiMsg]);
                 setIsTyping(false);
+
+                // Handle redirection if suggested
+                if (data.redirect === 'hospitals') {
+                    setTimeout(() => {
+                        window.location.href = `/${locale}/hospitals`;
+                    }, 1500);
+                }
             })
             .catch(() => {
                 setMessages(prev => [...prev, {
@@ -158,17 +166,26 @@ const AIChatModal = ({ isOpen, onClose, locale }) => {
                                 <div className={`p-3 rounded-4 shadow-sm`} style={{
                                     maxWidth: '80%',
                                     background: msg.sender === 'user' ? 'var(--brand-color)' : 'white',
-                                    color: msg.sender === 'user' ? 'white' : '#1e293b',
+                                    color: msg.sender === 'user' ? '#ffffff' : '#1e293b',
                                     borderBottomRightRadius: msg.sender === 'user' ? '4px' : '20px',
                                     borderBottomLeftRadius: msg.sender === 'ai' ? '4px' : '20px',
+                                    transition: 'all 0.3s ease'
                                 }}>
-                                    <p className="mb-1 small">{msg.text}</p>
+                                    <p className="mb-1 small" style={{ 
+                                        color: msg.sender === 'user' ? '#ffffff' : '#1e293b', 
+                                        fontWeight: msg.sender === 'user' ? '600' : '400',
+                                        margin: 0
+                                    }}>{msg.text}</p>
                                     {msg.image && (
                                         <div className="mt-2 mb-1 overflow-hidden rounded-3">
                                             <img src={msg.image} alt="Support" className="img-fluid" style={{ maxHeight: '200px', objectFit: 'cover', width: '100%' }} />
                                         </div>
                                     )}
-                                    <div className="text-end" style={{ fontSize: '0.65rem', opacity: 0.7 }}>{msg.time}</div>
+                                    <div className="text-end" style={{ 
+                                        fontSize: '0.65rem', 
+                                        opacity: msg.sender === 'user' ? '0.9' : '0.6',
+                                        color: msg.sender === 'user' ? '#ffffff' : '#64748b'
+                                    }}>{msg.time}</div>
                                 </div>
                             )}
                         </div>

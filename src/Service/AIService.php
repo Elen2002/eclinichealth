@@ -6,7 +6,7 @@ class AIService
 {
     private array $knowledgeBase = [
         'flu' => [
-            'symptoms' => ['fever', 'cough', 'sore throat', 'body ache', 'ջերմություն', 'հազ', 'կոկորդի ցավ', 'температура', 'кашель', 'грипп'],
+            'symptoms' => ['fever', 'cough', 'sore throat', 'body ache', 'ջերմություն', 'հազ', 'կոկորդի ցավ', 'температура', 'кашель', 'грипп', 'вирус', 'hivand', 'satkum', 'vat'],
             'department' => 'General Medicine',
             'urgency' => 'regular'
         ],
@@ -16,43 +16,58 @@ class AIService
             'urgency' => 'regular'
         ],
         'cardiac' => [
-            'symptoms' => ['chest pain', 'shortness of breath', 'dizziness', 'heart', 'կրծքավանդակի ցավ', 'շնչահեղձություն', 'սիրտ', 'боль в груди', 'одышка', 'сердце'],
+            'symptoms' => ['chest pain', 'shortness of breath', 'dizziness', 'heart', 'կրծքավանդակի ցավ', 'շնչահեղձություն', 'սիրտ', 'боль в груди', 'одышка', 'сердце', 'пульс', 'pulse', 'srtic', 'serte', 'shunch'],
             'department' => 'Cardiology',
             'urgency' => 'urgent'
         ],
         'dermatology' => [
-            'symptoms' => ['rash', 'itching', 'skin redness', 'acne', 'ցան', 'քոր', 'մաշկի', 'сыпь', 'зуд', 'кожа'],
+            'symptoms' => ['rash', 'itching', 'skin redness', 'acne', 'ցան', 'քոր', 'մաշկի', 'сыпь', 'зуд', 'кожа', 'պրիշիկ', 'прыщи'],
             'department' => 'Dermatology',
             'urgency' => 'regular'
         ],
         'gastrology' => [
-            'symptoms' => ['stomach pain', 'nausea', 'bloating', 'stomach', 'ստամոքսի ցավ', 'սրտխառնոց', 'փորացավ', 'боль в животе', 'тошнота', 'желудок'],
+            'symptoms' => ['stomach pain', 'nausea', 'bloating', 'stomach', 'ստամոքսի ցավ', 'սրտխառնոց', 'փորացավ', 'боль в животе', 'тошнота', 'желудок', 'диզենտերիա', 'poracav', 'stamoqs', 'srtkharnoc'],
             'department' => 'Gastroenterology',
             'urgency' => 'regular'
         ],
         'neurology' => [
-            'symptoms' => ['headache', 'migraine', 'numbness', 'գլխացավ', 'միգրեն', 'թմրածություն', 'головная боль', 'мигрень', 'онемение'],
+            'symptoms' => ['headache', 'migraine', 'numbness', 'գլխացավ', 'միգրեն', 'թմրածություն', 'головная боль', 'мигрень', 'онемение', 'головокружение', 'glkhacav', 'migren'],
             'department' => 'Neurology',
             'urgency' => 'regular'
         ],
         'orthopedics' => [
-            'symptoms' => ['bone pain', 'joint pain', 'fracture', 'back pain', 'ոսկրերի ցավ', 'հոդացավ', 'մեջքի ցավ', 'կոտրվածք', 'боль в суставах', 'боль в спине', 'перелом'],
+            'symptoms' => ['bone pain', 'joint pain', 'fracture', 'back pain', 'ոսկրերի ցավ', 'հոդացավ', 'մեջքի ցավ', 'կոտրվածք', 'боль в суставах', 'боль в спине', 'перелом', 'травма', 'վնասվածք'],
             'department' => 'Orthopedics',
             'urgency' => 'urgent'
         ],
         'dentistry' => [
-            'symptoms' => ['toothache', 'bleeding gums', 'ատամի ցավ', 'լնդերի արյունահոսություն', 'зубная боль', 'десны'],
+            'symptoms' => ['toothache', 'bleeding gums', 'ատամի ցավ', 'լնդերի արյունահոսություն', 'зубная боль', 'десны', 'ատամ', 'зуб'],
             'department' => 'Dentistry',
             'urgency' => 'regular'
         ],
         'ophthalmology' => [
-            'symptoms' => ['blurry vision', 'eye pain', 'red eye', 'աչքի ցավ', 'տեսողության վատացում', 'աչք', 'боль в глазах', 'зрение'],
+            'symptoms' => ['blurry vision', 'eye pain', 'red eye', 'աչքի ցավ', 'տեսողության վատացում', 'աչք', 'боль в глазах', 'зрение', 'глаз'],
             'department' => 'Ophthalmology',
             'urgency' => 'regular'
         ],
         'pediatrics' => [
-            'symptoms' => ['child fever', 'baby crying', 'երեխայի ջերմություն', 'երեխա', 'температура у ребенка', 'ребенок'],
+            'symptoms' => ['child fever', 'baby crying', 'երեխայի ջերմություն', 'երեխա', 'температура у ребенка', 'ребенок', 'մանկաբույժ'],
             'department' => 'Pediatrics',
+            'urgency' => 'regular'
+        ],
+        'urology' => [
+            'symptoms' => ['kidney', 'urinary', 'bladder', 'երիկամ', 'միզապարկ', 'почки', 'мочевой пузырь'],
+            'department' => 'Urology',
+            'urgency' => 'regular'
+        ],
+        'psychology' => [
+            'symptoms' => ['anxiety', 'depression', 'stress', 'տագնապ', 'դեպրեսիա', 'սթրես', 'тревога', 'депрессия', 'стресс'],
+            'department' => 'Psychology',
+            'urgency' => 'regular'
+        ],
+        'endocrinology' => [
+            'symptoms' => ['diabetes', 'thyroid', 'hormone', 'դիաբետ', 'շաքարախտ', 'щитовидка', 'диабет'],
+            'department' => 'Endocrinology',
             'urgency' => 'regular'
         ]
     ];
@@ -67,8 +82,16 @@ class AIService
         foreach ($this->knowledgeBase as $disease => $data) {
             $matchCount = 0;
             foreach ($data['symptoms'] as $symptom) {
-                if (str_contains($input, $symptom)) {
-                    $matchCount++;
+                // Use word boundaries for Latin keywords to avoid "hi" matching "hivand"
+                if (preg_match('/[a-zA-Z]/', $symptom)) {
+                    if (preg_match('/\b' . preg_quote($symptom, '/') . '\b/i', $input)) {
+                        $matchCount++;
+                    }
+                } else {
+                    // For non-Latin (Armenian/Russian), str_contains is safer as word boundaries vary
+                    if (str_contains($input, $symptom)) {
+                        $matchCount++;
+                    }
                 }
             }
 
@@ -89,12 +112,12 @@ class AIService
         }
 
         // Conversational Intents (Greetings, Yes/No)
-        $greetings = ['hi', 'hello', 'hey', 'բարև', 'ողջույն', 'привет', 'здравствуйте'];
-        $affirmative = ['yes', 'yeah', 'ok', 'okay', 'այո', 'հա', 'да', 'хорошо'];
-        $negative = ['no', 'nope', 'ոչ', 'չէ', 'нет'];
+        $greetings = ['hi', 'hello', 'hey', 'բարև', 'ողջույն', 'привет', 'здравствуйте', 'barev', 'voghjuyn'];
+        $affirmative = ['yes', 'yeah', 'ok', 'okay', 'այո', 'հա', 'да', 'хорошо', 'ayo', 'ha'];
+        $negative = ['no', 'nope', 'ոչ', 'չէ', 'нет', 'voch', 'che'];
 
         foreach ($greetings as $word) {
-            if (str_contains($input, $word)) {
+            if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $input)) {
                 return [
                     'status' => 'conversational',
                     'intent' => 'greeting',
@@ -104,17 +127,18 @@ class AIService
         }
 
         foreach ($affirmative as $word) {
-            if (str_contains($input, $word)) {
+            if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $input)) {
                 return [
                     'status' => 'conversational',
                     'intent' => 'affirmative',
-                    'translationKey' => 'home.aiChat.response.affirmative'
+                    'translationKey' => 'home.aiChat.response.affirmative',
+                    'redirect' => 'hospitals'
                 ];
             }
         }
 
         foreach ($negative as $word) {
-            if (str_contains($input, $word)) {
+            if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $input)) {
                 return [
                     'status' => 'conversational',
                     'intent' => 'negative',
@@ -124,9 +148,9 @@ class AIService
         }
 
         // Help & Email Intents
-        $helpKeywords = ['help', 'info', 'support', 'օգնություն', 'помощь', 'инфо', 'տեղեկություն'];
+        $helpKeywords = ['help', 'info', 'support', 'օգնություն', 'помощь', 'инфо', 'տեղեկություն', 'ognutyun'];
         foreach ($helpKeywords as $word) {
-            if (str_contains($input, $word)) {
+            if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $input)) {
                 return [
                     'status' => 'conversational',
                     'intent' => 'help',
@@ -136,14 +160,98 @@ class AIService
             }
         }
 
-        $emailKeywords = ['email', 'mail', 'փոստ', 'почта', 'էլեկտրոնային'];
+        $emailKeywords = ['email', 'mail', 'փոստ', 'почта', 'էլեկտրոնային', 'post'];
         foreach ($emailKeywords as $word) {
-            if (str_contains($input, $word)) {
+            if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $input)) {
                 return [
                     'status' => 'conversational',
                     'intent' => 'email',
                     'translationKey' => 'home.aiChat.response.mail',
                     'image' => '/img/help/contact.png'
+                ];
+            }
+        }
+
+        // Gratitude Intent
+        $thanksKeywords = ['thanks', 'thank you', 'merci', 'շնորհակալություն', 'ապրես', 'спасибо', 'благодарю', 'shnorhakalutyun', 'apres'];
+        foreach ($thanksKeywords as $word) {
+            if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $input)) {
+                return [
+                    'status' => 'conversational',
+                    'intent' => 'thanks',
+                    'translationKey' => 'home.aiChat.response.thanks'
+                ];
+            }
+        }
+
+        // Identity Intent
+        $whoKeywords = ['who are you', 'what are you', 'your name', 'ով ես', 'ինչ ես', 'кто ты', 'как тебя зовут', 'ov es'];
+        foreach ($whoKeywords as $word) {
+            if (str_contains($input, $word)) {
+                return [
+                    'status' => 'conversational',
+                    'intent' => 'whoAreYou',
+                    'translationKey' => 'home.aiChat.response.whoAreYou'
+                ];
+            }
+        }
+
+        // Well-being Intent
+        $howAreYouKeywords = ['how are you', 'how is it going', 'ոնց ես', 'ինչպես ես', 'как дела', 'как ты', 'vonc es'];
+        foreach ($howAreYouKeywords as $word) {
+            if (str_contains($input, $word)) {
+                return [
+                    'status' => 'conversational',
+                    'intent' => 'howAreYou',
+                    'translationKey' => 'home.aiChat.response.howAreYou'
+                ];
+            }
+        }
+
+        // Farewell Intent
+        $byeKeywords = ['bye', 'goodbye', 'see you', 'ցտեսություն', 'հաջող', 'пока', 'до свидания', 'hajogh'];
+        foreach ($byeKeywords as $word) {
+            if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $input)) {
+                return [
+                    'status' => 'conversational',
+                    'intent' => 'goodbye',
+                    'translationKey' => 'home.aiChat.response.goodbye'
+                ];
+            }
+        }
+
+        // Pricing Intent
+        $priceKeywords = ['price', 'cost', 'how much', 'արժեք', 'գին', 'цена', 'сколько стоит'];
+        foreach ($priceKeywords as $word) {
+            if (str_contains($input, $word)) {
+                return [
+                    'status' => 'conversational',
+                    'intent' => 'pricing',
+                    'translationKey' => 'home.aiChat.response.pricing'
+                ];
+            }
+        }
+
+        // Location Intent
+        $locationKeywords = ['where', 'location', 'address', 'որտեղ', 'հասցե', 'տեղ', 'где', 'адрес', 'место'];
+        foreach ($locationKeywords as $word) {
+            if (str_contains($input, $word)) {
+                return [
+                    'status' => 'conversational',
+                    'intent' => 'location',
+                    'translationKey' => 'home.aiChat.response.location'
+                ];
+            }
+        }
+
+        // Working Hours Intent
+        $hoursKeywords = ['hours', 'working', 'time', 'when', 'ժամ', 'երբ', 'время', 'когда', 'часы'];
+        foreach ($hoursKeywords as $word) {
+            if (str_contains($input, $word)) {
+                return [
+                    'status' => 'conversational',
+                    'intent' => 'workingHours',
+                    'translationKey' => 'home.aiChat.response.workingHours'
                 ];
             }
         }
