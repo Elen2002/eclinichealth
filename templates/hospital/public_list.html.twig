@@ -162,6 +162,92 @@
             position: relative;
             z-index: 1070;
         }
+
+        /* Mobile Sidebar Drawer Styles */
+        @media (max-width: 991px) {
+            .filter-sidebar-wrapper {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 300px;
+                height: 100vh;
+                background: white;
+                z-index: 2000;
+                transform: translateX(-100%);
+                transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+                box-shadow: 20px 0 50px rgba(0,0,0,0.1);
+                display: flex;
+                flex-direction: column;
+            }
+            .filter-sidebar-wrapper.active {
+                transform: translateX(0);
+            }
+            .filter-sidebar {
+                position: relative !important;
+                top: 0 !important;
+                max-height: 100% !important;
+                flex-grow: 1;
+            }
+            .sidebar-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.5);
+                backdrop-filter: blur(4px);
+                z-index: 1999;
+                display: none;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            .sidebar-overlay.active {
+                display: block;
+                opacity: 1;
+            }
+            .mobile-filter-btn {
+                display: flex !important;
+            }
+        }
+        .mobile-filter-btn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1050;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--brand-gradient, linear-gradient(135deg, #6366f1 0%, #a855f7 100%));
+            color: white;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .mobile-filter-btn:hover {
+            transform: scale(1.1);
+        }
+        .close-sidebar-btn {
+            display: none;
+        }
+        @media (max-width: 991px) {
+            .close-sidebar-btn {
+                display: block;
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: #f1f5f9;
+                border: none;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                color: #64748b;
+                z-index: 2001;
+            }
+        }
     </style>
 {% endblock %}
 
@@ -199,7 +285,8 @@
     <div class="container py-5">
         <div class="row g-5">
             <!-- Sidebar Filters -->
-            <div class="col-lg-3">
+            <div class="col-lg-3 filter-sidebar-wrapper" id="sidebarWrapper">
+                <button class="close-sidebar-btn" id="closeSidebar"><i class="bi bi-x-lg"></i></button>
                 <div class="filter-sidebar p-4 bg-white rounded-4 shadow-sm" data-aos="fade-right" data-aos-delay="400">
                     <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
                         <h5 class="fw-bold mb-0" style="color: #6f42c1;">{{ 'Refine Search'|trans }}</h5>
@@ -312,6 +399,12 @@
     </div>
 </section>
 
+<!-- Mobile Overlay & Toggle -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<button class="mobile-filter-btn" id="mobileFilterToggle">
+    <i class="bi bi-funnel-fill fs-4"></i>
+</button>
+
 {% block javascripts %}
     {{ parent() }}
     <script>
@@ -327,6 +420,21 @@
         const clearBtn = document.getElementById('clearFilters');
         const resetAllBtn = document.getElementById('resetAll');
         const sortOptions = document.querySelectorAll('#hospitalSortMenu .dropdown-item');
+
+        // Mobile Sidebar Controls
+        const sidebarWrapper = document.getElementById('sidebarWrapper');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const mobileToggle = document.getElementById('mobileFilterToggle');
+        const closeSidebar = document.getElementById('closeSidebar');
+
+        function toggleSidebar() {
+            if (sidebarWrapper) sidebarWrapper.classList.toggle('active');
+            if (sidebarOverlay) sidebarOverlay.classList.toggle('active');
+        }
+
+        if (mobileToggle) mobileToggle.addEventListener('click', toggleSidebar);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleSidebar);
+        if (closeSidebar) closeSidebar.addEventListener('click', toggleSidebar);
 
         let activeFilter = 'all';
         let searchQuery = '';

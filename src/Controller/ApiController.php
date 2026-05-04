@@ -221,6 +221,14 @@ class ApiController extends AbstractController
             'staff' => $h->getStaffCount(),
             'emergency' => $h->isHasAmbulance(),
             'departmentIds' => array_values($h->getHospitalDepartments()->map(fn($hd) => $hd->getDepartment() ? $hd->getDepartment()->getId() : null)->filter(fn($id) => $id !== null)->toArray()),
+            'departmentNames' => (function() use ($h) {
+                $names = array_values($h->getHospitalDepartments()->map(fn($hd) => $hd->getDepartment() ? $hd->getDepartment()->getName() : null)->filter(fn($n) => $n !== null)->toArray());
+                if (empty($names)) {
+                    // Fallback: get specialties from doctors
+                    $names = array_unique(array_filter($h->getDoctors()->map(fn($d) => $d->getSpecialty())->toArray()));
+                }
+                return array_values($names);
+            })(),
         ], $hospitals);
 
         return $this->json($data);
@@ -244,10 +252,21 @@ class ApiController extends AbstractController
             'beds' => $h->getBedsCount(),
             'staff' => $h->getStaffCount(),
             'emergency' => $h->isHasAmbulance(),
-            'departments' => array_values($h->getHospitalDepartments()->map(fn($hd) => $hd->getDepartment() ? [
-                'id' => $hd->getDepartment()->getId(),
-                'name' => $hd->getDepartment()->getName(),
-            ] : null)->filter(fn($d) => $d !== null)->toArray()),
+            'departments' => (function() use ($h) {
+                $depts = array_values($h->getHospitalDepartments()->map(fn($hd) => $hd->getDepartment() ? [
+                    'id' => $hd->getDepartment()->getId(),
+                    'name' => $hd->getDepartment()->getName(),
+                ] : null)->filter(fn($d) => $d !== null)->toArray());
+                
+                if (empty($depts)) {
+                    // Fallback: get unique specialties from doctors
+                    $specialties = array_unique(array_filter($h->getDoctors()->map(fn($d) => $d->getSpecialty())->toArray()));
+                    foreach ($specialties as $index => $s) {
+                        $depts[] = ['id' => 999 + $index, 'name' => $s];
+                    }
+                }
+                return $depts;
+            })(),
         ];
 
         return $this->json($data);
@@ -266,7 +285,7 @@ class ApiController extends AbstractController
             'roleType' => $d->getRoleType(),
             'hospital' => $d->getHospital() ? $d->getHospital()->getName() : null,
             'department' => $d->getDepartment() ? $d->getDepartment()->getName() : null,
-            'image' => $uploadFileService->getImage(Doctor::class, $d->getId(), '223x200'),
+            'image' => $d->getUser() && $d->getUser()->getAvatar() ? $d->getUser()->getAvatar() : $uploadFileService->getImage(Doctor::class, $d->getId(), '223x200'),
         ], $doctors);
 
         return $this->json($data);
@@ -332,8 +351,9 @@ class ApiController extends AbstractController
             'name' => $d->getUser() ? ($d->getUser()->getFirstName() . ' ' . $d->getUser()->getLastName()) : 'Unknown',
             'email' => $d->getUser() ? $d->getUser()->getEmail() : 'Unknown',
             'specialty' => $d->getSpecialty(),
+            'department' => $d->getDepartment() ? $d->getDepartment()->getName() : null,
             'departmentId' => $d->getDepartment() ? $d->getDepartment()->getId() : null,
-            'image' => $uploadFileService->getImage(Doctor::class, $d->getId(), '223x200'),
+            'image' => $d->getUser() && $d->getUser()->getAvatar() ? $d->getUser()->getAvatar() : $uploadFileService->getImage(Doctor::class, $d->getId(), '223x200'),
         ], $hospital->getDoctors()->toArray());
 
         return $this->json($data);
