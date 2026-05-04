@@ -50,9 +50,9 @@ class GeneratePatientQrCommand extends Command
         foreach ($users as $user) {
             if (!in_array('ROLE_DOCTOR', $user->getRoles()) && !in_array('ROLE_ADMIN', $user->getRoles()) && !in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
                 // Generate a URL for the QR code to point to the scan/profile page
-                $baseUrl = $_ENV['DEFAULT_URI'] ?? 'https://eclinichealth.ru';
+                $baseUrl = 'https://eclinichealth.ru';
                 $qrData = rtrim($baseUrl, '/') . '/patient/profile/' . $user->getId();
-                
+
                 try {
                     $result = \Endroid\QrCode\Builder\Builder::create()
                         ->writer(new PngWriter())
@@ -67,10 +67,10 @@ class GeneratePatientQrCommand extends Command
 
                     $filePath = $qrDir . '/' . $user->getId() . '.png';
                     $result->saveToFile($filePath);
-                    
+
                     // Save relative path to DB
                     $user->setQrPath('/uploads/patient_qrs/' . $user->getId() . '.png');
-                    
+
                     $io->writeln("Generated QR for patient: " . $user->getEmail());
                     $count++;
                 } catch (\Exception $e) {
