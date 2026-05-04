@@ -461,6 +461,7 @@ class ApiController extends AbstractController
                 'title' => $n->getTitle(),
                 'message' => $n->getMessage(),
                 'url' => $n->getLink(),
+                'type' => $n->getType(),
             ];
         }
 
@@ -1303,6 +1304,28 @@ class ApiController extends AbstractController
         return $this->json(['status' => 'ok']);
     }
 
+    #[Route('/api/chat/partner/{id}', name: 'api_chat_partner', methods: ['GET'])]
+    public function getChatPartner(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $partner = $entityManager->getRepository(User::class)->find($id);
+        if (!$partner) return $this->json(['error' => 'Partner not found'], 404);
+
+        $isDoctor = in_array('ROLE_DOCTOR', $partner->getRoles());
+        
+        return $this->json([
+            'id' => $partner->getId(),
+            'name' => ($partner->getFirstName() || $partner->getLastName()) 
+                ? ($partner->getFirstName() . ' ' . $partner->getLastName()) 
+                : $partner->getEmail(),
+            'email' => $partner->getEmail(),
+            'avatar' => $partner->getAvatar(),
+            'role' => $isDoctor ? 'Doctor' : 'Patient'
+        ]);
+    }
+
     #[Route('/api/test/push', name: 'api_test_push', methods: ['POST'])]
     public function triggerTestPush(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -1330,7 +1353,7 @@ class ApiController extends AbstractController
         $notification->setUser($recipient);
         $notification->setTitle($sender->getFirstName() ? ($sender->getFirstName() . ' ' . $sender->getLastName()) : $sender->getEmail());
         $notification->setMessage(mb_substr($content, 0, 100));
-        $notification->setType('chat');
+        $notification->setType('chat:' . $sender->getId());
         $notification->setCreatedAt(new \DateTimeImmutable());
         $notification->setIsRead(false);
         
