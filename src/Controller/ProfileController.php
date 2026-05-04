@@ -70,6 +70,36 @@ class ProfileController extends AbstractController
         ]);
     }
 
+    #[Route('/{_locale}/profile/chat-list', name: 'app_chat', locale: 'hy')]
+    public function chatList(EntityManagerInterface $entityManager): Response
+    {
+        $user = $this->getUser();
+        $isDoctor = in_array('ROLE_DOCTOR', $user->getRoles());
+        
+        if ($isDoctor) {
+            $relation = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findOneBy(['doctor' => $user]);
+            if ($relation) {
+                return $this->redirectToRoute('app_profile_chat', ['doctorId' => $user->getDoctorProfile()->getId(), 'patientId' => $relation->getPacient()->getId()]);
+            }
+        } else {
+            $relation = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findOneBy(['pacient' => $user]);
+            if ($relation) {
+                $doctorUser = $relation->getDoctor();
+                $doctorProfile = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $doctorUser]);
+                if ($doctorProfile) {
+                    return $this->redirectToRoute('app_profile_chat', ['doctorId' => $doctorProfile->getId()]);
+                }
+            }
+        }
+
+        // Fallback: If no relations yet, show chat page with first available or empty
+        return $this->render('profile/chat.html.twig', [
+            'doctor' => null,
+            'patient' => $isDoctor ? null : $user,
+            'contacts' => [],
+        ]);
+    }
+
     #[Route('/{_locale}/profile/chat/{doctorId}/{patientId}', name: 'app_profile_chat', locale: 'hy', defaults: ['patientId' => null])]
     public function chat(int $doctorId, ?int $patientId, EntityManagerInterface $entityManager): Response
     {

@@ -98,9 +98,14 @@
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4" style="background: var(--surface-color);">
                     <div class="card-header border-0 py-4 px-4 d-flex justify-content-between align-items-center" style="background: var(--surface-color);">
                         <h5 class="fw-bold mb-0"><i class="bi bi-heart-fill text-danger me-2"></i>{{ 'My Doctors'|trans }}</h5>
-                        <a href="{{ path('app_profile_doctors') }}" class="btn btn-sm btn-white-modern rounded-pill px-3 shadow-sm border fw-bold" style="width: fit-content; min-width: 110px; font-size: 0.75rem;">
-                            {{ 'View All'|trans }}
-                        </a>
+                        <div class="d-flex gap-2">
+                            <a href="{{ path('app_chat') }}" class="btn btn-sm btn-white-modern rounded-pill px-3 shadow-sm border fw-bold d-flex align-items-center" style="width: fit-content; min-width: 120px; font-size: 0.75rem;">
+                                <i class="bi bi-chat-dots-fill me-2 text-primary"></i> {{ 'Messages'|trans }}
+                            </a>
+                            <a href="{{ path('app_profile_doctors') }}" class="btn btn-sm btn-white-modern rounded-pill px-3 shadow-sm border fw-bold" style="width: fit-content; min-width: 110px; font-size: 0.75rem;">
+                                {{ 'View All'|trans }}
+                            </a>
+                        </div>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">

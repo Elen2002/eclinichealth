@@ -23,6 +23,8 @@ use App\Entity\ChatMessage;
 use App\Entity\Notification;
 use App\Repository\ChatMessageRepository;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 
 class ApiController extends AbstractController
 {
@@ -540,6 +542,9 @@ class ApiController extends AbstractController
             $partner = ($sender->getId() === $currentUserId) ? $recipient : $sender;
             $partnerId = $partner->getId();
 
+            // Exclude Admins/Support from regular chat list
+            if (in_array('ROLE_ADMIN', $partner->getRoles())) continue;
+
             if ($partnerId === $currentUserId || isset($seenPartnerIds[$partnerId])) continue;
 
             $partnerName = trim(($partner->getFirstName() ?? '') . ' ' . ($partner->getLastName() ?? ''));
@@ -600,6 +605,11 @@ class ApiController extends AbstractController
         $user = $this->getApiUser($request, $entityManager);
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
 
+        $qrPath = $user->getQrPath();
+        if (!$qrPath) {
+            $qrPath = $this->generateUserQrCode($user, $entityManager);
+        }
+
         $data = [
             'id' => $user->getId(),
             'email' => $user->getEmail(),
@@ -607,6 +617,7 @@ class ApiController extends AbstractController
             'lastName' => $user->getLastName(),
             'phone' => $user->getPhone(),
             'avatar' => $user->getAvatar(),
+            'qrPath' => $qrPath,
             'roles' => $user->getRoles(),
         ];
 
@@ -628,41 +639,53 @@ class ApiController extends AbstractController
         $user = $this->getApiUser($request, $entityManager);
         if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
 
-        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
-        if (!$doctor) {
-            // Debug info
-            $allDoctors = $entityManager->getRepository(Doctor::class)->findAll();
-            $docInfo = array_map(fn($d) => ['id' => $d->getId(), 'user_id' => $d->getUser() ? $d->getUser()->getId() : null], $allDoctors);
-            $allCons = $entityManager->getRepository(Consultation::class)->findAll();
-            $consInfo = array_map(fn($c) => ['id' => $c->getId(), 'doc_id' => $c->getDoctor() ? $c->getDoctor()->getId() : null, 'pat' => $c->getPatientName()], $allCons);
-            
-            return $this->json([
-                'debug' => true,
-                'message' => 'No Doctor entity linked to this User.',
-                'user_id' => $user->getId(),
-                'user_email' => $user->getUserIdentifier(),
-                'doctors_in_db' => $docInfo,
-                'consultations_in_db' => $consInfo
-            ]);
+        $consultations = $entityManager->getRepository(Consultation::class)->findBy(['doctor' => $user], ['createdAt' => 'DESC']);
+        
+        $data = [];
+        foreach ($consultations as $c) {
+            $patient = $c->getPatient();
+            $data[] = [
+                'id' => $c->getId(),
+                'patientName' => $patient ? $patient->getFirstName() . ' ' . $patient->getLastName() : 'Unknown',
+                'date' => $c->getCreatedAt()->format('Y-m-d H:i'),
+                'status' => $c->getStatus(),
+                'message' => $c->getMessage(),
+            ];
         }
-
-        $consultations = $entityManager->getRepository(Consultation::class)->findBy(
-            ['doctor' => $doctor],
-            ['requestedDate' => 'DESC']
-        );
-
-        $data = array_map(fn($c) => [
-            'id' => $c->getId(),
-            'patientName' => $c->getPatientName(),
-            'patientPhone' => $c->getPatientPhone(),
-            'patientEmail' => $c->getPatientEmail(),
-            'requestedDate' => $c->getRequestedDate() ? $c->getRequestedDate()->format('Y-m-d H:i') : 'N/A',
-            'status' => $c->getStatus(),
-            'message' => $c->getMessage(),
-        ], $consultations);
 
         return $this->json($data);
     }
+
+    private function generateUserQrCode(User $user, EntityManagerInterface $entityManager): string
+    {
+        try {
+            $qrContent = 'USER_ID:' . $user->getId() . '|EMAIL:' . $user->getEmail();
+            $qrCode = QrCode::create($qrContent)
+                ->setSize(300)
+                ->setMargin(10);
+                
+            $writer = new PngWriter();
+            $result = $writer->write($qrCode);
+            
+            $fileName = 'qr_' . $user->getId() . '_' . uniqid() . '.png';
+            $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads/qr';
+            
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            
+            $result->saveToFile($uploadDir . '/' . $fileName);
+            
+            $path = '/uploads/qr/' . $fileName;
+            $user->setQrPath($path);
+            $entityManager->flush();
+            
+            return $path;
+        } catch (\Exception $e) {
+            return '';
+        }
+    }
+
 
     #[Route('/api/doctor/patients', name: 'api_doctor_patients', methods: ['GET'])]
     public function getDoctorPatients(Request $request, EntityManagerInterface $entityManager): JsonResponse

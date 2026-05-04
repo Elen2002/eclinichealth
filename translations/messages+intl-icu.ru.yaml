@@ -376,6 +376,7 @@ booking:
 "Your future medical requests will appear here.": "Ваши будущие медицинские запросы появятся здесь."
 "Not provided": "Не указано"
 dashboard.viewAll: "Посмотреть все"
+Messages: "Сообщения"
 dashboard.viewAllReq: "Посмотреть все"
 dashboard.editProfile: "Редактировать профиль"
 dashboard.logout: "Выход"
