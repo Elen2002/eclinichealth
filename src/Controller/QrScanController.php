@@ -11,15 +11,32 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 class QrScanController extends AbstractController
 {
-    #[Route('/patient/profile/{id}', name: 'app_patient_profile_view')]
-    #[IsGranted('ROLE_DOCTOR')] // Only doctors/staff should see this
-    public function viewPatient(User $patient, ConsultationRepository $consultationRepository): Response
+    #[Route('/{_locale}/patient/profile/{id}', name: 'app_patient_profile_view', locale: 'hy')]
+    public function viewPatient(User $patient, ConsultationRepository $consultationRepository, \Doctrine\ORM\EntityManagerInterface $entityManager): Response
     {
-        $consultations = $consultationRepository->findBy(['patient' => $patient], ['requestedDate' => 'DESC']);
+        $consultations = $consultationRepository->findBy(['patientEmail' => $patient->getEmail()], ['requestedDate' => 'DESC']);
+
+        $doctor = null;
+        if ($this->getUser() && in_array('ROLE_DOCTOR', $this->getUser()->getRoles())) {
+            $doctor = $entityManager->getRepository(\App\Entity\Doctor::class)->findOneBy(['user' => $this->getUser()]);
+        }
+
+        // Fetch patient's doctors
+        $doctorRelations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['pacient' => $patient]);
+        $patientDoctors = [];
+        foreach ($doctorRelations as $rel) {
+            $dUser = $rel->getDoctor();
+            $dProfile = $entityManager->getRepository(\App\Entity\Doctor::class)->findOneBy(['user' => $dUser]);
+            if ($dProfile) {
+                $patientDoctors[] = $dProfile;
+            }
+        }
 
         return $this->render('qr_scan/patient_view.html.twig', [
             'patient' => $patient,
             'consultations' => $consultations,
+            'doctor' => $doctor,
+            'patient_doctors' => $patientDoctors,
         ]);
     }
 }

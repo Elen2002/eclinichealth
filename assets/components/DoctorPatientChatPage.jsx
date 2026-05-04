@@ -66,19 +66,6 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
             })
         }).catch(err => console.error('Failed to save message to DB:', err));
 
-        // Save persistent notification for the recipient
-        fetch('/api/notifications/create', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                targetIdentifier: isDoctorViewer ? patient.identifier : doctor.identifier,
-                title: user.name || (locale === 'hy' ? 'Նոր հաղորդագրություն' : 'New Chat Message'),
-                message: inputValue.substring(0, 100),
-                type: 'chat',
-                link: '/' + locale + '/profile/chat/' + doctor.id + (isDoctorViewer ? '' : '/' + patient.id)
-            })
-        }).catch(err => console.error('Failed to save notification:', err));
-
         setInputValue('');
     };
 

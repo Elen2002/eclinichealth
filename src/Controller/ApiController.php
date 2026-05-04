@@ -443,6 +443,30 @@ class ApiController extends AbstractController
         return $this->json(['count' => $count]);
     }
 
+    #[Route('/api/notifications/unread', name: 'api_notifications_unread', methods: ['GET'])]
+    public function getUnreadNotifications(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $notifications = $entityManager->getRepository(Notification::class)->findBy([
+            'user' => $user,
+            'isRead' => false
+        ], ['createdAt' => 'DESC'], 10);
+
+        $data = [];
+        foreach ($notifications as $n) {
+            $data[] = [
+                'id' => $n->getId(),
+                'title' => $n->getTitle(),
+                'message' => $n->getMessage(),
+                'url' => $n->getLink(),
+            ];
+        }
+
+        return $this->json($data);
+    }
+
     #[Route('/api/notifications', name: 'api_notifications_list', methods: ['GET'])]
     public function getNotifications(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
@@ -1055,15 +1079,7 @@ class ApiController extends AbstractController
         $entityManager->persist($message);
 
         // Notify Recipient
-        $notification = new Notification();
-        $notification->setUser($partner);
-        $notification->setTitle("New Message");
-        $notification->setMessage("You have a new message from " . ($user->getFirstName() ?: $user->getEmail()));
-        $notification->setType('chat');
-        $notification->setCreatedAt(new \DateTimeImmutable());
-        $notification->setIsRead(false);
-        $notification->setLink('/chat/' . $user->getId() . '?title=' . urlencode($user->getFirstName() . ' ' . $user->getLastName()) . '&avatar=' . urlencode($user->getAvatar() ?: ''));
-        $entityManager->persist($notification);
+        $this->createChatNotification($partner, $user, $data['content'], $entityManager);
 
         $entityManager->flush();
 
@@ -1209,5 +1225,132 @@ class ApiController extends AbstractController
                 'email' => $patient->getEmail()
             ]
         ]);
+    }
+
+    #[Route('/api/chat/rooms/{roomId}/messages', name: 'api_chat_messages', methods: ['GET'])]
+    public function getRoomChatMessages(string $roomId, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $partnerId = (int)$roomId;
+        $partner = $entityManager->getRepository(User::class)->find($partnerId);
+        
+        if (!$partner) return $this->json(['error' => 'Partner not found'], 404);
+
+        $messages = $entityManager->getRepository(ChatMessage::class)->createQueryBuilder('m')
+            ->where('(m.sender = :user AND m.recipient = :partner) OR (m.sender = :partner AND m.recipient = :user)')
+            ->setParameter('user', $user)
+            ->setParameter('partner', $partner)
+            ->orderBy('m.createdAt', 'ASC')
+            ->getQuery()
+            ->getResult();
+
+        $data = [];
+        foreach ($messages as $m) {
+            $data[] = [
+                'id' => $m->getId(),
+                'content' => $m->getContent(),
+                'createdAt' => $m->getCreatedAt()->format('c'),
+                'isMine' => $m->getSender()->getId() === $user->getId(),
+                'senderId' => $m->getSender()->getId(),
+            ];
+        }
+
+        return $this->json($data);
+    }
+
+    #[Route('/api/chat/rooms/{roomId}/messages', name: 'api_chat_send', methods: ['POST'])]
+    public function sendRoomChatMessage(string $roomId, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $partnerId = (int)$roomId;
+        $partner = $entityManager->getRepository(User::class)->find($partnerId);
+        if (!$partner) return $this->json(['error' => 'Partner not found'], 404);
+
+        $data = json_decode($request->getContent(), true);
+        $content = $data['content'] ?? '';
+
+        if (empty($content)) return $this->json(['error' => 'Empty content'], 400);
+
+        $message = new ChatMessage();
+        $message->setSender($user);
+        $message->setRecipient($partner);
+        $message->setContent($content);
+        $message->setRoomId('p2p_' . min($user->getId(), $partner->getId()) . '_' . max($user->getId(), $partner->getId()));
+
+        $entityManager->persist($message);
+        
+        // Notify Recipient
+        $this->createChatNotification($partner, $user, $content, $entityManager);
+        
+        $entityManager->flush();
+
+        return $this->json([
+            'id' => $message->getId(),
+            'content' => $message->getContent(),
+            'createdAt' => $message->getCreatedAt()->format('c'),
+            'isMine' => true,
+            'senderId' => $user->getId(),
+        ]);
+    }
+
+    #[Route('/api/chat/rooms/{roomId}/read', name: 'api_chat_read', methods: ['POST'])]
+    public function markChatAsRead(string $roomId, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        return $this->json(['status' => 'ok']);
+    }
+
+    #[Route('/api/test/push', name: 'api_test_push', methods: ['POST'])]
+    public function triggerTestPush(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $notification = new Notification();
+        $notification->setUser($user);
+        $notification->setTitle("Test Notification");
+        $notification->setMessage("This is a live test notification from EClinic server.");
+        $notification->setType('info');
+        $notification->setLink('/notifications');
+        $notification->setCreatedAt(new \DateTimeImmutable());
+        $notification->setIsRead(false);
+        
+        $entityManager->persist($notification);
+        $entityManager->flush();
+
+        return $this->json(['success' => true]);
+    }
+
+    private function createChatNotification(User $recipient, User $sender, string $content, EntityManagerInterface $entityManager): void
+    {
+        $notification = new Notification();
+        $notification->setUser($recipient);
+        $notification->setTitle($sender->getFirstName() ? ($sender->getFirstName() . ' ' . $sender->getLastName()) : $sender->getEmail());
+        $notification->setMessage(mb_substr($content, 0, 100));
+        $notification->setType('chat');
+        $notification->setCreatedAt(new \DateTimeImmutable());
+        $notification->setIsRead(false);
+        
+        // Dynamic link based on sender role
+        $senderRoles = $sender->getRoles();
+        if (in_array('ROLE_DOCTOR', $senderRoles)) {
+            $doctorRepo = $entityManager->getRepository(Doctor::class);
+            $doctor = $doctorRepo->findOneBy(['user' => $sender]);
+            if ($doctor) {
+                $notification->setLink('/profile/chat/' . $doctor->getId());
+            }
+        } else {
+            // For doctor receiving from patient
+            $doctorRepo = $entityManager->getRepository(Doctor::class);
+            $doctor = $doctorRepo->findOneBy(['user' => $recipient]);
+            if ($doctor) {
+                $notification->setLink('/profile/chat/' . $doctor->getId() . '/' . $sender->getId());
+            }
+        }
+
+        $entityManager->persist($notification);
     }
 }

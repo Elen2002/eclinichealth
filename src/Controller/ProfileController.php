@@ -239,23 +239,4 @@ class ProfileController extends AbstractController
             'consultations' => $consultations,
         ]);
     }
-    #[Route('/{_locale}/patient/profile/{id}', name: 'app_patient_profile_view', locale: 'hy')]
-    public function patientProfile(int $id, EntityManagerInterface $entityManager, ConsultationRepository $consultationRepository): Response
-    {
-        if (!$this->isGranted('ROLE_DOCTOR') && !$this->isGranted('ROLE_ADMIN')) {
-             throw $this->createAccessDeniedException('Only doctors and admins can view patient profiles via QR.');
-        }
-
-        $patient = $entityManager->getRepository(User::class)->find($id);
-        if (!$patient) {
-            throw $this->createNotFoundException('Patient not found.');
-        }
-
-        $consultations = $consultationRepository->findBy(['patientEmail' => $patient->getEmail()], ['requestedDate' => 'DESC']);
-
-        return $this->render('profile/patient_view.html.twig', [
-            'patient' => $patient,
-            'consultations' => $consultations,
-        ]);
-    }
 }

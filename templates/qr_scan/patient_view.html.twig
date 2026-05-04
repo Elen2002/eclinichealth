@@ -11,7 +11,7 @@
                 <div class="card-body p-5" style="background: linear-gradient(135deg, var(--brand-color), var(--accent-color)); color: white;">
                     <div class="row align-items-center">
                         <div class="col-md-auto text-center mb-3 mb-md-0">
-                            <img src="{{ patient.avatar ? (patient.avatar|slice(0, 4) == 'http' ? patient.avatar : '/uploads/avatars/' ~ patient.avatar) : '/img/default-avatar.png' }}" 
+                            <img src="{{ patient.avatar ? (patient.avatar|slice(0, 4) == 'http' or patient.avatar|slice(0, 1) == '/' ? patient.avatar : '/uploads/avatars/' ~ patient.avatar) : '/img/default-avatar.png' }}" 
                                  class="rounded-circle border border-4 border-white shadow" 
                                  style="width: 120px; height: 120px; object-fit: cover;" alt="Patient">
                         </div>
@@ -29,9 +29,11 @@
                             </div>
                         </div>
                         <div class="col-md-auto mt-4 mt-md-0">
-                            <a href="{{ path('app_chat_start', {'id': patient.id}) }}" class="btn btn-white rounded-pill px-4 py-2 fw-bold shadow-sm">
-                                <i class="bi bi-chat-dots-fill me-2"></i> {{ 'Open Chat'|trans }}
-                            </a>
+                            {% if doctor %}
+                                <a href="{{ path('app_profile_chat', {'doctorId': doctor.id, 'patientId': patient.id}) }}" class="btn btn-white rounded-pill px-4 py-2 fw-bold shadow-sm">
+                                    <i class="bi bi-chat-dots-fill me-2"></i> {{ 'Open Chat'|trans }}
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -72,7 +74,7 @@
                                         </span>
                                     </td>
                                     <td class="pe-4 text-end">
-                                        <a href="{{ path('app_doctor_consultation_process', {'id': consultation.id}) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        <a href="{{ path('app_consultation_process', {'id': consultation.id}) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                             {{ 'View Records'|trans }}
                                         </a>
                                     </td>
@@ -90,10 +92,41 @@
                 </div>
             </div>
 
+            <!-- Patient's Doctors -->
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="card-header bg-white border-0 py-4 px-4">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-people text-primary me-2"></i>{{ 'Կցված մասնագետներ'|trans }}</h5>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-3">
+                        {% for dr in patient_doctors %}
+                            <div class="col-12">
+                                <div class="d-flex align-items-center p-3 bg-light rounded-4 border border-white shadow-sm transition-all">
+                                    <img src="{{ dr.user.avatar ? (dr.user.avatar|slice(0, 4) == 'http' or dr.user.avatar|slice(0, 1) == '/' ? dr.user.avatar : '/uploads/avatars/' ~ dr.user.avatar) : '/img/default-avatar.png' }}" 
+                                         class="rounded-circle me-4" 
+                                         style="width: 60px; height: 60px; object-fit: cover;" alt="Doctor">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold text-dark fs-5">{{ dr.user.firstName }} {{ dr.user.lastName }}</div>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span class="small text-muted"><i class="bi bi-envelope me-1"></i>{{ dr.user.email }}</span>
+                                            <span class="badge bg-primary-subtle text-primary rounded-pill px-3">{{ dr.specialty|default('Specialist'|trans) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="col-12 text-center py-4 text-muted small">
+                                <i class="bi bi-info-circle me-1"></i> {{ 'No other specialists are currently linked to this patient.'|trans }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
             <!-- Action Area -->
             <div class="text-center mt-5">
-                <a href="{{ path('app_doctor_dashboard') }}" class="btn btn-link text-muted text-decoration-none">
-                    <i class="bi bi-arrow-left me-1"></i> {{ 'Back to Dashboard'|trans }}
+                <a href="{{ path('app_doctor_dashboard') }}" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-lg text-white">
+                    <i class="bi bi-arrow-left me-2"></i> {{ 'Back to Dashboard'|trans }}
                 </a>
             </div>
         </div>
@@ -109,6 +142,11 @@
     .btn-white:hover {
         background: #f8f9fa;
         transform: translateY(-2px);
+    }
+    .hover-translate:hover {
+        transform: translateY(-5px);
+        background: white !important;
+        border-color: var(--brand-color) !important;
     }
     .transition-all {
         transition: all 0.3s ease;
