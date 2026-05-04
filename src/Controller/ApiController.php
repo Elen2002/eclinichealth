@@ -1301,6 +1301,24 @@ class ApiController extends AbstractController
     #[Route('/api/chat/rooms/{roomId}/read', name: 'api_chat_read', methods: ['POST'])]
     public function markChatAsRead(string $roomId, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $partnerId = (int)$roomId;
+        
+        // Mark chat notifications from this partner as read
+        $notifications = $entityManager->getRepository(Notification::class)->findBy([
+            'user' => $user,
+            'isRead' => false,
+            'type' => 'chat:' . $partnerId
+        ]);
+
+        foreach ($notifications as $n) {
+            $n->setIsRead(true);
+        }
+
+        $entityManager->flush();
+
         return $this->json(['status' => 'ok']);
     }
 
