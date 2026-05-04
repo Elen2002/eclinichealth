@@ -832,6 +832,8 @@ class ApiController extends AbstractController
                     'specialty' => $doctorProfile->getSpecialty(),
                     'hospital_name' => ($doctorProfile && $doctorProfile->getHospital()) ? $doctorProfile->getHospital()->getName() : 'Hospital',
                     'image' => $doctorUser->getAvatar(),
+                    'email' => $doctorUser->getEmail(),
+                    'phone' => $doctorUser->getPhone(),
                 ];
             }
         }
@@ -850,6 +852,8 @@ class ApiController extends AbstractController
                     'specialty' => $doctorProfile->getSpecialty(),
                     'hospital_name' => $doctorProfile->getHospital() ? $doctorProfile->getHospital()->getName() : 'N/A',
                     'image' => $doctorUser ? $doctorUser->getAvatar() : null,
+                    'email' => $doctorUser ? $doctorUser->getEmail() : null,
+                    'phone' => $doctorUser ? $doctorUser->getPhone() : null,
                 ];
             }
         }
