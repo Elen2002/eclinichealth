@@ -552,12 +552,19 @@ class ApiController extends AbstractController
                 $partnerName = $partner->getEmail();
             }
             
+            $unreadCount = $entityManager->getRepository(ChatMessage::class)->count([
+                'sender' => $partner,
+                'recipient' => $user,
+                'isRead' => false
+            ]);
+
             $data[] = [
                 'id' => $partnerId,
                 'title' => $partnerName,
                 'avatar' => $partner->getAvatar(),
                 'message' => $m->getContent(),
                 'time' => $m->getCreatedAt()->format('Y-m-d H:i'),
+                'unreadCount' => $unreadCount,
                 'type' => 'chat',
                 'timestamp' => $m->getCreatedAt()->getTimestamp()
             ];
@@ -1018,6 +1025,30 @@ class ApiController extends AbstractController
             'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s'),
             'isMine' => true,
         ]);
+    }
+
+    #[Route('/api/chat/messages/{partnerId}/read', name: 'api_chat_messages_read', methods: ['POST'])]
+    public function markMessagesRead(int $partnerId, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $partner = $entityManager->getRepository(User::class)->find($partnerId);
+        if (!$partner) return $this->json(['error' => 'Partner not found'], 404);
+
+        $unreadMessages = $entityManager->getRepository(ChatMessage::class)->findBy([
+            'sender' => $partner,
+            'recipient' => $user,
+            'isRead' => false
+        ]);
+
+        foreach ($unreadMessages as $m) {
+            $m->setIsRead(true);
+        }
+
+        $entityManager->flush();
+
+        return $this->json(['success' => true]);
     }
 
     #[Route('/api/consultations/{id}/reject', name: 'api_consultation_reject', methods: ['POST'])]
