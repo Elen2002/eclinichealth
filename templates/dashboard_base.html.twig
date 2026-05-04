@@ -5,6 +5,17 @@
 {% endblock %}
 
 {% block body %}
+    <script>
+        window.APP_DATA = {
+            user: {{ app.user ? {
+                'identifier': app.user.email|split('@')[0]|capitalize,
+                'email': app.user.email,
+                'roles': app.user.roles,
+                'id': app.user.id
+            }|json_encode|raw : 'null' }},
+            locale: '{{ app.request.locale }}'
+        };
+    </script>
     <div class="dashboard-wrapper">
         <aside class="sidebar-nav">
             <a href="{{ path('app_home') }}" class="sidebar-logo text-decoration-none">

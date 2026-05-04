@@ -4,7 +4,7 @@ namespace App\Command;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use Endroid\QrCode\Builder\Builder;
+
 use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
@@ -48,13 +48,12 @@ class GeneratePatientQrCommand extends Command
         $io->section('Generating Patient QR Codes');
 
         foreach ($users as $user) {
-            // Check if user is a patient (and not a doctor/admin if needed)
-            if (in_array('ROLE_PATIENT', $user->getRoles()) || empty($user->getRoles())) {
+            if (!in_array('ROLE_DOCTOR', $user->getRoles()) && !in_array('ROLE_ADMIN', $user->getRoles()) && !in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
                 // Generate a URL for the QR code to point to the scan/profile page
                 $qrData = 'https://eclinichealth.int/patient/profile/' . $user->getId();
                 
                 try {
-                    $result = Builder::create()
+                    $result = \Endroid\QrCode\Builder\Builder::create()
                         ->writer(new PngWriter())
                         ->writerOptions([])
                         ->data($qrData)

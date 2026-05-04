@@ -370,7 +370,7 @@ class ApiController extends AbstractController
                 $notification->setTitle("New Consultation Request");
                 $notification->setMessage("You have a new request from " . $data['name']);
                 $notification->setType('consultation');
-                $notification->setCreatedAt(new \DateTime());
+                $notification->setCreatedAt(new \DateTimeImmutable());
                 $notification->setIsRead(false);
                 $notification->setLink('/consultations/' . $consultation->getId());
                 $entityManager->persist($notification);
@@ -543,7 +543,8 @@ class ApiController extends AbstractController
             $partnerId = $partner->getId();
 
             // Exclude Admins/Support from regular chat list
-            if (in_array('ROLE_ADMIN', $partner->getRoles())) continue;
+            $roles = $partner->getRoles();
+            if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_SUPER_ADMIN', $roles) || str_contains(strtolower($partner->getEmail()), 'admin')) continue;
 
             if ($partnerId === $currentUserId || isset($seenPartnerIds[$partnerId])) continue;
 
@@ -552,19 +553,12 @@ class ApiController extends AbstractController
                 $partnerName = $partner->getEmail();
             }
             
-            $unreadCount = $entityManager->getRepository(ChatMessage::class)->count([
-                'sender' => $partner,
-                'recipient' => $user,
-                'isRead' => false
-            ]);
-
             $data[] = [
                 'id' => $partnerId,
                 'title' => $partnerName,
                 'avatar' => $partner->getAvatar(),
                 'message' => $m->getContent(),
                 'time' => $m->getCreatedAt()->format('Y-m-d H:i'),
-                'unreadCount' => $unreadCount,
                 'type' => 'chat',
                 'timestamp' => $m->getCreatedAt()->getTimestamp()
             ];
@@ -580,6 +574,10 @@ class ApiController extends AbstractController
         foreach ($relations as $rel) {
             $partner = $doctor ? $rel->getPacient() : $rel->getDoctor();
             if (!$partner) continue;
+
+            // Exclude Admins/Support
+            $roles = $partner->getRoles();
+            if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_SUPER_ADMIN', $roles) || str_contains(strtolower($partner->getEmail()), 'admin')) continue;
 
             $partnerId = $partner->getId();
             if (isset($seenPartnerIds[$partnerId])) continue;
@@ -935,8 +933,9 @@ class ApiController extends AbstractController
              $notification->setTitle("Consultation Confirmed");
              $notification->setMessage("Dr. " . ($user->getFirstName() ?: $user->getEmail()) . " has accepted your request.");
              $notification->setType('consultation');
-             $notification->setCreatedAt(new \DateTime());
+             $notification->setCreatedAt(new \DateTimeImmutable());
              $notification->setIsRead(false);
+             $notification->setLink('/chat/' . $user->getId() . '?title=' . urlencode($user->getFirstName() . ' ' . $user->getLastName()) . '&avatar=' . urlencode($user->getAvatar() ?: ''));
              $entityManager->persist($notification);
 
              $entityManager->flush();
@@ -1011,9 +1010,9 @@ class ApiController extends AbstractController
         $notification->setTitle("New Message");
         $notification->setMessage("You have a new message from " . ($user->getFirstName() ?: $user->getEmail()));
         $notification->setType('chat');
-        $notification->setCreatedAt(new \DateTime());
+        $notification->setCreatedAt(new \DateTimeImmutable());
         $notification->setIsRead(false);
-        $notification->setLink('/chat/' . $user->getId());
+        $notification->setLink('/chat/' . $user->getId() . '?title=' . urlencode($user->getFirstName() . ' ' . $user->getLastName()) . '&avatar=' . urlencode($user->getAvatar() ?: ''));
         $entityManager->persist($notification);
 
         $entityManager->flush();
@@ -1027,29 +1026,6 @@ class ApiController extends AbstractController
         ]);
     }
 
-    #[Route('/api/chat/messages/{partnerId}/read', name: 'api_chat_messages_read', methods: ['POST'])]
-    public function markMessagesRead(int $partnerId, Request $request, EntityManagerInterface $entityManager): JsonResponse
-    {
-        $user = $this->getApiUser($request, $entityManager);
-        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
-
-        $partner = $entityManager->getRepository(User::class)->find($partnerId);
-        if (!$partner) return $this->json(['error' => 'Partner not found'], 404);
-
-        $unreadMessages = $entityManager->getRepository(ChatMessage::class)->findBy([
-            'sender' => $partner,
-            'recipient' => $user,
-            'isRead' => false
-        ]);
-
-        foreach ($unreadMessages as $m) {
-            $m->setIsRead(true);
-        }
-
-        $entityManager->flush();
-
-        return $this->json(['success' => true]);
-    }
 
     #[Route('/api/consultations/{id}/reject', name: 'api_consultation_reject', methods: ['POST'])]
     public function rejectConsultation(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
@@ -1077,7 +1053,7 @@ class ApiController extends AbstractController
                 $notification->setTitle("Consultation Rejected");
                 $notification->setMessage("Dr. " . ($user->getFirstName() ?: $user->getEmail()) . " has rejected your request.");
                 $notification->setType('consultation');
-                $notification->setCreatedAt(new \DateTime());
+                $notification->setCreatedAt(new \DateTimeImmutable());
                 $notification->setIsRead(false);
                 $notification->setLink('/profile');
                 $entityManager->persist($notification);
@@ -1168,7 +1144,7 @@ class ApiController extends AbstractController
         $notification->setTitle("Clinic Check-in");
         $notification->setMessage("You have been checked-in by Dr. " . ($doctorUser->getFirstName() ?: 'Specialist') . " at " . (new \DateTime())->format('H:i'));
         $notification->setType('info');
-        $notification->setCreatedAt(new \DateTime());
+        $notification->setCreatedAt(new \DateTimeImmutable());
         $notification->setIsRead(false);
         $notification->setLink('/profile');
         $entityManager->persist($notification);

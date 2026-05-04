@@ -176,7 +176,12 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
                                 </div>
                                 <div>
                                     <h6 className="fw-bold mb-0">{chatPartner.name || chatPartner.identifier}</h6>
-                                    <p className="text-primary small mb-0" style={{ fontSize: '0.7rem', fontWeight: '600' }}>{isDoctorViewer ? (locale === 'hy' ? 'Պացիենտ' : 'Patient') : (chatPartner.specialty || (locale === 'hy' ? 'Բժշկական մասնագետ' : 'Medical Specialist'))}</p>
+                                    <p className="text-primary small mb-0" style={{ fontSize: '0.7rem', fontWeight: '600' }}>
+                                        {isDoctorViewer 
+                                            ? (locale === 'hy' ? 'Պացիենտ' : (locale === 'ru' ? 'Пациент' : 'Patient')) 
+                                            : (chatPartner.specialty || (locale === 'hy' ? 'Բժշկական մասնագետ' : (locale === 'ru' ? 'Медицинский специалист' : 'Medical Specialist')))
+                                        }
+                                    </p>
                                 </div>
                             </div>
 

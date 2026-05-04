@@ -75,6 +75,7 @@
                 </div>
 
                 <!-- Digital ID Card -->
+                {% if not is_granted('ROLE_DOCTOR') and not is_granted('ROLE_ADMIN') %}
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden text-center">
                     <div class="card-body p-4">
                         <h6 class="fw-bold text-muted text-uppercase small mb-3 tracking-wider">{{ 'Digital Health ID'|trans }}</h6>
@@ -89,6 +90,7 @@
                         <p class="small text-muted mb-0">{{ 'Scan this code at the clinic reception for quick check-in.'|trans }}</p>
                     </div>
                 </div>
+                {% endif %}
 
             </div>
 

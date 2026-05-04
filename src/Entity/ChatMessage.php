@@ -39,24 +39,9 @@ class ChatMessage
     #[Groups(['chat:read'])]
     private ?string $roomId = null;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
-    #[Groups(['chat:read'])]
-    private bool $isRead = false;
-
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function isRead(): bool
-    {
-        return $this->isRead;
-    }
-
-    public function setIsRead(bool $isRead): static
-    {
-        $this->isRead = $isRead;
-        return $this;
     }
 
     public function getSender(): ?User

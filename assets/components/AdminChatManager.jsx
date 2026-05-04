@@ -40,32 +40,51 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
     };
 
     const currentT = translations[locale] || translations.en;
+    const [fetchError, setFetchError] = useState(null);
 
     useEffect(() => {
         const fetchSessions = () => {
             // Only poll if user is admin
             const roles = currentUser?.roles || window.APP_DATA?.user?.roles || [];
             if (!roles.includes('ROLE_ADMIN') && !roles.includes('ROLE_SUPER_ADMIN')) {
+                setFetchError('User is not authorized (Roles check failed on frontend). Roles: ' + JSON.stringify(roles));
                 return;
             }
 
             fetch('/api/admin/chat/sessions') 
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) {
+                        return res.text().then(text => { throw new Error(`HTTP ${res.status}: ${text}`); });
+                    }
+                    return res.json();
+                })
                 .then(data => {
-                    if (data.error) return;
+                    if (data.error) {
+                        setFetchError('API Error: ' + data.error);
+                        return;
+                    }
+                    setFetchError(null);
                     setChats(prev => {
                         const next = { ...prev };
                         data.forEach(session => {
                             if (!next[session.roomId]) {
-                                next[session.roomId] = { messages: [], lastMessage: session.lastMessage };
+                                next[session.roomId] = { 
+                                    messages: [], 
+                                    lastMessage: session.lastMessage,
+                                    lastDate: session.lastDate 
+                                };
                             } else {
                                 next[session.roomId].lastMessage = session.lastMessage;
+                                next[session.roomId].lastDate = session.lastDate;
                             }
                         });
                         return next;
                     });
                 })
-                .catch(err => console.error('Failed to load sessions:', err));
+                .catch(err => {
+                    console.error('Failed to load sessions:', err);
+                    setFetchError('Fetch Error: ' + err.message);
+                });
         };
 
         fetchSessions();
@@ -136,7 +155,7 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
     const handleSend = () => {
         if (!inputValue.trim() || !activeRoom) return;
 
-        let targetId = activeRoom.startsWith('pair_') ? activeRoom.split('_')[1] : activeRoom;
+        let targetId = activeRoom.startsWith('pair_') ? activeRoom.split('_')[1] : (activeRoom.startsWith('room_') ? activeRoom.split('_')[2] : activeRoom);
         
         if (targetId.includes('(') && targetId.includes(')')) {
             const match = targetId.match(/\((.*?)\)/);
@@ -197,14 +216,22 @@ const AdminChatManager = ({ user, locale = 'en' }) => {
     const filteredRooms = Object.keys(chats).filter(roomId => {
         const matchesSearch = roomId.toLowerCase().includes(searchTerm.toLowerCase());
         if (showAll) return matchesSearch;
-        return matchesSearch && !roomId.startsWith('pair_');
+        // Permissive view: show all matching search
+        return matchesSearch;
     }).sort((a, b) => {
-        return (chats[b].messages?.length || 0) - (chats[a].messages?.length || 0);
+        const dateA = new Date(chats[a].lastDate || 0);
+        const dateB = new Date(chats[b].lastDate || 0);
+        return dateB - dateA;
     });
 
     return (
         <div className="d-flex h-100 bg-white shadow-sm rounded-4 overflow-hidden" style={{ minHeight: '700px' }}>
             <div className="border-end d-flex flex-column" style={{ width: '320px', background: '#f8fafc' }}>
+                {fetchError && (
+                    <div className="alert alert-danger m-3 p-3 small border-0 shadow-sm rounded-4 text-center">
+                        <strong><i className="bi bi-exclamation-triangle-fill me-2"></i>Diagnostic Error:</strong><br/> {fetchError}
+                    </div>
+                )}
                 <div className="p-4 border-bottom bg-white">
                     <div className="fw-bold text-uppercase small tracking-wider text-primary mb-3">
                         {currentT.activeSessions}

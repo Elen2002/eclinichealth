@@ -101,7 +101,7 @@ class ProfileController extends AbstractController
     }
 
     #[Route('/{_locale}/profile/chat/{doctorId}/{patientId}', name: 'app_profile_chat', locale: 'hy', defaults: ['patientId' => null])]
-    public function chat(int $doctorId, ?int $patientId, EntityManagerInterface $entityManager): Response
+    public function chat(int $doctorId, ?int $patientId, EntityManagerInterface $entityManager, \Symfony\Contracts\Translation\TranslatorInterface $translator): Response
     {
         $doctor = $entityManager->getRepository(Doctor::class)->find($doctorId);
         if (!$doctor) {
@@ -129,7 +129,7 @@ class ProfileController extends AbstractController
                     'dbId' => $p->getId(),
                     'name' => $p->getFirstName() ? $p->getFirstName() . ' ' . $p->getLastName() : $p->getEmail(),
                     'avatar' => $p->getAvatar(),
-                    'specialty' => 'Patient',
+                    'specialty' => $translator->trans('Patient'),
                     'identifier' => $p->getEmail() ? explode('@', $p->getEmail())[0] : 'user_' . $p->getId()
                 ];
             }

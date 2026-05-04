@@ -25,20 +25,24 @@ final class AdminController extends AbstractController
     #[Route('/api/admin/chat/sessions', name: 'api_admin_chat_sessions', methods: ['GET'])]
     public function chatSessions(\App\Repository\ChatMessageRepository $chatMessageRepository): \Symfony\Component\HttpFoundation\JsonResponse
     {
-        if (!$this->isGranted('ROLE_ADMIN')) {
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_SUPER_ADMIN')) {
             return $this->json(['error' => 'Access denied'], 403);
         }
 
         $rooms = $chatMessageRepository->createQueryBuilder('c')
             ->select('c.roomId, MAX(c.createdAt) as lastDate')
-            ->where('LOWER(c.roomId) NOT LIKE :pair')
-            ->setParameter('pair', 'pair_%')
             ->groupBy('c.roomId')
             ->orderBy('lastDate', 'DESC')
             ->getQuery()
             ->getResult();
 
         $data = [];
+        $data[] = [
+            'roomId' => 'System Check',
+            'lastMessage' => 'If you see this, the API is working.',
+            'lastDate' => (new \DateTime())->format('c')
+        ];
+
         foreach ($rooms as $room) {
             $lastMsg = $chatMessageRepository->findOneBy(
                 ['roomId' => $room['roomId']],
@@ -47,7 +51,8 @@ final class AdminController extends AbstractController
             
             $data[] = [
                 'roomId' => $room['roomId'],
-                'lastMessage' => $lastMsg ? $lastMsg->getContent() : ''
+                'lastMessage' => $lastMsg ? $lastMsg->getContent() : '',
+                'lastDate' => $room['lastDate']
             ];
         }
 
