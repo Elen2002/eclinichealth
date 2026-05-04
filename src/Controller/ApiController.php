@@ -215,7 +215,11 @@ class ApiController extends AbstractController
             'name' => $h->getName(),
             'address' => $h->getAddress(),
             'description' => $h->getAbout(), // using getAbout based on HomeController
-             'image' => $uploadFileService->getImage(Hospital::class, $h->getId(), '970x440'),
+            'image' => $uploadFileService->getImage(Hospital::class, $h->getId(), '970x440'),
+            'beds' => $h->getBedsCount(),
+            'staff' => $h->getStaffCount(),
+            'emergency' => $h->isHasAmbulance(),
+            'departmentIds' => array_values($h->getHospitalDepartments()->map(fn($hd) => $hd->getDepartment() ? $hd->getDepartment()->getId() : null)->filter(fn($id) => $id !== null)->toArray()),
         ], $hospitals);
 
         return $this->json($data);
@@ -241,13 +245,15 @@ class ApiController extends AbstractController
     }
 
     #[Route('/api/departments', name: 'api_departments', methods: ['GET'])]
-    public function getDepartments(DepartmentRepository $departmentRepository): JsonResponse
+    public function getDepartments(DepartmentRepository $departmentRepository, DoctorRepository $doctorRepository, UploadFileInterface $uploadFileService): JsonResponse
     {
         $departments = $departmentRepository->findAll();
         $data = array_map(fn($d) => [
             'id' => $d->getId(),
             'name' => $d->getName(),
             'description' => $d->getDescription(),
+            'image' => $uploadFileService->getImage(\App\Entity\Department::class, $d->getId(), '650x450'),
+            'specialistCount' => $doctorRepository->count(['department' => $d]),
         ], $departments);
 
         return $this->json($data);
@@ -264,7 +270,7 @@ class ApiController extends AbstractController
             'name' => $department->getName(),
             'description' => $department->getDescription(),
             'longDescription' => $department->getDescription(), // Using same description as placeholder
-            'image' => $uploadFileService->getImage(\App\Entity\Department::class, $department->getId(), '800x600') ?: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=800',
+            'image' => $uploadFileService->getImage(\App\Entity\Department::class, $department->getId(), '650x450'),
         ]);
     }
 
@@ -353,8 +359,21 @@ class ApiController extends AbstractController
 
             $consultation->setMessage($data['message'] ?? '');
             $consultation->setStatus('pending');
-
             $entityManager->persist($consultation);
+
+            // Notify Doctor
+            if ($doctor->getUser()) {
+                $notification = new Notification();
+                $notification->setUser($doctor->getUser());
+                $notification->setTitle("New Consultation Request");
+                $notification->setMessage("You have a new request from " . $data['name']);
+                $notification->setType('consultation');
+                $notification->setCreatedAt(new \DateTime());
+                $notification->setIsRead(false);
+                $notification->setLink('/consultations/' . $consultation->getId());
+                $entityManager->persist($notification);
+            }
+
             $entityManager->flush();
 
             return $this->json([
@@ -376,10 +395,51 @@ class ApiController extends AbstractController
         return $this->json(['count' => $count]);
     }
 
-    #[Route('/api/notifications/mark-all-read', name: 'api_notifications_mark_all_read', methods: ['POST'])]
-    public function markAllNotificationsRead(EntityManagerInterface $entityManager): JsonResponse
+    #[Route('/api/notifications', name: 'api_notifications_list', methods: ['GET'])]
+    public function getNotifications(Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
-        $user = $this->getUser();
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $notifications = $entityManager->getRepository(Notification::class)->findBy(
+            ['user' => $user],
+            ['createdAt' => 'DESC']
+        );
+
+        $data = array_map(fn($n) => [
+            'id' => $n->getId(),
+            'title' => $n->getTitle(),
+            'message' => $n->getMessage(),
+            'type' => $n->getType(),
+            'isRead' => $n->isRead(),
+            'link' => $n->getLink(),
+            'createdAt' => $n->getCreatedAt()->format('Y-m-d H:i:s'),
+        ], $notifications);
+
+        return $this->json($data);
+    }
+
+    #[Route('/api/notifications/{id}/read', name: 'api_notification_mark_read', methods: ['POST'])]
+    public function markNotificationRead(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $notification = $entityManager->getRepository(Notification::class)->find($id);
+        if (!$notification || $notification->getUser() !== $user) {
+            return $this->json(['error' => 'Notification not found'], 404);
+        }
+
+        $notification->setIsRead(true);
+        $entityManager->flush();
+
+        return $this->json(['success' => true]);
+    }
+
+    #[Route('/api/notifications/mark-all-read', name: 'api_notifications_mark_all_read', methods: ['POST'])]
+    public function markAllNotificationsRead(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
         if (!$user) return $this->json(['success' => false, 'error' => 'Not authenticated'], 401);
         $notifications = $entityManager->getRepository(Notification::class)->findBy(['user' => $user, 'isRead' => false]);
         foreach ($notifications as $n) $n->setIsRead(true);
@@ -946,6 +1006,18 @@ class ApiController extends AbstractController
         $message->setCreatedAtValue();
 
         $entityManager->persist($message);
+
+        // Notify Recipient
+        $notification = new Notification();
+        $notification->setUser($partner);
+        $notification->setTitle("New Message");
+        $notification->setMessage("You have a new message from " . ($user->getFirstName() ?: $user->getEmail()));
+        $notification->setType('chat');
+        $notification->setCreatedAt(new \DateTime());
+        $notification->setIsRead(false);
+        $notification->setLink('/chat/' . $user->getId());
+        $entityManager->persist($notification);
+
         $entityManager->flush();
 
         return $this->json([
@@ -954,6 +1026,87 @@ class ApiController extends AbstractController
             'content' => $message->getContent(),
             'createdAt' => $message->getCreatedAt()->format('Y-m-d H:i:s'),
             'isMine' => true,
+        ]);
+    }
+
+    #[Route('/api/consultations/{id}/reject', name: 'api_consultation_reject', methods: ['POST'])]
+    public function rejectConsultation(int $id, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $consultation = $entityManager->getRepository(Consultation::class)->find($id);
+        if (!$consultation) return $this->json(['error' => 'Consultation not found'], 404);
+
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+        if (!$doctor || $consultation->getDoctor() !== $doctor) {
+            return $this->json(['error' => 'Forbidden'], 403);
+        }
+
+        $consultation->setStatus('rejected');
+
+        // Notify Patient
+        $patientEmail = $consultation->getPatientEmail();
+        if ($patientEmail) {
+            $patientUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $patientEmail]);
+            if ($patientUser) {
+                $notification = new Notification();
+                $notification->setUser($patientUser);
+                $notification->setTitle("Consultation Rejected");
+                $notification->setMessage("Dr. " . ($user->getFirstName() ?: $user->getEmail()) . " has rejected your request.");
+                $notification->setType('consultation');
+                $notification->setCreatedAt(new \DateTime());
+                $notification->setIsRead(false);
+                $notification->setLink('/profile');
+                $entityManager->persist($notification);
+            }
+        }
+
+        $entityManager->flush();
+
+        return $this->json(['success' => true]);
+    }
+
+    #[Route('/api/doctor/stats', name: 'api_doctor_stats', methods: ['GET'])]
+    public function getDoctorStats(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $this->getApiUser($request, $entityManager);
+        if (!$user) return $this->json(['error' => 'Unauthorized'], 401);
+
+        $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
+        if (!$doctor) return $this->json(['error' => 'Doctor not found'], 404);
+
+        $stats = [];
+        $now = new \DateTime();
+        for ($i = 6; $i >= 0; $i--) {
+            $date = (clone $now)->modify("- $i days");
+            $dateStr = $date->format('Y-m-d');
+            
+            $qb = $entityManager->getRepository(Consultation::class)->createQueryBuilder('c');
+            $count = $qb->select('count(c.id)')
+                ->where('c.doctor = :doctor')
+                ->andWhere('c.requestedDate >= :start')
+                ->andWhere('c.requestedDate <= :end')
+                ->setParameter('doctor', $doctor)
+                ->setParameter('start', $dateStr . ' 00:00:00')
+                ->setParameter('end', $dateStr . ' 23:59:59')
+                ->getQuery()
+                ->getSingleScalarResult();
+
+            $stats[] = [
+                'date' => $dateStr,
+                'count' => (int)$count,
+                'label' => $date->format('D')
+            ];
+        }
+
+        return $this->json([
+            'trends' => $stats,
+            'summary' => [
+                'totalPatients' => $entityManager->getRepository(\App\Entity\DoctorPacient::class)->count(['doctor' => $user]),
+                'pendingRequests' => $entityManager->getRepository(Consultation::class)->count(['doctor' => $doctor, 'status' => 'pending']),
+                'completedVisits' => $entityManager->getRepository(Consultation::class)->count(['doctor' => $doctor, 'status' => 'completed']),
+            ]
         ]);
     }
 }

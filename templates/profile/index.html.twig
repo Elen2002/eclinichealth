@@ -74,6 +74,18 @@
                     </div>
                 </div>
 
+                <!-- Digital ID Card -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden text-center">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold text-muted text-uppercase small mb-3 tracking-wider">{{ 'Digital Health ID'|trans }}</h6>
+                        <div class="qr-wrapper p-3 bg-white rounded-3 border mb-3 d-inline-block">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ user.id }}-{{ user.email|url_encode }}" 
+                                 alt="QR ID" class="img-fluid" style="width: 150px; height: 150px;">
+                        </div>
+                        <p class="small text-muted mb-0">{{ 'Scan this code at the clinic reception for quick check-in.'|trans }}</p>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Right Content -->

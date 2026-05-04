@@ -66,7 +66,7 @@
                                     </div>
                                     <div class="col-md-6 text-start">
                                         <label class="form-label small fw-bold text-muted ms-1 mb-2">{{ 'booking.select_hospital'|trans }}</label>
-                                        <select name="hospital" id="hospitalSelect" class="form-select medical-input select2-enable" required>
+                                        <select name="hospital" id="hospitalSelect" class="form-select medical-input select2-enable" data-placeholder="{{ 'booking.choose_location'|trans }}" required>
                                             <option value="">{{ 'booking.choose_location'|trans }}</option>
                                             {% for h in hospitals %}
                                                 <option value="{{ h.id }}" {{ h.id == app.request.query.get('hospital') ? 'selected' : '' }}>{{ h.name }}</option>
@@ -75,7 +75,7 @@
                                     </div>
                                     <div class="col-md-6 text-start">
                                         <label class="form-label small fw-bold text-muted ms-1 mb-2">{{ 'booking.department'|trans }}</label>
-                                        <select name="department" id="departmentSelect" class="form-select medical-input select2-enable" required {{ app.request.query.get('hospital') ? '' : 'disabled' }}>
+                                        <select name="department" id="departmentSelect" class="form-select medical-input select2-enable" data-placeholder="{{ 'booking.choose_department'|trans }}" required {{ app.request.query.get('hospital') ? '' : 'disabled' }}>
                                             <option value="">{{ 'booking.select_hospital_first'|trans }}</option>
                                             {% for d in departments %}
                                                 {% set hos_ids = [] %}
@@ -105,7 +105,7 @@
                                     </div>
                                     <div class="col-md-6 text-start">
                                         <label class="form-label small fw-bold text-muted ms-1 mb-2">{{ 'booking.doctor'|trans }}</label>
-                                        <select name="doctor" id="doctorSelect" class="form-select medical-input select2-enable" required {{ app.request.query.get('department') ? '' : 'disabled' }}>
+                                        <select name="doctor" id="doctorSelect" class="form-select medical-input select2-enable" data-placeholder="{{ 'booking.choose_specialist'|trans }}" required {{ app.request.query.get('department') ? '' : 'disabled' }}>
                                             <option value="">{{ 'booking.select_department_first'|trans }}</option>
                                             {% for doc in doctors %}
                                                 {% set docHospitals = [] %}

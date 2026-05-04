@@ -37,10 +37,20 @@ window.$ = window.jQuery = $;
 
 // Initialize Select2 for all multiselects
 document.addEventListener('DOMContentLoaded', () => {
-    $('.medical-input[multiple], .select2-enable').select2({
-        width: '100%',
-        placeholder: 'Select options...',
-        allowClear: true
+    const locale = window.APP_DATA?.locale || 'en';
+    const placeholders = {
+        'hy': 'Ընտրել...',
+        'ru': 'Выберите...',
+        'en': 'Select options...'
+    };
+
+    $('.medical-input[multiple], .select2-enable').each(function() {
+        const $el = $(this);
+        $el.select2({
+            width: '100%',
+            placeholder: $el.data('placeholder') || placeholders[locale] || placeholders['en'],
+            allowClear: true
+        });
     });
 });
 

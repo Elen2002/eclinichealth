@@ -129,16 +129,16 @@ const HospitalPage = ({ hospitalData }) => {
                                                     <div className="d-flex align-items-center mb-3">
                                                         <div className="avatar-wrapper flex-shrink-0 me-3" style={{ width: '60px', height: '60px' }}>
                                                             <img 
-                                                                src={doctor.user?.avatar && !doctor.user.avatar.includes('demo/')
+                                                                src={doctor.user?.avatar && doctor.user.avatar !== '' && !doctor.user.avatar.includes('demo/')
                                                                     ? (doctor.user.avatar.startsWith('http') || doctor.user.avatar.startsWith('/') 
                                                                         ? doctor.user.avatar 
-                                                                        : `/uploads/${doctor.user.avatar}`) 
-                                                                    : `https://i.pravatar.cc/150?u=${doctor.user?.id || index}`} 
+                                                                        : `/uploads/avatars/${doctor.user.avatar}`) 
+                                                                    : '/img/default-doctor.png'} 
                                                                 className="rounded-circle w-100 h-100 object-fit-cover shadow-sm border border-2 border-white"
                                                                 alt={doctor.user?.firstName}
                                                                 onError={(e) => {
-                                                                    if (!e.target.src.includes('pravatar.cc')) {
-                                                                        e.target.src = `https://i.pravatar.cc/150?u=${doctor.user?.id || index}`;
+                                                                    if (e.target.src !== '/img/default-doctor.png') {
+                                                                        e.target.src = '/img/default-doctor.png';
                                                                     }
                                                                 }}
                                                             />

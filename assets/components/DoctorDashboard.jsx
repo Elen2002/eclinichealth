@@ -86,17 +86,17 @@ const DoctorDashboard = ({
                 <div className="col">
                     <div className="d-flex align-items-center gap-3">
                         <img
-                            src={doctor?.user?.avatar && !doctor.user.avatar.includes('demo/')
+                            src={doctor?.user?.avatar && doctor.user.avatar !== '' && !doctor.user.avatar.includes('demo/')
                                 ? (doctor.user.avatar.startsWith('http') || doctor.user.avatar.startsWith('/') 
                                     ? doctor.user.avatar 
-                                    : `/uploads/${doctor.user.avatar}`) 
-                                : `https://i.pravatar.cc/150?u=${doctor.user?.id || 'doc'}`}
+                                    : `/uploads/avatars/${doctor.user.avatar}`) 
+                                : '/img/default-doctor.png'}
                             alt="Avatar"
                             className="rounded-circle shadow-sm border border-2 border-white"
                             style={{ width: '60px', height: '60px', objectFit: 'cover' }}
                             onError={(e) => {
-                                if (!e.target.src.includes('pravatar.cc')) {
-                                    e.target.src = `https://i.pravatar.cc/150?u=${doctor.user?.id || 'doc'}`;
+                                if (e.target.src !== '/img/default-doctor.png') {
+                                    e.target.src = '/img/default-doctor.png';
                                 }
                             }}
                         />

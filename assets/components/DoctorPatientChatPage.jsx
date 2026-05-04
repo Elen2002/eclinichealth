@@ -119,7 +119,11 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
                                     >
                                         <div className="position-relative">
                                             <img 
-                                                src={contact.avatar && contact.avatar !== '' ? contact.avatar : (isDoctorViewer ? '/img/default-avatar.png' : '/img/default-doctor.png')} 
+                                                src={contact.avatar && contact.avatar !== ''
+                                                    ? (contact.avatar.startsWith('http') || contact.avatar.startsWith('/') 
+                                                        ? contact.avatar 
+                                                        : `/uploads/avatars/${contact.avatar}`) 
+                                                    : (isDoctorViewer ? '/img/default-avatar.png' : '/img/default-doctor.png')} 
                                                 className="rounded-circle shadow-sm" 
                                                 style={{ width: '45px', height: '45px', objectFit: 'cover' }} 
                                                 alt="" 
@@ -158,7 +162,11 @@ const DoctorPatientChatPage = ({ doctor, patient, user, doctors = [], locale = '
                             <div className="d-flex align-items-center gap-3">
                                 <div className="position-relative">
                                     <img 
-                                        src={chatPartner.avatar && chatPartner.avatar !== '' ? chatPartner.avatar : (isDoctorViewer ? '/img/default-avatar.png' : '/img/default-doctor.png')} 
+                                        src={chatPartner.avatar && chatPartner.avatar !== ''
+                                            ? (chatPartner.avatar.startsWith('http') || chatPartner.avatar.startsWith('/') 
+                                                ? chatPartner.avatar 
+                                                : `/uploads/avatars/${chatPartner.avatar}`) 
+                                            : (isDoctorViewer ? '/img/default-avatar.png' : '/img/default-doctor.png')} 
                                         className="rounded-circle shadow-sm" 
                                         style={{ width: '45px', height: '45px', objectFit: 'cover' }} 
                                         alt="" 
