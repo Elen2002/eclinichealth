@@ -83,7 +83,7 @@
                             {% if user.qrPath %}
                                 <img src="{{ user.qrPath }}" alt="QR ID" class="img-fluid" style="width: 150px; height: 150px;">
                             {% else %}
-                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://eclinichealth.int/patient/profile/{{ user.id }}" 
+                                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ app.request.schemeAndHttpHost }}/patient/profile/{{ user.id }}" 
                                      alt="QR ID" class="img-fluid" style="width: 150px; height: 150px;">
                             {% endif %}
                         </div>

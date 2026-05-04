@@ -50,7 +50,8 @@ class GeneratePatientQrCommand extends Command
         foreach ($users as $user) {
             if (!in_array('ROLE_DOCTOR', $user->getRoles()) && !in_array('ROLE_ADMIN', $user->getRoles()) && !in_array('ROLE_SUPER_ADMIN', $user->getRoles())) {
                 // Generate a URL for the QR code to point to the scan/profile page
-                $qrData = 'https://eclinichealth.int/patient/profile/' . $user->getId();
+                $baseUrl = $_ENV['DEFAULT_URI'] ?? 'https://eclinichealth.ru';
+                $qrData = rtrim($baseUrl, '/') . '/patient/profile/' . $user->getId();
                 
                 try {
                     $result = \Endroid\QrCode\Builder\Builder::create()
