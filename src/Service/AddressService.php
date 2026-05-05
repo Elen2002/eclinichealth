@@ -64,13 +64,13 @@ class AddressService implements AddressInterface
     }
 
     public function getAddress(int $entityId, string $className): Address|null{
-        /** @var Address $address */
+        
         $address = $this->addressRepository->findOneBy(['entityId' => $entityId, 'className'=> $className]);
         if(!empty($address)){
             $addressArea = $this->addressAreaRepository->findBy(['address' => $address]);
 
             $areaCoordinates = [];
-            /** @var AddressArea $area */
+            
             foreach ($addressArea as $area){
                 $item = [
                     (float)$area->getLat(),
@@ -127,11 +127,11 @@ class AddressService implements AddressInterface
     {
         $addresses =  $this->addressRepository->findBy(['className' => $className]);
         $coordinates = [];
-        /** @var Address $address */
+        
         foreach ($addresses as $address){
 
             $areas = $this->addressAreaRepository->findBy(['address' => $address->getId()]);
-            /** @var AddressArea $area */
+            
             foreach ($areas as $area){
                 $item = [$area->getLat(), $area->getLong()];
                 $coordinates[] = $item;

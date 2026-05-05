@@ -1,10 +1,5 @@
-// import './stimulus_bootstrap.js';
-/*
- * Welcome to your app's main JavaScript file!
- *
- * This file will be included onto the page via the importmap() Twig function,
- * which should already be in your base.html.twig.
- */
+
+
 import 'leaflet/dist/leaflet.css'
 import './styles/app.scss';
 import './styles/style.scss';
@@ -15,7 +10,7 @@ import 'bootstrap-icons/font/bootstrap-icons.css'
 import * as bootstrap from 'bootstrap';
 window.bootstrap = bootstrap;
 
-// JS
+
 import './js/main.js';
 import 'leaflet/dist/leaflet.js'
 import './js/map.js'
@@ -23,9 +18,9 @@ import './js/home_chart.js';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
-// Reorganized Layout & Page Logic
+
 import './js/layout/dashboard.js';
-// import './js/layout/header.js';
+
 import './js/pages/profile.js';
 import './js/pages/notifications.js';
 
@@ -35,7 +30,7 @@ import 'select2';
 
 window.$ = window.jQuery = $;
 
-// Initialize Select2 for all multiselects
+
 document.addEventListener('DOMContentLoaded', () => {
     const locale = window.APP_DATA?.locale || 'en';
     const placeholders = {
@@ -54,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// Initialize AOS
+
 document.addEventListener('DOMContentLoaded', () => {
     AOS.init({
         duration: 800,
@@ -64,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// React (Temporary imports for remaining pages)
+
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import DoctorDashboard from './components/DoctorDashboard.jsx';
@@ -83,7 +78,7 @@ const ChatContainer = () => {
     const locale = window.APP_DATA?.locale || 'en';
     
     React.useEffect(() => {
-        // Allow opening the AI Modal from external triggers (like Home page buttons)
+        
         window.openChat = () => setIsAiModalOpen(true);
     }, []);
     
@@ -102,10 +97,10 @@ const ChatContainer = () => {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    // React components still in transition
-    // ...
+    
+    
 
-    // Doctor Dashboard
+    
     const doctorDashboardRoot = document.getElementById('doctor-dashboard-root');
     if (doctorDashboardRoot) {
         const root = createRoot(doctorDashboardRoot);
@@ -126,8 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Other pages in transition...
-    // Hospital Page
+    
+    
     const hospitalPageRoot = document.getElementById('hospital-page-root');
     if (hospitalPageRoot) {
         const root = createRoot(hospitalPageRoot);
@@ -135,14 +130,14 @@ document.addEventListener('DOMContentLoaded', () => {
         root.render(<HospitalPage hospitalData={data} />);
     }
 
-    // How It Works Page
+    
     const howItWorksRoot = document.getElementById('how-it-works-root');
     if (howItWorksRoot) {
         const root = createRoot(howItWorksRoot);
         root.render(<HowItWorksPage />);
     }
 
-    // Departments Page
+    
     const departmentsRoot = document.getElementById('departments-page-root');
     if (departmentsRoot) {
         const root = createRoot(departmentsRoot);
@@ -153,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         />);
     }
 
-    // Department Detail Page
+    
     const departmentDetailRoot = document.getElementById('department-detail-page-root');
     if (departmentDetailRoot) {
         const root = createRoot(departmentDetailRoot);
@@ -164,21 +159,21 @@ document.addEventListener('DOMContentLoaded', () => {
         />);
     }
 
-    // Chat (AI + Support)
+    
     const aiChatRoot = document.getElementById('ai-chat-root');
     if (aiChatRoot) {
         const root = createRoot(aiChatRoot);
         root.render(<ChatContainer />);
     }
 
-    // Admin Support Manager
+    
     const adminChatRoot = document.getElementById('admin-chat-root');
     if (adminChatRoot) {
         const root = createRoot(adminChatRoot);
         root.render(<AdminChatManager locale={adminChatRoot.dataset.locale} />);
     }
 
-    // Doctor-Patient Live Chat Page
+    
     const chatPageRoot = document.getElementById('doctor-patient-chat-root');
     if (chatPageRoot) {
         const root = createRoot(chatPageRoot);
@@ -194,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Global Notification Badge
+    
     const notificationRoot = document.getElementById('notification-badge-root');
     if (notificationRoot) {
         const root = createRoot(notificationRoot);

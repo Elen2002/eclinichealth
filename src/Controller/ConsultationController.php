@@ -33,23 +33,23 @@ class ConsultationController extends AbstractController
         
         if ($request->isMethod('POST')) {
             $consultation = new Consultation();
-            // Auto-fill from logged in user
+            
             $consultation->setPatientName($request->request->get('name'));
-            $consultation->setPatientEmail($user->getUserIdentifier()); // Enforce email from account
+            $consultation->setPatientEmail($user->getUserIdentifier()); 
             $consultation->setPatientPhone($request->request->get('phone'));
             
             $dateStr = $request->request->get('date');
             try {
                 $consultation->setRequestedDate(new \DateTime($dateStr));
             } catch (\Exception $e) {
-                // Fallback or error
+                
                 $this->addFlash('error', 'Invalid date format.');
                 return $this->redirectToRoute('app_consultation_new');
             }
 
             $consultation->setMessage($request->request->get('message'));
 
-            // Relationships
+            
             $hospitalId = $request->request->get('hospital');
             $departmentId = $request->request->get('department');
             $doctorId = $request->request->get('doctor');
@@ -69,7 +69,7 @@ class ConsultationController extends AbstractController
                 
                 $entityManager->flush();
                 $this->addFlash('success', 'Your appointment request has been sent successfully!');
-                return $this->redirectToRoute('app_profile'); // Redirect to profile to see the new request
+                return $this->redirectToRoute('app_profile'); 
             } else {
                 $this->addFlash('error', 'Please select a valid Hospital, Department, and Doctor.');
             }
@@ -133,7 +133,7 @@ class ConsultationController extends AbstractController
                  $consultation->setMedicalTests($tests);
                  $consultation->setStatus('confirmed');
                  
-                 // Automatically add to doctor's patient list if not already there
+                 
                  $patientUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $consultation->getPatientEmail()]);
                  if ($patientUser) {
                      $existingRelation = $entityManager->getRepository(DoctorPacient::class)->findOneBy([
@@ -151,7 +151,7 @@ class ConsultationController extends AbstractController
                  
                  $entityManager->flush();
                  
-                 // Notify patient
+                 
                  if ($patientUser) {
                      $notif = new \App\Entity\Notification();
                      $notif->setUser($patientUser);
@@ -195,8 +195,8 @@ class ConsultationController extends AbstractController
     {
          $user = $this->getUser();
          
-         // Verify the user is the patient for this consultation
-         // Using email as the link per existing logic in ProfileController
+         
+         
          if ($consultation->getPatientEmail() !== $user->getUserIdentifier()) {
              throw $this->createAccessDeniedException('You can only view your own consultations.');
          }
@@ -219,7 +219,7 @@ class ConsultationController extends AbstractController
          $consultation->setIsPatientApproved(true);
          $entityManager->flush();
 
-         // Notify doctor
+         
          $doctorUser = $consultation->getDoctor() ? $consultation->getDoctor()->getUser() : null;
          if ($doctorUser) {
              $notif = new \App\Entity\Notification();

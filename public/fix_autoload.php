@@ -1,5 +1,5 @@
 <?php
-// Safety token - delete this file after use
+
 $token = $_GET['token'] ?? '';
 if ($token !== 'eclinic2026fix') {
     die('Unauthorized');
@@ -10,7 +10,7 @@ $projectRoot = dirname(__DIR__);
 echo "<pre>";
 echo "Project root: $projectRoot\n\n";
 
-// Step 1: Check what autoload_classmap.php contains
+
 $classmapFile = $projectRoot . '/vendor/composer/autoload_classmap.php';
 if (file_exists($classmapFile)) {
     $classmap = require $classmapFile;
@@ -23,7 +23,7 @@ if (file_exists($classmapFile)) {
     echo "No classmap file found.\n\n";
 }
 
-// Step 2: Regenerate the autoloader classmap with correct server paths
+
 echo "Regenerating autoloader...\n";
 $descriptors = [
     0 => ['pipe', 'r'],
@@ -52,13 +52,13 @@ if (is_resource($process)) {
     echo "Failed to run composer.\n";
 }
 
-// Step 3: Clear Symfony cache
+
 echo "\nClearing Symfony cache...\n";
 $cacheDir = $projectRoot . '/var/cache';
 if (is_dir($cacheDir)) {
     $devDir = $cacheDir . '/dev';
     if (is_dir($devDir)) {
-        // Rename old cache and create fresh directory
+        
         $oldCache = $cacheDir . '/dev_old_' . time();
         rename($devDir, $oldCache);
         mkdir($devDir, 0777, true);

@@ -4,7 +4,7 @@
 
 {% block body %}
 <div class="profile-page bg-light min-vh-100 mt-5 pt-4">
-    <!-- Profile Header/Hero -->
+    
     <div class="profile-hero py-5 mb-5" style="background: linear-gradient(135deg, var(--brand-color), var(--accent-color));">
         <div class="container position-relative" style="z-index: 1;">
             <div class="row align-items-center">
@@ -42,9 +42,9 @@
 
     <div class="container pb-5">
         <div class="row">
-            <!-- Left Sidebar -->
+            
             <div class="col-lg-4">
-                <!-- Quick Stats -->
+                
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
                     <div class="card-body p-4">
                         <h6 class="fw-bold text-muted text-uppercase small mb-4 tracking-wider">{{ 'Personal Information'|trans }}</h6>
@@ -74,7 +74,7 @@
                     </div>
                 </div>
 
-                <!-- Digital ID Card -->
+                
                 {% if not is_granted('ROLE_DOCTOR') and not is_granted('ROLE_ADMIN') %}
                 <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden text-center">
                     <div class="card-body p-4">
@@ -94,9 +94,9 @@
 
             </div>
 
-            <!-- Right Content -->
+            
             <div class="col-lg-8">
-                <!-- My Doctors Table Section -->
+                
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4" style="background: var(--surface-color);">
                     <div class="card-header border-0 py-4 px-4 d-flex justify-content-between align-items-center" style="background: var(--surface-color);">
                         <h5 class="fw-bold mb-0"><i class="bi bi-heart-fill text-danger me-2"></i>{{ 'My Doctors'|trans }}</h5>
@@ -162,7 +162,7 @@
                     </div>
                 </div>
 
-                <!-- Consultation History -->
+                
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100" style="background: var(--surface-color);">
                     <div class="card-header border-0 py-4 px-4 d-flex justify-content-between align-items-center" style="background: var(--surface-color);">
                         <h5 class="fw-bold mb-0"><i class="bi bi-calendar2-week text-primary me-2"></i>{{ 'Appointment History'|trans }}</h5>

@@ -21,7 +21,7 @@ class QrScanController extends AbstractController
             $doctor = $entityManager->getRepository(\App\Entity\Doctor::class)->findOneBy(['user' => $this->getUser()]);
         }
 
-        // Fetch patient's doctors
+        
         $doctorRelations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['pacient' => $patient]);
         $patientDoctors = [];
         foreach ($doctorRelations as $rel) {

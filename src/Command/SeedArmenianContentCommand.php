@@ -37,16 +37,16 @@ class SeedArmenianContentCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $io->title('Seeding Armenian Medical Content');
 
-        // Clear existing demo images (remote URLs)
+        
         $this->entityManager->createQuery('DELETE FROM App\Entity\Images i WHERE i.title LIKE \'https://images.unsplash.com/%\'')->execute();
 
-        // 1. Seed Departments
+        
         $departments = $this->seedDepartments($io);
 
-        // 2. Seed Hospitals
+        
         $hospitals = $this->seedHospitals($io, $departments);
 
-        // 3. Seed Doctors
+        
         $this->seedDoctors($io, $hospitals, $departments);
 
         $io->success('All Armenian content seeded successfully!');
@@ -86,7 +86,7 @@ class SeedArmenianContentCommand extends Command
 
         $entities = [];
         foreach ($deptData as [$name, $desc]) {
-            // Check if exists
+            
             $existing = $this->entityManager->getRepository(Department::class)->findOneBy(['name' => $name]);
             if ($existing) {
                 $entities[] = $existing;
@@ -97,9 +97,9 @@ class SeedArmenianContentCommand extends Command
             $dept->setName($name);
             $dept->setDescription($desc);
             $this->entityManager->persist($dept);
-            $this->entityManager->flush(); // Flush to get ID
+            $this->entityManager->flush(); 
 
-            // Add unique image
+            
             $imgUrl = match($name) {
                 'Կարդիոլոգիա' => 'https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&q=80&w=800',
                 'Նյարդաբանություն' => 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&q=80&w=800',
@@ -152,12 +152,12 @@ class SeedArmenianContentCommand extends Command
             $hospital->setStaffCount(rand(50, 200));
             
             $this->entityManager->persist($hospital);
-            $this->entityManager->flush(); // Flush to get ID
+            $this->entityManager->flush(); 
 
-            // Add unique image
+            
             $this->addImage($hospital, 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&q=80&w=1200&sig=' . $hospital->getId());
 
-            // Assign some departments
+            
             $randomDepts = (array) array_rand($departments, rand(3, 5));
             foreach ($randomDepts as $idx) {
                 $hd = new HospitalDepartment();
@@ -189,8 +189,8 @@ class SeedArmenianContentCommand extends Command
             ['Տիգրան', 'Բաղդասարյան', 'doctor_male.png', 'Ատամնաբույժ'],
         ];
 
-        // To ensure every Hospital+Department has at least one doctor,
-        // let's fetch all HospitalDepartment relations and assign doctors to them first.
+        
+        
         $hdRelations = $this->entityManager->getRepository(HospitalDepartment::class)->findAll();
         
         $docIndex = 0;

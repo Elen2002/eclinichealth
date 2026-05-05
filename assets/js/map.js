@@ -33,7 +33,7 @@ let sqIcon = L.icon({
 });
 $(document).ready(function () {
     if ($('#map').length === 0) {
-        // Check for other map related inputs to avoid errors if map is missing but inputs exist (rare but safe)
+        
         if ($('#address-input').length === 0) {
             return;
         }
@@ -150,11 +150,11 @@ $(document).ready(function () {
             let boundaryCoords = GEO_POLYGONS;
             let boundaryPolygon = L.polygon(boundaryCoords, { color: 'green' }).addTo(map);
             map.fitBounds(boundaryPolygon.getBounds());
-            // L.marker(boundaryPolygon.getCenter()).addTo(map);
+            
         }
     }
     if (currentMode === 'search' || currentMode === 'search-add') {
-        // drawPolygonAndPoint();
+        
 
         const searchInput = $('#address-input');
         debugger
@@ -267,7 +267,7 @@ export function reqBasket(coord = '') {
                         removeMarkerByCoords(jsArray[0], jsArray[1]);
                         marker = L.marker(jsArray, { icon: greenIcon }).addTo(map);
                         marker.boundInfo = arr.bounds;
-                        // marker.wasClicked = false;
+                        
                         clickMarker(marker)
                     } else {
                         removeMarkerByCoords(jsArray[0], jsArray[1]);
@@ -367,18 +367,18 @@ function reverseGeocode(searchMarker, lat, lon) {
 
                 updateCoordinatesDisplay(lat, lon, result.display_name);
                 map.setView([lat, lon], 13);
-                // map.on('click', function (e) {
-                //     const latlng = [e.latlng.lat, e.latlng.lng];
-                //     if (point.lat != 'undefined') {
-                //         map.eachLayer(function (layer) {
-                //             map.removeLayer(layer);
-                //         });
-                //         layerMap.addTo(map);
-                //     }
-                //     point = e.latlng
-                //     L.marker(point, {icon: greenIcon}).addTo(map);
-                //     $('#coordinates').val(e.latlng)
-                // })
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
 
             } else {
                 alert("Адрес не найден.");

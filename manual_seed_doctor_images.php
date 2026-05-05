@@ -1,5 +1,5 @@
 <?php
-// Manual seed script for doctor images
+
 $dsn = "pgsql:host=localhost;port=5432;dbname=eclinichealth";
 $user = "postgres";
 $pass = "root12";
@@ -28,7 +28,7 @@ try {
     foreach ($doctors as $doctor) {
         $id = $doctor['id'];
         
-        // Check if has images
+        
         $stmt = $pdo->prepare("SELECT count(*) FROM images WHERE parent_class = ? AND entity_id = ?");
         $stmt->execute(['App\\Entity\\Doctor', $id]);
         if ($stmt->fetchColumn() == 0) {

@@ -20,32 +20,32 @@ class DoctorDashboardController extends AbstractController
     {
         $user = $this->getUser();
         
-        // Fetch the Doctor entity associated with this User
+        
         $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
 
         if (!$doctor) {
-            // Fallback if the user has ROLE_DOCTOR but no Doctor entity is linked (should not happen in normal flow)
+            
             $this->addFlash('error', 'Doctor profile not found.');
             return $this->redirectToRoute('app_home');
         }
 
-        // Fetch Stats
-        // 1. Patients (DoctorPacient table links User (doctor) to User (patient))
+        
+        
         $doctorPatients = $entityManager->getRepository(DoctorPacient::class)->findBy(['doctor' => $user]);
         $totalPatients = count($doctorPatients);
 
-        // 2. Consultations (Consultation table links to Doctor entity)
+        
         $consultations = $entityManager->getRepository(Consultation::class)->findBy(['doctor' => $doctor], ['requestedDate' => 'DESC']);
         
         $pendingConsultations = 0;
-        $appointmentsPerMonth = []; // For the graph
+        $appointmentsPerMonth = []; 
         
         foreach ($consultations as $consultation) {
             if ($consultation->getStatus() === 'pending') {
                 $pendingConsultations++;
             }
             
-            // Group by month for chart: "Y-m"
+            
             $monthKey = $consultation->getCreatedAt()->format('Y-m');
             if (!isset($appointmentsPerMonth[$monthKey])) {
                 $appointmentsPerMonth[$monthKey] = 0;
@@ -53,19 +53,19 @@ class DoctorDashboardController extends AbstractController
             $appointmentsPerMonth[$monthKey]++;
         }
         
-        // Sort chart data
+        
         ksort($appointmentsPerMonth);
         $chartLabels = array_keys($appointmentsPerMonth);
         $chartData = array_values($appointmentsPerMonth);
 
-        // Fetch last unique chat partners from ChatMessage entity
+        
         $recentMessages = $entityManager->createQuery(
             'SELECT m FROM App\Entity\ChatMessage m
              WHERE m.sender = :user OR m.recipient = :user
              ORDER BY m.createdAt DESC'
         )
         ->setParameter('user', $user)
-        ->setMaxResults(50) // Fetch more to filter unique partners
+        ->setMaxResults(50) 
         ->getResult();
 
         $allData = [];
@@ -88,7 +88,7 @@ class DoctorDashboardController extends AbstractController
             ];
         }
 
-        // Add notifications as well to be consistent with API
+        
         $notifications = $entityManager->getRepository(\App\Entity\Notification::class)->findBy(
             ['user' => $user],
             ['createdAt' => 'DESC'],
@@ -106,7 +106,7 @@ class DoctorDashboardController extends AbstractController
             ];
         }
 
-        // Deduplicate by title
+        
         usort($allData, fn($a, $b) => $b['timestamp'] <=> $a['timestamp']);
         
         $communications = [];

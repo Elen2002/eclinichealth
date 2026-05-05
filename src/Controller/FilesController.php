@@ -16,9 +16,9 @@ class FilesController extends AbstractController
     {
         $baseDir = $bag->get('kernel.project_dir');
         
-        // Construct path based on type
-        // upload/{entity}/{id}/{type}/{size}/{filename}
-        // e.g. upload/hospital/1/images/original/file.jpg
+        
+        
+        
         
         $path = $baseDir . '/upload/' . $class_name . '/' . $class_id . '/' . $file_type;
         
@@ -34,7 +34,7 @@ class FilesController extends AbstractController
 
         $response = new BinaryFileResponse($path);
         
-        // Set appropriate content disposition
+        
         $response->setContentDisposition(
             ResponseHeaderBag::DISPOSITION_INLINE,
             $file_name

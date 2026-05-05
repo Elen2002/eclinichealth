@@ -83,7 +83,7 @@ class SeedHospitalDoctorsCommand extends Command
 
         foreach ($doctorData as $index => [$first, $last, $spec]) {
             $user = new User();
-            // Use random suffix to avoid unique constraint violations if running multiple times
+            
             $user->setEmail(strtolower($first . '.' . $last . '.' . $hospital->getId() . '.' . bin2hex(random_bytes(2)) . '@eclinic.health'));
             $user->setFirstName($first);
             $user->setLastName($last);
@@ -96,7 +96,7 @@ class SeedHospitalDoctorsCommand extends Command
             $doctor->setUser($user);
             $doctor->setHospital($hospital);
             if ($depts->count() > 0) {
-                // Distribute doctors across available departments
+                
                 $deptIndex = $index % $depts->count();
                 $doctor->setDepartment($depts->get($deptIndex)->getDepartment());
             }

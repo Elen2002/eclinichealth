@@ -55,7 +55,7 @@ class DoctorController extends AbstractController
     {
         $form = $this->createForm(DoctorType::class, $doctor);
         
-        // Pre-populate unmapped fields
+        
         $form->get('email')->setData($doctor->getUser()?->getEmail());
         $form->get('name')->setData($doctor->getUser()?->getFirstName() . ' ' . $doctor->getUser()?->getLastName());
 
@@ -135,7 +135,7 @@ class DoctorController extends AbstractController
         EntityManagerInterface $entityManager,
         UserPasswordHasherInterface $passwordHasher
     ): Response {
-        /** @var \Symfony\Component\HttpFoundation\File\UploadedFile $file */
+        
         $file = $request->files->get('import_file');
 
         if (!$file) {
@@ -151,18 +151,18 @@ class DoctorController extends AbstractController
 
         $count = 0;
         if (($handle = fopen($file->getRealPath(), 'r')) !== false) {
-            // Handle optional BOM
+            
             $bom = fread($handle, 3);
             if ($bom !== chr(0xEF) . chr(0xBB) . chr(0xBF)) {
                 rewind($handle);
             }
 
-            $header = fgetcsv($handle); // skip header row
+            $header = fgetcsv($handle); 
 
             while (($row = fgetcsv($handle)) !== false) {
                 if (empty(array_filter($row))) continue;
 
-                // Expected CSV columns: Email, Phone, Specialty, Hospital (optional), Department (optional)
+                
                 $email     = trim($row[0] ?? '');
                 $phone     = trim($row[1] ?? '');
                 $specialty = trim($row[2] ?? 'General');
@@ -171,7 +171,7 @@ class DoctorController extends AbstractController
 
                 if (!$email || !filter_var($email, FILTER_VALIDATE_EMAIL)) continue;
 
-                // Skip if user with same email already exists
+                
                 $existing = $entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
                 if ($existing) continue;
 

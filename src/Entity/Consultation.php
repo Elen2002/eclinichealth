@@ -47,7 +47,7 @@ class Consultation
 
     #[ORM\Column(length: 20)]
     #[Groups(['consultation:read'])]
-    private ?string $status = 'pending'; // pending, confirmed, cancelled
+    private ?string $status = 'pending'; 
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $prescription = null;

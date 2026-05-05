@@ -184,17 +184,13 @@ class Hospital
         return $this;
     }
 
-    /**
-     * @return Collection<int, HospitalDepartment>
-     */
+    
     public function getHospitalDepartments(): Collection
     {
         return $this->hospitalDepartments;
     }
 
-    /**
-     * @return Collection<int, Doctor>
-     */
+    
     public function getDoctors(): Collection
     {
         return $this->doctors;

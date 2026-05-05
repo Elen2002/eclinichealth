@@ -41,9 +41,9 @@ final class AdminController extends AbstractController
         foreach ($rooms as $room) {
             $roomId = $room['roomId'];
             
-            // Filter to show only support chats
-            // Support chats use the userId/GuestId directly as roomId
-            // Doctor-patient chats use 'room_' or 'pair_' prefixes
+            
+            
+            
             if (str_starts_with($roomId, 'room_') || str_starts_with($roomId, 'pair_')) {
                 continue;
             }

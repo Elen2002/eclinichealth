@@ -137,7 +137,7 @@ final class DepartmentController extends PAbstractController
     #[Route('/import', name: 'app_department_import', methods: ['POST'])]
     public function import(Request $request, EntityManagerInterface $entityManager, DepartmentRepository $departmentRepository): Response
     {
-        /** @var \Symfony\Component\HttpFoundation\File\UploadedFile $file */
+        
         $file = $request->files->get('import_file');
 
         if (!$file) {
@@ -153,24 +153,24 @@ final class DepartmentController extends PAbstractController
 
         $count = 0;
         if (($handle = fopen($file->getRealPath(), 'r')) !== false) {
-            // Handle optional BOM
+            
             $bom = fread($handle, 3);
             if ($bom !== chr(0xEF) . chr(0xBB) . chr(0xBF)) {
                 rewind($handle);
             }
 
-            $header = fgetcsv($handle); // skip header row
+            $header = fgetcsv($handle); 
 
             while (($row = fgetcsv($handle)) !== false) {
                 if (empty(array_filter($row))) continue;
 
-                // Expected columns: Name, Description (minimal import)
+                
                 $name = trim($row[0] ?? '');
                 $description = trim($row[1] ?? '');
 
                 if (!$name) continue;
 
-                // Skip if department with same name already exists
+                
                 $existing = $departmentRepository->findOneBy(['name' => $name]);
                 if ($existing) continue;
 

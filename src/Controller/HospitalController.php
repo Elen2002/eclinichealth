@@ -87,7 +87,7 @@ final class HospitalController extends AbstractController
         $filename = "hospitals_export_" . date('Y-m-d') . ($type === 'excel' ? ".csv" : ".csv");
 
         $fp = fopen('php://temp', 'r+');
-        // Add UTF-8 BOM for Excel compatibility
+        
         fprintf($fp, chr(0xEF).chr(0xBB).chr(0xBF));
 
         foreach ($data as $row) {
@@ -111,7 +111,7 @@ final class HospitalController extends AbstractController
      #[Route('/import', name: 'app_hospital_import', methods: ['POST'])]
     public function import(Request $request, EntityManagerInterface $entityManager): Response
     {
-        /** @var UploadedFile $file */
+        
         $file = $request->files->get('import_file');
 
         if (!$file) {
@@ -126,7 +126,7 @@ final class HospitalController extends AbstractController
 
         $count = 0;
         if (($handle = fopen($file->getRealPath(), "r")) !== FALSE) {
-            // Handle BOM if present
+            
             $bom = fread($handle, 3);
             if ($bom !== chr(0xEF).chr(0xBB).chr(0xBF)) {
                 rewind($handle);
@@ -135,22 +135,22 @@ final class HospitalController extends AbstractController
             $header = fgetcsv($handle);
 
             while (($data = fgetcsv($handle)) !== FALSE) {
-                if (count($data) < 2) continue; // Skip empty lines
+                if (count($data) < 2) continue; 
 
                 $hospital = new Hospital();
-                // We assume columns are roughly: [ID (optional/ignored), Name, Address, Phone, Email, ...]
-                // Based on our export: [ID, Name, Address, Phone, Email, Departments, Staff Count, About]
+                
+                
 
                 $name = $data[1] ?? ($data[0] ?? null);
                 if (!$name || is_numeric($name)) {
-                    // If first col is ID, name is second
+                    
                     $name = $data[1] ?? 'Unnamed Hospital';
                     $address = $data[2] ?? '';
                     $phone = $data[3] ?? '';
                     $email = $data[4] ?? '';
                     $about = $data[7] ?? '';
                 } else {
-                    // If first col is Name
+                    
                     $address = $data[1] ?? '';
                     $phone = $data[2] ?? '';
                     $email = $data[3] ?? '';
@@ -255,7 +255,7 @@ final class HospitalController extends AbstractController
             return $this->redirectToRoute('app_hospital_show', ['id' => $hospital->getId()]);
         }
 
-        // Check if already assigned
+        
         $existing = $entityManager->getRepository(HospitalDepartment::class)->findOneBy([
             'hospital' => $hospital,
             'department' => $department

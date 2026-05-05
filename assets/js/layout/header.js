@@ -1,4 +1,4 @@
-/* Global Header Logic */
+
 document.addEventListener('DOMContentLoaded', function() {
     const header = document.getElementById('header');
     const langBtn = document.getElementById('lang-selector-btn');
@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileClose = document.getElementById('mobile-nav-close');
     const mobileOverlay = document.getElementById('mobile-nav-overlay');
 
-    // Scroll effect
+    
     window.addEventListener('scroll', () => {
         if (header) {
             if (window.scrollY > 20) {
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Language dropdown
+    
     if (langBtn && langDropdown) {
         langBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Mobile nav
+    
     if (mobileToggle && mobileOverlay) {
         mobileToggle.addEventListener('click', () => mobileOverlay.classList.remove('d-none'));
         if (mobileClose) {

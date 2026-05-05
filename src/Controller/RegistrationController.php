@@ -36,13 +36,13 @@ class RegistrationController extends PAbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var string $plainPassword */
+            
             $plainPassword = $form->get('plainPassword')->getData();
 
-            // encode the plain password
+            
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             
-            // Set first name from email prefix and ensure empty last name
+            
             $emailParts = explode('@', $user->getEmail());
             $user->setFirstName(ucfirst($emailParts[0]));
             $user->setLastName('');
@@ -52,7 +52,7 @@ class RegistrationController extends PAbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // generate a signed url and email it to the user
+            
             $this->emailVerifier->sendEmailConfirmation('app_verify_email', $user,
                 (new TemplatedEmail())
                     ->from(new Address('zalibekyanelen@gmail.com', 'EClinick & Health'))
@@ -61,7 +61,7 @@ class RegistrationController extends PAbstractController
                     ->htmlTemplate('registration/confirmation_email.html.twig')
             );
 
-            // automatic login
+            
             return $security->login($user, 'form_login', 'main');
         }
 
@@ -75,9 +75,9 @@ class RegistrationController extends PAbstractController
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
-        // validate email confirmation link, sets User::isVerified=true and persists
+        
         try {
-            /** @var User $user */
+            
             $user = $this->getUser();
             $this->emailVerifier->handleEmailConfirmation($request, $user);
         } catch (VerifyEmailExceptionInterface $exception) {
@@ -86,7 +86,7 @@ class RegistrationController extends PAbstractController
             return $this->redirectToRoute('app_register');
         }
 
-        // @TODO Change the redirect on success and handle or remove the flash message in your templates
+        
         $this->addFlash('success', 'Your email address has been verified.');
 
         return $this->redirectToRoute('app_register');

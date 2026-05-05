@@ -50,7 +50,7 @@ class UploadFileService implements UploadFileInterface
 
     public function uploadFiles(array $files, string $documentType, string $className, int $id, bool $remove = false): void
     {
-        /** @var UploadedFile $file */
+        
         foreach ($files as $file) {
             if (!$file instanceof UploadedFile) {
                 continue;
@@ -92,7 +92,7 @@ class UploadFileService implements UploadFileInterface
 
     public function uploadAvatar($file, int $id)
     {
-        // $classDirName = strtolower(explode('\\', $className)[2]);
+        
         $imageDirectory = $this->bag->get('base_dir') . '/public/avatars/' . $id;
         if (!$this->filesystem->exists($imageDirectory)) {
             $this->filesystem->mkdir($imageDirectory);
@@ -102,9 +102,9 @@ class UploadFileService implements UploadFileInterface
         try {
             $file->move($imageDirectory, $safeFilename);
         } catch (FileException $e) {
-            // ... handle exception if something happens during file upload
+            
         }
-        // $uploadedName = $this->uploadFile($file, $imageDirectory);
+        
         return $safeFilename;
     }
 
@@ -158,11 +158,11 @@ class UploadFileService implements UploadFileInterface
         $safeFilename = $this->slugger->slug($originalFilename);
         $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
 
-        // Move the file to the directory where brochures are stored
+        
         try {
             $file->move($uploadDirectory, $newFilename);
         } catch (FileException $e) {
-            // ... handle exception if something happens during file upload
+            
         }
 
         return $newFilename;
@@ -192,12 +192,12 @@ class UploadFileService implements UploadFileInterface
                 imagegif($f, $targetPath);
                 break;
         }
-        // Move the file to the directory where brochures are stored
-//        try {
-//            $file->move($uploadDirectory, $newFilename);
-//        } catch (FileException $e) {
-//            // ... handle exception if something happens during file upload
-//        }
+        
+
+
+
+
+
 
         return $newFilename;
 
@@ -234,7 +234,7 @@ class UploadFileService implements UploadFileInterface
         $entityNameLow = strtolower($entityName);
         if (!empty($size)) {
             $objs = $this->em->getRepository(Images::class)->findBy(['parentClass' => $className, 'entityId' => $id, 'size' => $size]);
-            // If no images found for specific size, try any size
+            
             if (empty($objs)) {
                 $objs = $this->em->getRepository(Images::class)->findBy(['parentClass' => $className, 'entityId' => $id]);
             }

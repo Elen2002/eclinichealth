@@ -35,12 +35,7 @@ class AppExtension extends AbstractExtension
 
     }
 
-    /**
-     * @throws SyntaxError
-     * @throws \ReflectionException
-     * @throws RuntimeError
-     * @throws LoaderError
-     */
+    
     public function formGenerator($form, string $buttonName = '', bool $map = false,
                                   string $mode = '', string $type = 'normal',
                                   bool $polygon = false, bool $marker = false,

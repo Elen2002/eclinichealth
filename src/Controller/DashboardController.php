@@ -41,7 +41,7 @@ class DashboardController extends AbstractController
             return $this->redirectToRoute('app_doctor_dashboard');
         }
 
-        // Default redirect for generic users
+        
         return $this->redirectToRoute('app_home');
     }
 
@@ -99,13 +99,13 @@ class DashboardController extends AbstractController
             5
         );
 
-        // Simple chart data (last 6 months)
+        
         $chartLabels = [];
         $chartData = [];
         for ($i = 5; $i >= 0; $i--) {
             $month = (new \DateTime())->modify("-$i months");
             $chartLabels[] = $month->format('M Y');
-            $chartData[] = rand(5, 20); // Placeholder for actual trend data
+            $chartData[] = rand(5, 20); 
         }
 
         $repo = $entityManager->getRepository(\App\Entity\Notification::class);

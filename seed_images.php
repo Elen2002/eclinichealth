@@ -1,5 +1,5 @@
 <?php
-// seed_images.php - Standalone script to seed images directly via PDO
+
 
 $dsn = "pgsql:host=localhost;port=5432;dbname=eclinichealth";
 $user = "postgres";
@@ -9,11 +9,11 @@ try {
     $pdo = new PDO($dsn, $user, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
     echo "Connected to database successfully.\n";
 
-    // 1. Clear existing Unsplash images
+    
     $pdo->exec("DELETE FROM images WHERE title LIKE 'https://images.unsplash.com/%'");
     echo "Cleared old Unsplash images.\n";
 
-    // 2. Seed Hospital Images
+    
     $hospitals = $pdo->query("SELECT id FROM hospital")->fetchAll(PDO::FETCH_ASSOC);
     foreach ($hospitals as $h) {
         $id = $h['id'];
@@ -23,7 +23,7 @@ try {
     }
     echo "Seeded images for " . count($hospitals) . " hospitals.\n";
 
-    // 3. Seed Department Images
+    
     $departments = $pdo->query("SELECT id, name FROM department")->fetchAll(PDO::FETCH_ASSOC);
     foreach ($departments as $d) {
         $id = $d['id'];

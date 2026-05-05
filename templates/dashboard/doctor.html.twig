@@ -3,7 +3,7 @@
 {% block title %}{{ 'Medical Dashboard'|trans }}{% endblock %}
 
 {% block body %}
-<!-- Dashboard Header -->
+
     <div id="doctor-dashboard-root"
          data-doctor="{{ doctor|serialize('json', { groups: 'doctor:read' })|e('html_attr') }}"
          data-hospital="{{ hospital|serialize('json', { groups: 'hospital:read' })|e('html_attr') }}"

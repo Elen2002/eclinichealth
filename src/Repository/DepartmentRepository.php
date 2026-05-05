@@ -8,9 +8,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<Department>
- */
+
 class DepartmentRepository extends ServiceEntityRepository
 {
     private EntityManagerInterface $em;
@@ -38,33 +36,31 @@ class DepartmentRepository extends ServiceEntityRepository
         }
     }
 
-    //    /**
-    //     * @return Department[] Returns an array of Department objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('d')
-    //            ->andWhere('d.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('d.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
-    //    public function findOneBySomeField($value): ?Department
-    //    {
-    //        return $this->createQueryBuilder('d')
-    //            ->andWhere('d.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
-    /**
-     * @return Department[] Returns an array of Department objects
-     */
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public function findAllActive(): array
     {
         return $this->createQueryBuilder('d')

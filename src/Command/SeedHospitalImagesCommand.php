@@ -49,7 +49,7 @@ class SeedHospitalImagesCommand extends Command
         $count = 0;
 
         foreach ($hospitals as $hospital) {
-            // Check if hospital already has images
+            
             $existingImages = $this->entityManager->getRepository(Images::class)->findBy([
                 'parentClass' => Hospital::class,
                 'entityId' => $hospital->getId()
@@ -79,7 +79,7 @@ class SeedHospitalImagesCommand extends Command
                         $newFilename = $uploadedNameBase . '.' . $extension;
                         $targetPath = $imageDirectory . '/' . $newFilename;
 
-                        // Use GD to resize and save
+                        
                         $src = @imagecreatefromstring($imageContent);
                         if ($src) {
                             $w = imagesx($src);

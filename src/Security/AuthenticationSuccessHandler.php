@@ -30,9 +30,9 @@ class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterf
             return new RedirectResponse($this->router->generate('admin'));
         }
 
-        // Default to Home for regular users
-        // Check if there is a target path in session (e.g. they tried to access a protected page)
-        // For simplicity, we redirect to home now, but we could improve this.
+        
+        
+        
         return new RedirectResponse($this->router->generate('app_home'));
     }
 }

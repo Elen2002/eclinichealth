@@ -26,7 +26,7 @@ class ProfileController extends AbstractController
         $email = $user->getUserIdentifier();
         $consultations = $consultationRepository->findBy(['patientEmail' => $email], ['requestedDate' => 'DESC']);
 
-        // Fetch doctors linked to this patient via DoctorPacient
+        
         $doctorRelations = $entityManager->getRepository(DoctorPacient::class)->findBy(['pacient' => $user]);
         $myDoctors = [];
         $seenDoctorIds = [];
@@ -92,7 +92,7 @@ class ProfileController extends AbstractController
             }
         }
 
-        // Fallback: If no relations yet, show chat page with first available or empty
+        
         return $this->render('profile/chat.html.twig', [
             'doctor' => null,
             'patient' => $isDoctor ? null : $user,
@@ -120,7 +120,7 @@ class ProfileController extends AbstractController
         $contacts = [];
 
         if ($isDoctor) {
-            // For doctor: show their patients
+            
             $patientRelations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['doctor' => $user]);
             foreach ($patientRelations as $relation) {
                 $p = $relation->getPacient();
@@ -134,7 +134,7 @@ class ProfileController extends AbstractController
                 ];
             }
         } else {
-            // For patient: show their doctors
+            
             $doctorRelations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['pacient' => $user]);
             $seenDoctorIds = [];
             foreach ($doctorRelations as $relation) {
@@ -197,7 +197,7 @@ class ProfileController extends AbstractController
         \Symfony\Component\String\Slugger\SluggerInterface $slugger,
         ConsultationRepository $consultationRepository
     ): Response {
-        /** @var User $user */
+        
         $user = $this->getUser();
         $form = $this->createForm(\App\Form\ProfileType::class, $user);
         $form->handleRequest($request);

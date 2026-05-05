@@ -30,9 +30,9 @@ class ApiAuthController extends AbstractController
             return $this->json(['error' => 'Invalid credentials'], 401);
         }
 
-        // For a simple generic app, we return the user info. 
-        // In a full production app, you'd return a JWT token here.
-        // Get or generate a simple token for mobile use
+        
+        
+        
         if (!$user->getApiToken()) {
             $user->setApiToken(bin2hex(random_bytes(32)));
             $entityManager->persist($user);

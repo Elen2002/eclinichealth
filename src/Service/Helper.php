@@ -45,27 +45,27 @@ class Helper
 
     public static function generateUniqNumber(string $prefix, int $length = 8): string
     {
-        // Generate a unique ID based on the current time in microseconds
-        $uniqueId = uniqid('', true); // Adds more entropy
-        // Shorten the unique ID to the desired length
+        
+        $uniqueId = uniqid('', true); 
+        
         $uniquePart = substr(bin2hex(random_bytes($length)), 0, $length);
 
-        // Combine the prefix with the unique identifier
+        
         return $prefix . '-' . $uniquePart;
     }
 
     public static function generateSerialNumber($prefix = 'PROD')
     {
-        // Use a prefix for the product, like a category or 'PROD' for product
+        
         $prefix = strtoupper($prefix);
 
-        // Date and time in a sortable format: YYYYMMDDHHMMSS
+        
         $dateTime = date('YmdHis');
 
-        // A unique identifier, e.g., a random number or UUID (here using a 5-digit random number)
+        
         $randomNumber = mt_rand(10000, 99999);
 
-        // Combine them to form the serial number
+        
         $serialNumber = $prefix . '-' . $dateTime . '-' . $randomNumber;
 
         return $serialNumber;
@@ -73,13 +73,13 @@ class Helper
 
     public static function generateWalletNumber($length = 12)
     {
-        // Define the characters to use in the wallet number (alphanumeric)
+        
         $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-        // Get the current timestamp for uniqueness
+        
         $timestamp = time();
 
-        // Generate a random string for the wallet number
+        
         $randomString = '';
         if ($length < strlen($timestamp)) {
             for ($i = 0; $i < $length; $i++) {
@@ -182,7 +182,7 @@ class Helper
 
                 }
             } else {
-                // No resizing needed, use original dimensions
+                
                 $newWidth = $originalWidth;
                 $newHeight = $originalHeight;
             }
@@ -280,8 +280,8 @@ class Helper
 
     public static function generateEasyPayOrderNumber()
     {
-        $uuid = uniqid(bin2hex(random_bytes(8)) . '-', true); // Unique identifier like '32faa424-858a-4f22-92c5-a5'
-        $secondPart = bin2hex(random_bytes(5)); // Generate random hex for the second part
+        $uuid = uniqid(bin2hex(random_bytes(8)) . '-', true); 
+        $secondPart = bin2hex(random_bytes(5)); 
 
         return $uuid . ' ' . $secondPart;
     }
@@ -353,7 +353,7 @@ class Helper
                         $currentBlock = [];
                     }
                     $header = explode("\t", $line);
-                    continue; // заголовок не добавляем в блок данных
+                    continue; 
                 }
 
                 if ($header) {
@@ -381,11 +381,11 @@ class Helper
     {
         $radius = 6378137.0;
 
-        // Convert Y to latitude
+        
         $latRad = atan(sinh($y / $radius));
         $latitude = rad2deg($latRad);
 
-        // Convert X to longitude
+        
         $longitude = rad2deg($x / $radius);
 
         return ['latitude' => $latitude, 'longitude' => $longitude];
@@ -502,10 +502,10 @@ class Helper
 
     public static function generateClassFile(array $config): string
     {
-        //
-        // ──────────────────────────────────────────────────────────────
-        // 1. Extract config
-        // ──────────────────────────────────────────────────────────────
+        
+        
+        
+        
         $path       = rtrim($config['path'] ?? 'src/', '/') . '/';
         $namespace  = $config['namespace'] ?? self::autodetectNamespace($path);
         $className  = $config['name'] ?? 'MyClass';
@@ -515,23 +515,23 @@ class Helper
         $extends    = $config['extends'] ?? null;
         $implements = $config['implements'] ?? [];
 
-        //
-        // ──────────────────────────────────────────────────────────────
-        // 2. Build namespace + class signature
-        // ──────────────────────────────────────────────────────────────
+        
+        
+        
+        
         $class  = "<?php\n\n";
         if ($namespace) $class .= "namespace {$namespace};\n\n";
 
-        // Build EXTENDS / IMPLEMENTS
+        
         $signature = "class {$className}";
         if ($extends) $signature .= " extends {$extends}";
         if ($implements) $signature .= " implements " . implode(', ', $implements);
         $class .= $signature . "\n{\n";
 
-        //
-        // ──────────────────────────────────────────────────────────────
-        // 3. PROPERTIES
-        // ──────────────────────────────────────────────────────────────
+        
+        
+        
+        
         foreach ($properties as $prop) {
             $vis = $prop['visibility'] ?? 'private';
             $type = $prop['type'] ?? null;
@@ -540,7 +540,7 @@ class Helper
 
             $typeStr = $type ? "{$type} " : "";
 
-            // DocBlock
+            
             if ($type) {
                 $class .= "    /**\n";
                 $class .= "     * @var {$type}\n";
@@ -550,10 +550,10 @@ class Helper
             $class .= "    {$vis} {$typeStr}\${$name}{$default};\n\n";
         }
 
-        //
-        // ──────────────────────────────────────────────────────────────
-        // 4. CONSTRUCTOR
-        // ──────────────────────────────────────────────────────────────
+        
+        
+        
+        
         if (!empty($constructor)) {
             $params = [];
             $body   = [];
@@ -576,10 +576,10 @@ class Helper
             $class .= "    {\n" . implode("\n", $body) . "\n    }\n\n";
         }
 
-        //
-        // ──────────────────────────────────────────────────────────────
-        // 5. METHODS
-        // ──────────────────────────────────────────────────────────────
+        
+        
+        
+        
         foreach ($methods as $method) {
             $name = $method['name'];
             $params = $method['params'] ?? [];
@@ -595,14 +595,14 @@ class Helper
                 $docParams[] = "     * @param {$type} \${$paramName}";
             }
 
-            // DocBlock
+            
             $class .= "    /**\n";
             $class .= "     * {$name} method.\n";
             if ($docParams) $class .= implode("\n", $docParams) . "\n";
             if ($return) $class .= "     * @return {$return}\n";
             $class .= "     */\n";
 
-            // Signature
+            
             $returnStr = $return ? ": {$return}" : "";
             $class .= "    public function {$name}(" . implode(', ', $paramCode) . "){$returnStr}\n";
             $class .= "    {\n";
@@ -612,10 +612,10 @@ class Helper
 
         $class .= "}\n";
 
-        //
-        // ──────────────────────────────────────────────────────────────
-        // 6. Ensure directory exists and save file
-        // ──────────────────────────────────────────────────────────────
+        
+        
+        
+        
         if (!is_dir($path)) mkdir($path, 0777, true);
 
         $filePath = $path . $className . '.php';
@@ -629,11 +629,11 @@ class Helper
         $path = trim($path, '/');
         $parts = explode('/', $path);
 
-        // Find "src"
+        
         $srcIndex = array_search('src', array_map('strtolower', $parts));
         if ($srcIndex === false) return null;
 
-        // Convert remaining path to namespace
+        
         $namespaceParts = array_slice($parts, $srcIndex + 1);
         return 'App\\' . implode('\\', array_map('ucfirst', $namespaceParts));
     }

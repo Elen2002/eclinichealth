@@ -1,4 +1,4 @@
-/* Profile Page Logic */
+
 document.addEventListener('DOMContentLoaded', function() {
     const avatarInput = document.querySelector('[data-avatar-input]');
     const previewImages = document.querySelectorAll('img[data-profile-preview]');

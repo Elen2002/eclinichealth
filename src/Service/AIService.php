@@ -82,13 +82,13 @@ class AIService
         foreach ($this->knowledgeBase as $disease => $data) {
             $matchCount = 0;
             foreach ($data['symptoms'] as $symptom) {
-                // Use word boundaries for Latin keywords to avoid "hi" matching "hivand"
+                
                 if (preg_match('/[a-zA-Z]/', $symptom)) {
                     if (preg_match('/\b' . preg_quote($symptom, '/') . '\b/i', $input)) {
                         $matchCount++;
                     }
                 } else {
-                    // For non-Latin (Armenian/Russian), str_contains is safer as word boundaries vary
+                    
                     if (str_contains($input, $symptom)) {
                         $matchCount++;
                     }
@@ -111,7 +111,7 @@ class AIService
             ];
         }
 
-        // Conversational Intents (Greetings, Yes/No)
+        
         $greetings = ['hi', 'hello', 'hey', 'բարև', 'ողջույն', 'привет', 'здравствуйте', 'barev', 'voghjuyn'];
         $affirmative = ['yes', 'yeah', 'ok', 'okay', 'այո', 'հա', 'да', 'хорошо', 'ayo', 'ha'];
         $negative = ['no', 'nope', 'ոչ', 'չէ', 'нет', 'voch', 'che'];
@@ -147,7 +147,7 @@ class AIService
             }
         }
 
-        // Help & Email Intents
+        
         $helpKeywords = ['help', 'info', 'support', 'օգնություն', 'помощь', 'инфо', 'տեղեկություն', 'ognutyun'];
         foreach ($helpKeywords as $word) {
             if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $input)) {
@@ -172,7 +172,7 @@ class AIService
             }
         }
 
-        // Gratitude Intent
+        
         $thanksKeywords = ['thanks', 'thank you', 'merci', 'շնորհակալություն', 'ապրես', 'спасибо', 'благодарю', 'shnorhakalutyun', 'apres'];
         foreach ($thanksKeywords as $word) {
             if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $input)) {
@@ -184,7 +184,7 @@ class AIService
             }
         }
 
-        // Identity Intent
+        
         $whoKeywords = ['who are you', 'what are you', 'your name', 'ով ես', 'ինչ ես', 'кто ты', 'как тебя зовут', 'ov es'];
         foreach ($whoKeywords as $word) {
             if (str_contains($input, $word)) {
@@ -196,7 +196,7 @@ class AIService
             }
         }
 
-        // Well-being Intent
+        
         $howAreYouKeywords = ['how are you', 'how is it going', 'ոնց ես', 'ինչպես ես', 'как дела', 'как ты', 'vonc es'];
         foreach ($howAreYouKeywords as $word) {
             if (str_contains($input, $word)) {
@@ -208,7 +208,7 @@ class AIService
             }
         }
 
-        // Farewell Intent
+        
         $byeKeywords = ['bye', 'goodbye', 'see you', 'ցտեսություն', 'հաջող', 'пока', 'до свидания', 'hajogh'];
         foreach ($byeKeywords as $word) {
             if (preg_match('/\b' . preg_quote($word, '/') . '\b/i', $input)) {
@@ -220,7 +220,7 @@ class AIService
             }
         }
 
-        // Pricing Intent
+        
         $priceKeywords = ['price', 'cost', 'how much', 'արժեք', 'գին', 'цена', 'сколько стоит'];
         foreach ($priceKeywords as $word) {
             if (str_contains($input, $word)) {
@@ -232,7 +232,7 @@ class AIService
             }
         }
 
-        // Location Intent
+        
         $locationKeywords = ['where', 'location', 'address', 'որտեղ', 'հասցե', 'տեղ', 'где', 'адрес', 'место'];
         foreach ($locationKeywords as $word) {
             if (str_contains($input, $word)) {
@@ -244,7 +244,7 @@ class AIService
             }
         }
 
-        // Working Hours Intent
+        
         $hoursKeywords = ['hours', 'working', 'time', 'when', 'ժամ', 'երբ', 'время', 'когда', 'часы'];
         foreach ($hoursKeywords as $word) {
             if (str_contains($input, $word)) {

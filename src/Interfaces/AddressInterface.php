@@ -17,10 +17,5 @@ interface AddressInterface
 
     public function getCenterCoordinates(string $className, int $parentId, string $parentClassName): array|string;
 
-    /**
-     * @param int $entityId
-     * @param string $className
-     * @param string $childClassName
-     * @return Address
-     */
+    
 }

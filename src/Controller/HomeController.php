@@ -31,8 +31,8 @@ final class HomeController extends PAbstractController
         Request $request
     ): Response {
         if ($this->getUser()) {
-             // Optional: Redirect logged in users or let them see home
-             // return $this->redirectToRoute('app_dashboard');
+             
+             
         }
 
         $hospitals = $hospitalRepository->findAll();
@@ -43,7 +43,7 @@ final class HomeController extends PAbstractController
 
         $departments = $departmentRepository->findAll();
 
-        // Build department image map: {id: imageUrl}
+        
         $departmentImages = [];
         foreach ($departments as $dept) {
             $imgs = $uploadFileService->getImagesArr(Department::class, $dept->getId(), '970x440');
@@ -69,7 +69,7 @@ final class HomeController extends PAbstractController
         $reviews = $entityManager->getRepository(Review::class)->findAll();
         $reviewAgg = [];
         foreach ($reviews as $review) {
-            $date = $review->getCreatedAt()->format('Y-m-d'); // Daily trend
+            $date = $review->getCreatedAt()->format('Y-m-d'); 
             if (!isset($reviewAgg[$date])) {
                 $reviewAgg[$date] = ['total' => 0, 'count' => 0];
             }
@@ -111,7 +111,7 @@ final class HomeController extends PAbstractController
     {
         $departments = $departmentRepository->findAll();
 
-        // Attach image URL to each department using the UploadFile service
+        
         $departmentImages = [];
         foreach ($departments as $dept) {
             $images = $uploadFileService->getImagesArr(Department::class, $dept->getId(), '970x440');

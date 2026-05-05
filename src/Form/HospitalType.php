@@ -52,7 +52,7 @@ class HospitalType extends AbstractType
         ;
 
         $builder->addEventListener(FormEvents::POST_SET_DATA, function (FormEvent $event) {
-            /** @var Hospital $hospital */
+            
             $hospital = $event->getData();
             $form = $event->getForm();
 

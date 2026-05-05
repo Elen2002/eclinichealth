@@ -29,9 +29,9 @@ class AccessDeniedSubscriber implements EventSubscriberInterface
     {
         $exception = $event->getThrowable();
 
-        // Catch Access Denied exceptions (403 Forbidden)
+        
         if ($exception instanceof AccessDeniedException) {
-            // Redirect to home page instead of showing the error page
+            
             $event->setResponse(new RedirectResponse($this->urlGenerator->generate('app_home')));
         }
     }

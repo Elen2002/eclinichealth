@@ -52,16 +52,12 @@ class Department
         return $this;
     }
 
-    /**
-     * @return \Doctrine\Common\Collections\Collection<int, HospitalDepartment>
-     */
+    
     #[ORM\Column(type: 'text', nullable: true)]
     #[Groups(['department:read', 'doctor:read', 'hospital:read'])]
     private ?string $description = null;
 
-    /**
-     * @return \Doctrine\Common\Collections\Collection<int, HospitalDepartment>
-     */
+    
     public function getHospitalDepartments(): \Doctrine\Common\Collections\Collection
     {
         return $this->hospitalDepartments;
@@ -79,9 +75,7 @@ class Department
         return $this;
     }
 
-    /**
-     * @return Collection<int, Doctor>
-     */
+    
     public function getDoctors(): Collection
     {
         return $this->doctors;
@@ -100,7 +94,7 @@ class Department
     public function removeDoctor(Doctor $doctor): static
     {
         if ($this->doctors->removeElement($doctor)) {
-            // set the owning side to null (unless already changed)
+            
             if ($doctor->getDepartment() === $this) {
                 $doctor->setDepartment(null);
             }

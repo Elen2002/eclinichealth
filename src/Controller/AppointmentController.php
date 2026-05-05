@@ -34,14 +34,14 @@ class AppointmentController extends AbstractController
         $user = $this->getUser();
         if ($user) {
              $consultation->setPatientEmail($user->getEmail());
-             // $consultation->setPatientName(...); // User entity doesn't seem to have name field based on DoctorController usage?
+             
         }
         
-        // I need to check if ConsultationType form exists, or create it.
-        // For now, I'll assume I need to create/use it.
+        
+        
         $form = $this->createForm(ConsultationType::class, $consultation);
         
-        // If doctor serves from URL, hide the selection
+        
         if ($doctor_id && $doctor) {
             $form->remove('doctor');
         }
@@ -53,7 +53,7 @@ class AppointmentController extends AbstractController
                 $consultation->setHospital($doctor->getHospital());
                 $consultation->setDepartment($doctor->getDepartment());
             } elseif ($consultation->getDoctor()) {
-                // If doctor was selected in form
+                
                 $doc = $consultation->getDoctor();
                 $consultation->setHospital($doc->getHospital());
                 $consultation->setDepartment($doc->getDepartment());
@@ -63,7 +63,7 @@ class AppointmentController extends AbstractController
             $entityManager->flush();
 
             $this->addFlash('success', 'Appointment request sent successfully.');
-            return $this->redirectToRoute('app_home'); // or appointment list
+            return $this->redirectToRoute('app_home'); 
         }
 
         return $this->render('appointment/new.html.twig', [
@@ -77,8 +77,8 @@ class AppointmentController extends AbstractController
     #[IsGranted('ROLE_DOCTOR')]
     public function doctorResponse(Request $request, Consultation $consultation, EntityManagerInterface $entityManager): Response
     {
-        // Security check: ensure current doctor owns this consultation
-        // $this->getUser() -> Doctor -> check id
+        
+        
         
         if ($request->isMethod('POST')) {
             $prescription = $request->request->get('prescription');
@@ -94,7 +94,7 @@ class AppointmentController extends AbstractController
             
             $entityManager->flush();
             $this->addFlash('success', 'Response sent to patient.');
-            return $this->redirectToRoute('app_doctor_dashboard'); // Pending dashboard
+            return $this->redirectToRoute('app_doctor_dashboard'); 
         }
 
         return $this->render('appointment/doctor_response.html.twig', [
@@ -109,7 +109,7 @@ class AppointmentController extends AbstractController
         $consultation->setIsPatientApproved(true);
         $consultation->setStatus('confirmed');
         
-        // Create Doctor-Patient relationship if it doesn't exist
+        
         $patient = $this->getUser();
         $doctorUser = $consultation->getDoctor()->getUser();
         

@@ -35,7 +35,7 @@ class SeedDataCommand extends Command
 
         $io->title('Seeding EClinic Data');
 
-        // 1. Admin User
+        
         $adminEmail = 'admin@mail.ru';
         $admin = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $adminEmail]);
         if (!$admin) {
@@ -50,7 +50,7 @@ class SeedDataCommand extends Command
             $io->text('Created admin user: ' . $adminEmail);
         }
 
-        // 2. Departments
+        
         $deptNames = [
             'emergency' => 'Emergency Care',
             'Kardio' => 'Cardiology',
@@ -73,7 +73,7 @@ class SeedDataCommand extends Command
         $this->entityManager->flush();
         $io->text('Departments seeded.');
 
-        // 3. Hospitals
+        
         $hospitalsData = [
             [
                 'name' => 'Central Medical Plaza',
@@ -122,7 +122,7 @@ class SeedDataCommand extends Command
                 $this->entityManager->persist($hospital);
             }
 
-            // Link departments
+            
             foreach ($data['depts'] as $dKey) {
                 $exists = $this->entityManager->getRepository(HospitalDepartment::class)->findOneBy([
                     'hospital' => $hospital,
@@ -139,7 +139,7 @@ class SeedDataCommand extends Command
         $this->entityManager->flush();
         $io->text('Hospitals seeded.');
 
-        // 4. Doctors
+        
         $doctorsData = [
             [
                 'email' => 'dr.smith@mail.ru',
@@ -201,7 +201,7 @@ class SeedDataCommand extends Command
                 $this->entityManager->persist($dr);
             }
 
-            // Create some fake reviews
+            
             if ($dr->getReviews()->isEmpty()) {
                 for ($i = 0; $i < 3; $i++) {
                     $review = new Review();

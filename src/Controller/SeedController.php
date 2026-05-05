@@ -36,7 +36,7 @@ class SeedController extends AbstractController
                 $entityManager->persist($dept);
                 $created[] = $name;
             } else {
-                 // Update description if it exists but is empty
+                 
                  if (!$exists->getDescription()) {
                      $exists->setDescription($desc);
                      $created[] = $name . " (updated)";

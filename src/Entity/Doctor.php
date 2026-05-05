@@ -29,9 +29,7 @@ class Doctor
         $this->reviews = new ArrayCollection();
     }
 
-    /**
-     * @return Collection<int, Review>
-     */
+    
     public function getReviews(): Collection
     {
         return $this->reviews;
@@ -50,7 +48,7 @@ class Doctor
     public function removeReview(Review $review): static
     {
         if ($this->reviews->removeElement($review)) {
-            // set the owning side to null (unless already changed)
+            
             if ($review->getDoctor() === $this) {
                 $review->setDoctor(null);
             }
@@ -65,7 +63,7 @@ class Doctor
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Groups(['doctor:read', 'department:read'])]
-    private ?string $roleType = null; // surgeon, therapist, etc.
+    private ?string $roleType = null; 
 
     #[ORM\Column(length: 20, nullable: true)]
     #[Groups(['doctor:read'])]

@@ -1,4 +1,4 @@
-/* Notifications Page Logic */
+
 document.addEventListener('DOMContentLoaded', function() {
     const items = document.querySelectorAll('.notification-item.unread');
     items.forEach(item => {

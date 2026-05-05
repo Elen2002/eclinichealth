@@ -79,7 +79,7 @@ class ApiController extends AbstractController
                      $email = $u->getEmail();
                      if (!$email) continue;
                      
-                     // Direct email match
+                     
                      if ($email === $data['targetId']) {
                          $recipient = $u;
                          break;
@@ -131,7 +131,7 @@ class ApiController extends AbstractController
             $userPasswordHasher->hashPassword($user, $data['password'])
         );
         
-        // Extract name from email if not provided
+        
         $emailParts = explode('@', $data['email']);
         $nameFromEmail = ucfirst($emailParts[0]);
         
@@ -164,7 +164,7 @@ class ApiController extends AbstractController
             return $this->json(['error' => 'Invalid credentials'], 401);
         }
 
-        // Get or generate a simple token for mobile use
+        
         if (!$user->getApiToken()) {
             $user->setApiToken(bin2hex(random_bytes(32)));
             $userRepository->save($user, true);
@@ -215,7 +215,7 @@ class ApiController extends AbstractController
             'id' => $h->getId(),
             'name' => $h->getName(),
             'address' => $h->getAddress(),
-            'description' => $h->getAbout(), // using getAbout based on HomeController
+            'description' => $h->getAbout(), 
             'image' => $uploadFileService->getImage(Hospital::class, $h->getId(), '970x440'),
             'beds' => $h->getBedsCount(),
             'staff' => $h->getStaffCount(),
@@ -224,7 +224,7 @@ class ApiController extends AbstractController
             'departmentNames' => (function() use ($h) {
                 $names = array_values($h->getHospitalDepartments()->map(fn($hd) => $hd->getDepartment() ? $hd->getDepartment()->getName() : null)->filter(fn($n) => $n !== null)->toArray());
                 if (empty($names)) {
-                    // Fallback: get specialties from doctors
+                    
                     $names = array_unique(array_filter($h->getDoctors()->map(fn($d) => $d->getSpecialty())->toArray()));
                 }
                 return array_values($names);
@@ -259,7 +259,7 @@ class ApiController extends AbstractController
                 ] : null)->filter(fn($d) => $d !== null)->toArray());
                 
                 if (empty($depts)) {
-                    // Fallback: get unique specialties from doctors
+                    
                     $specialties = array_unique(array_filter($h->getDoctors()->map(fn($d) => $d->getSpecialty())->toArray()));
                     foreach ($specialties as $index => $s) {
                         $depts[] = ['id' => 999 + $index, 'name' => $s];
@@ -279,7 +279,7 @@ class ApiController extends AbstractController
 
         $data = array_map(fn($d) => [
             'id' => $d->getId(),
-            'email' => $d->getUser() ? $d->getUser()->getEmail() : 'Unknown', // Using email as name proxy if needed
+            'email' => $d->getUser() ? $d->getUser()->getEmail() : 'Unknown', 
             'name' => $d->getUser() ? ($d->getUser()->getFirstName() . ' ' . $d->getUser()->getLastName()) : 'Unknown',
             'specialty' => $d->getSpecialty(),
             'roleType' => $d->getRoleType(),
@@ -316,7 +316,7 @@ class ApiController extends AbstractController
             'id' => $department->getId(),
             'name' => $department->getName(),
             'description' => $department->getDescription(),
-            'longDescription' => $department->getDescription(), // Using same description as placeholder
+            'longDescription' => $department->getDescription(), 
             'image' => $uploadFileService->getImage(\App\Entity\Department::class, $department->getId(), '650x450'),
         ]);
     }
@@ -332,8 +332,8 @@ class ApiController extends AbstractController
             'name' => $d->getUser() ? ($d->getUser()->getFirstName() . ' ' . $d->getUser()->getLastName()) : 'Unknown',
             'specialty' => $d->getSpecialty(),
             'image' => $uploadFileService->getImage(Doctor::class, $d->getId(), '223x200'),
-            'rating' => 4.9, // Professional fallback
-            'reviews' => 120, // Professional fallback
+            'rating' => 4.9, 
+            'reviews' => 120, 
             'role' => $d->getRoleType() ?: 'Specialist',
         ], $department->getDoctors()->toArray());
 
@@ -369,7 +369,7 @@ class ApiController extends AbstractController
                  return $this->json(['error' => 'Invalid JSON'], 400);
             }
 
-            // Robust validation
+            
             $required = ['name', 'phone', 'hospital_id', 'department_id', 'doctor_id', 'date'];
             foreach ($required as $field) {
                 if (empty($data[$field])) {
@@ -389,7 +389,7 @@ class ApiController extends AbstractController
             $consultation->setPatientName($data['name']);
             $consultation->setPatientPhone($data['phone']);
             
-            // Link to authenticated user if available
+            
             $authUser = $this->getUser();
             $consultation->setPatientEmail($authUser ? $authUser->getUserIdentifier() : ($data['email'] ?? 'mobile@eclinic.int'));
             
@@ -397,7 +397,7 @@ class ApiController extends AbstractController
             $consultation->setDepartment($department);
             $consultation->setDoctor($doctor);
             
-            // Handle various date formats (DD.MM.YYYY HH:MM or ISO)
+            
             $dateStr = str_replace('.', '-', $data['date']);
             try {
                 $consultation->setRequestedDate(new \DateTime($dateStr));
@@ -409,7 +409,7 @@ class ApiController extends AbstractController
             $consultation->setStatus('pending');
             $entityManager->persist($consultation);
 
-            // Notify Doctor
+            
             if ($doctor->getUser()) {
                 $notification = new Notification();
                 $notification->setUser($doctor->getUser());
@@ -613,7 +613,7 @@ class ApiController extends AbstractController
             $partner = ($sender->getId() === $currentUserId) ? $recipient : $sender;
             $partnerId = $partner->getId();
 
-            // Exclude Admins/Support from regular chat list
+            
             $roles = $partner->getRoles();
             if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_SUPER_ADMIN', $roles) || str_contains(strtolower($partner->getEmail()), 'admin')) continue;
 
@@ -636,7 +636,7 @@ class ApiController extends AbstractController
             $seenPartnerIds[$partnerId] = true;
         }
 
-        // Include established relationships without messages
+        
         $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
         $relations = $doctor 
             ? $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['doctor' => $user])
@@ -646,7 +646,7 @@ class ApiController extends AbstractController
             $partner = $doctor ? $rel->getPacient() : $rel->getDoctor();
             if (!$partner) continue;
 
-            // Exclude Admins/Support
+            
             $roles = $partner->getRoles();
             if (in_array('ROLE_ADMIN', $roles) || in_array('ROLE_SUPER_ADMIN', $roles) || str_contains(strtolower($partner->getEmail()), 'admin')) continue;
 
@@ -774,7 +774,7 @@ class ApiController extends AbstractController
         $patientsData = [];
         $seenEmails = [];
 
-        // 1. Get from formal relations
+        
         $relations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['doctor' => $user]);
         foreach ($relations as $r) {
             $p = $r->getPacient();
@@ -790,7 +790,7 @@ class ApiController extends AbstractController
             }
         }
 
-        // 2. Get from consultations
+        
         if ($doctor) {
             $consultations = $entityManager->getRepository(Consultation::class)->findBy(['doctor' => $doctor]);
             foreach ($consultations as $c) {
@@ -798,7 +798,7 @@ class ApiController extends AbstractController
                 if ($email && !isset($seenEmails[$email])) {
                     $seenEmails[$email] = true;
                     $patientsData[] = [
-                        'id' => $c->getId(), // Use consultation ID as a key if user not linked
+                        'id' => $c->getId(), 
                         'name' => $c->getPatientName(),
                         'email' => $email,
                         'avatar' => null,
@@ -844,7 +844,7 @@ class ApiController extends AbstractController
         $doctorsData = [];
         $seenDoctorIds = [];
 
-        // 1. Get doctors from formal relations (DoctorPacient)
+        
         $relations = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findBy(['pacient' => $user]);
         foreach ($relations as $r) {
             $doctorUser = $r->getDoctor();
@@ -863,7 +863,7 @@ class ApiController extends AbstractController
             }
         }
 
-        // 2. Get doctors from consultations
+        
         $email = $user->getUserIdentifier();
         $consultations = $entityManager->getRepository(Consultation::class)->findBy(['patientEmail' => $email]);
         foreach ($consultations as $c) {
@@ -895,11 +895,11 @@ class ApiController extends AbstractController
         $consultation = $entityManager->getRepository(Consultation::class)->find($id);
         if (!$consultation) return $this->json(['error' => 'Consultation not found'], 404);
 
-        // Optional: Check if user is the doctor or the patient for security
-        // $doctor = $entityManager->getRepository(Doctor::class)->findOneBy(['user' => $user]);
-        // if ($consultation->getDoctor() !== $doctor && $consultation->getPatientEmail() !== $user->getUserIdentifier()) {
-        //     return $this->json(['error' => 'Forbidden'], 403);
-        // }
+        
+        
+        
+        
+        
 
         $doctorUser = $consultation->getDoctor() ? $consultation->getDoctor()->getUser() : null;
 
@@ -910,13 +910,13 @@ class ApiController extends AbstractController
             'patientPhone' => $consultation->getPatientPhone(),
             'patientNote' => $consultation->getMessage(),
             'requestedDate' => $consultation->getRequestedDate() ? $consultation->getRequestedDate()->format('M d, Y H:i') : null,
-            'confirmedDate' => clone $consultation->getRequestedDate(), // Or getDoctorProposedDate() if implemented
-            'status' => $consultation->getStatus(), // pending, confirmed, cancelled
-            'prescription' => $consultation->getPrescription() ?: 'qwerty', // Placeholder matching screenshot if null
-            'medicalTests' => $consultation->getMedicalTests() ?: 'Հետազոտություններ չեն պահանջվում:', // Placeholder
+            'confirmedDate' => clone $consultation->getRequestedDate(), 
+            'status' => $consultation->getStatus(), 
+            'prescription' => $consultation->getPrescription() ?: 'qwerty', 
+            'medicalTests' => $consultation->getMedicalTests() ?: 'Հետազոտություններ չեն պահանջվում:', 
         ];
 
-        // Format confirmed date same as requested date if it's "confirmed" in our mock data
+        
         if ($data['confirmedDate']) {
             $data['confirmedDate'] = $data['confirmedDate']->format('M d, Y H:i');
         }
@@ -951,18 +951,18 @@ class ApiController extends AbstractController
                 $date = new \DateTime($data['confirmedDate']);
                 $consultation->setDoctorProposedDate($date);
             } catch (\Exception $e) {
-                // Ignore date parse errors, fall back to requested date
+                
             }
         }
 
         $consultation->setStatus('confirmed');
 
-        // Automatically create a DoctorPacient relationship if the patient is a registered user
+        
         $patientEmail = $consultation->getPatientEmail();
         if ($patientEmail) {
             $patientUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $patientEmail]);
             if ($patientUser) {
-                // Check if relationship already exists
+                
                 $existingRelation = $entityManager->getRepository(\App\Entity\DoctorPacient::class)->findOneBy([
                     'doctor' => $user,
                     'pacient' => $patientUser
@@ -979,7 +979,7 @@ class ApiController extends AbstractController
 
         $entityManager->flush();
         
-        // Send a "System/SMS" message in the chat as confirmation
+        
         if ($patientUser) {
              $roomId = 'room_' . min($user->getId(), $patientUser->getId()) . '_' . max($user->getId(), $patientUser->getId());
              $confirmMsg = new ChatMessage();
@@ -1002,7 +1002,7 @@ class ApiController extends AbstractController
              $confirmMsg->setContent($text);
              $entityManager->persist($confirmMsg);
 
-             // Also create a formal Notification entity
+             
              $notification = new Notification();
              $notification->setUser($patientUser);
              $notification->setTitle("Consultation Confirmed");
@@ -1015,8 +1015,8 @@ class ApiController extends AbstractController
 
              $entityManager->flush();
              
-             // TODO: Integrate real SMS provider (Twilio/Nexmo) here
-             // SmsService::send($consultation->getPatientPhone(), $text);
+             
+             
         }
 
         return $this->json(['success' => true]);
@@ -1067,7 +1067,7 @@ class ApiController extends AbstractController
             return $this->json(['error' => 'Content is required'], 400);
         }
 
-        // Room ID is combination of both user IDs to keep it unique
+        
         $roomId = 'room_' . min($user->getId(), $partner->getId()) . '_' . max($user->getId(), $partner->getId());
 
         $message = new ChatMessage();
@@ -1079,7 +1079,7 @@ class ApiController extends AbstractController
 
         $entityManager->persist($message);
 
-        // Notify Recipient
+        
         $this->createChatNotification($partner, $user, $data['content'], $entityManager);
 
         $entityManager->flush();
@@ -1110,7 +1110,7 @@ class ApiController extends AbstractController
 
         $consultation->setStatus('rejected');
 
-        // Notify Patient
+        
         $patientEmail = $consultation->getPatientEmail();
         if ($patientEmail) {
             $patientUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $patientEmail]);
@@ -1186,14 +1186,14 @@ class ApiController extends AbstractController
             return $this->json(['error' => 'Invalid data'], 400);
         }
 
-        // patientData is usually "id-email"
+        
         $parts = explode('-', $data['patientData']);
         $patientId = (int)$parts[0];
         
         $patient = $entityManager->getRepository(User::class)->find($patientId);
         if (!$patient) return $this->json(['error' => 'Patient not found'], 404);
 
-        // Check if relationship exists in doctor_pacient table
+        
         $dpRepo = $entityManager->getRepository(\App\Entity\DoctorPacient::class);
         $relation = $dpRepo->findOneBy(['doctor' => $doctorUser, 'pacient' => $patient]);
 
@@ -1205,7 +1205,7 @@ class ApiController extends AbstractController
             $entityManager->persist($relation);
         }
 
-        // Notify Patient about check-in
+        
         $notification = new Notification();
         $notification->setUser($patient);
         $notification->setTitle("Clinic Check-in");
@@ -1284,7 +1284,7 @@ class ApiController extends AbstractController
 
         $entityManager->persist($message);
         
-        // Notify Recipient
+        
         $this->createChatNotification($partner, $user, $content, $entityManager);
         
         $entityManager->flush();
@@ -1306,7 +1306,7 @@ class ApiController extends AbstractController
 
         $partnerId = (int)$roomId;
         
-        // Mark chat notifications from this partner as read
+        
         $notifications = $entityManager->getRepository(Notification::class)->findBy([
             'user' => $user,
             'isRead' => false,
@@ -1375,7 +1375,7 @@ class ApiController extends AbstractController
         $notification->setCreatedAt(new \DateTimeImmutable());
         $notification->setIsRead(false);
         
-        // Dynamic link based on sender role
+        
         $senderRoles = $sender->getRoles();
         if (in_array('ROLE_DOCTOR', $senderRoles)) {
             $doctorRepo = $entityManager->getRepository(Doctor::class);
@@ -1384,7 +1384,7 @@ class ApiController extends AbstractController
                 $notification->setLink('/profile/chat/' . $doctor->getId());
             }
         } else {
-            // For doctor receiving from patient
+            
             $doctorRepo = $entityManager->getRepository(Doctor::class);
             $doctor = $doctorRepo->findOneBy(['user' => $recipient]);
             if ($doctor) {

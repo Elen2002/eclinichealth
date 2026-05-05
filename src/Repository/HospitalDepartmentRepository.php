@@ -6,9 +6,7 @@ use App\Entity\HospitalDepartment;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @extends ServiceEntityRepository<HospitalDepartment>
- */
+
 class HospitalDepartmentRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -16,28 +14,28 @@ class HospitalDepartmentRepository extends ServiceEntityRepository
         parent::__construct($registry, HospitalDepartment::class);
     }
 
-    //    /**
-    //     * @return HospitalDepartment[] Returns an array of HospitalDepartment objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('h')
-    //            ->andWhere('h.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('h.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
-    //    public function findOneBySomeField($value): ?HospitalDepartment
-    //    {
-    //        return $this->createQueryBuilder('h')
-    //            ->andWhere('h.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }

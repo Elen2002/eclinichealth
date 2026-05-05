@@ -49,15 +49,15 @@ class NotificationController extends AbstractController
             return new JsonResponse(['error' => 'Invalid data'], 400);
         }
 
-        // Find target user by identifier (email prefix or email)
+        
         $targetIdentifier = $params['targetIdentifier'];
         
-        // Find user where email starts with targetIdentifier or matches exactly
+        
         $userRepo = $entityManager->getRepository(User::class);
         $targetUser = $userRepo->findOneBy(['email' => $targetIdentifier]);
         
         if (!$targetUser) {
-            // Try to match by email prefix (as we use in identifier)
+            
             $users = $userRepo->findAll();
             foreach ($users as $u) {
                 $uId = ucfirst(explode('@', $u->getEmail())[0]);

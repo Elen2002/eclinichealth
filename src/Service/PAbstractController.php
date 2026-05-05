@@ -34,7 +34,7 @@ abstract class PAbstractController extends AbstractController
     public function render(string $view, array $parameters = [], ?Response $response = null): Response
     {
         $req = $this->container->get('request_stack');
-        /** @var Request $request */
+        
         $request = $req->getMainRequest();
         $queryParams = array_merge($request->attributes->all(), $request->query->all());
 
@@ -44,7 +44,7 @@ abstract class PAbstractController extends AbstractController
         $locales = [];
         $currentLocale = [];
 
-        /** @var Language $locale */
+        
         foreach ($localesModel as $locale) {
             $localeAssoc = [
                 "id" => $locale->getId(),

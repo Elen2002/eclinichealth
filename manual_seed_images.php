@@ -1,5 +1,5 @@
 <?php
-// Manual seed script to bypass Symfony version checks
+
 $dsn = "pgsql:host=localhost;port=5432;dbname=eclinichealth";
 $user = "postgres";
 $pass = "root12";
@@ -30,7 +30,7 @@ try {
     foreach ($hospitals as $hospital) {
         $id = $hospital['id'];
         
-        // Check if has images
+        
         $stmt = $pdo->prepare("SELECT count(*) FROM images WHERE parent_class = ? AND entity_id = ?");
         $stmt->execute(['App\\Entity\\Hospital', $id]);
         if ($stmt->fetchColumn() == 0) {

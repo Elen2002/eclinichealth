@@ -21,7 +21,7 @@ class PublicHospitalController extends AbstractController
         foreach ($hospitals as $hospital) {
             $hospital->images = $uploadFile->getImagesArr(Hospital::class, $hospital->getId(), '970x440');
             $hospital->image = $hospital->images[0] ?? null;
-            // Ensure departments are loaded for front-end filtering
+            
             $depts = [];
             foreach ($hospital->getHospitalDepartments() as $hd) {
                 $depts[] = $hd->getDepartment()->getName();

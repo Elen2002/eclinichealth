@@ -1,14 +1,14 @@
 {% set locale = app.request.locale %}
 
 <footer id="footer" class="footer position-relative overflow-hidden" style="background: #0a0f1d; color: rgba(255,255,255,0.7); padding: 100px 0 40px;">
-    <!-- Background Decorative Elements -->
+    
     <div class="footer-glow" style="position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: rgba(25, 119, 204, 0.05); border-radius: 50%; filter: blur(100px);"></div>
     <div class="footer-glow" style="position: absolute; bottom: -50px; left: -50px; width: 300px; height: 300px; background: rgba(59, 130, 246, 0.05); border-radius: 50%; filter: blur(80px);"></div>
 
     <div class="container position-relative">
         <div class="row gy-5">
             
-            <!-- Brand Section -->
+            
             <div class="col-lg-4 col-md-6">
                 <a href="{{ path('app_home') }}" class="logo d-flex align-items-center mb-4 text-decoration-none">
                     <img src="{{ asset('build/img/header-logo.png') }}" alt="Logo" class="img-fluid" style="max-height: 60px;">
@@ -28,7 +28,7 @@
                 </div>
             </div>
 
-            <!-- Quick Links -->
+            
             <div class="col-lg-2 col-md-6">
                 <h5 class="text-white fw-bold mb-4">{{ 'footer.quickLinks'|trans }}</h5>
                 <ul class="list-unstyled d-flex flex-column gap-2 small footer-links">
@@ -39,7 +39,7 @@
                 </ul>
             </div>
 
-            <!-- Services -->
+            
             <div class="col-lg-3">
                 <h5 class="text-white fw-bold mb-4">{{ 'footer.ourServices'|trans }}</h5>
                 <ul class="list-unstyled d-flex flex-column gap-2 small footer-links">
@@ -50,7 +50,7 @@
                 </ul>
             </div>
 
-            <!-- Contact & Newsletter -->
+            
             <div class="col-lg-3 col-md-6">
                 <h5 class="text-white fw-bold mb-4">{{ 'footer.stayHealthy'|trans }}</h5>
                 <div class="newsletter-form mb-4">
@@ -126,7 +126,7 @@
         </div>
     </div>
 
-    <!-- Bottom Bar -->
+    
     <div class="container">
         <div class="mt-5 pt-4 border-top border-secondary border-opacity-10 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
             <p class="mb-0 small">© {{ "now"|date("Y") }} <strong class="text-white">eclinic.</strong> All Rights Reserved.</p>

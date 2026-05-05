@@ -38,7 +38,7 @@ class ReviewController extends AbstractController
 
         $this->addFlash('success', 'Thank you for your feedback!');
         
-        // Redirect back to profile or wherever they came from
+        
         return $this->redirectToRoute('app_profile');
     }
 }

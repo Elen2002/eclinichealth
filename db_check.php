@@ -14,7 +14,7 @@ echo "URL: $url\n";
 
 try {
     $conn = @pg_connect(str_replace(['postgresql://', ':'], ['host=localhost port=', ' user='], explode('@', $url)[0]));
-    // Wait, parsing the URL is complex. I'll just try to boot the kernel.
+    
     
     $kernel = new Kernel($_ENV['APP_ENV'], (bool) $_ENV['APP_DEBUG']);
     $kernel->boot();
