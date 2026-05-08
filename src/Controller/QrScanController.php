@@ -12,6 +12,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class QrScanController extends AbstractController
 {
     #[Route('/{_locale}/patient/profile/{id}', name: 'app_patient_profile_view', locale: 'hy')]
+    #[Route('/patient/profile/{id}', name: 'app_patient_profile_view_no_locale')]
     public function viewPatient(User $patient, ConsultationRepository $consultationRepository, \Doctrine\ORM\EntityManagerInterface $entityManager): Response
     {
         $consultations = $consultationRepository->findBy(['patientEmail' => $patient->getEmail()], ['requestedDate' => 'DESC']);
