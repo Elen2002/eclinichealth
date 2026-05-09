@@ -26,6 +26,24 @@
                     <a href="#" class="social-btn rounded-circle transition-all"><i class="bi bi-instagram"></i></a>
                     <a href="#" class="social-btn rounded-circle transition-all"><i class="bi bi-linkedin"></i></a>
                 </div>
+
+                <div class="mt-4 pt-2">
+                    <h6 class="text-white fw-bold mb-3">
+                        {% if locale == 'hy' %}
+                            Ներբեռնեք հավելվածը
+                        {% else %}
+                            Get the Mobile App
+                        {% endif %}
+                    </h6>
+                    <a href="/apk/ech-mobile.apk" class="btn rounded-pill d-inline-flex align-items-center gap-3 text-white transition-all apk-download-btn" 
+                       style="padding: 10px 20px; text-decoration: none;">
+                        <i class="bi bi-android2" style="font-size: 1.6rem; color: #3DDC84;"></i>
+                        <div class="text-start">
+                            <span style="font-size: 0.7rem; display: block; opacity: 0.7; text-transform: uppercase; letter-spacing: 0.5px;">{% if locale == 'hy' %}Ներբեռնեք{% else %}Download For{% endif %}</span>
+                            <span style="font-size: 1rem; font-weight: 700; display: block;">Android APK</span>
+                        </div>
+                    </a>
+                </div>
             </div>
 
             
@@ -66,6 +84,21 @@
                 </div>
 
                 <style>
+                    .apk-download-btn {
+                        background: rgba(255, 255, 255, 0.03) !important;
+                        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                        backdrop-filter: blur(10px);
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+                    .apk-download-btn:hover {
+                        background: linear-gradient(135deg, #00B4DB 0%, #0083B0 100%) !important;
+                        border-color: transparent !important;
+                        transform: translateY(-3px);
+                        box-shadow: 0 8px 20px rgba(0, 180, 219, 0.3) !important;
+                    }
+                    .apk-download-btn:active {
+                        transform: translateY(0);
+                    }
                     .newsletter-input-standalone:focus {
                         background: rgba(255,255,255,0.08) !important;
                         border-color: rgba(146, 191, 231, 0.4) !important;

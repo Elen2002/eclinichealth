@@ -203,7 +203,7 @@ export const translations = {
         'home.hero.cta': 'Ամրագրել հիմա',
 
         'home.howItWorks.subtitle': 'Անխափան Աշխատանք',
-        'home.howItWorks.title': 'Կապակցված Խնամքի Օղակ',
+        'home.howItWorks.title': 'Ժամանակակից և Տեխնոլոգիական գործառնական առավելություններ',
         'home.howItWorks.desc': 'Անիմացիոն էկոհամակարգ՝ կապելով ձեզ ԱԻ հնարավորությունների և մասնագետների հետ:',
         'home.howItWorks.patient': 'Պացիենտի Հավելված',
         'home.howItWorks.patientDesc': 'Բջջային հավելված ամրագրումների և հետևման համար:',
