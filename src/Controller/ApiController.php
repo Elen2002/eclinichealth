@@ -354,6 +354,7 @@ class ApiController extends AbstractController
             'department' => $d->getDepartment() ? $d->getDepartment()->getName() : null,
             'departmentId' => $d->getDepartment() ? $d->getDepartment()->getId() : null,
             'image' => $d->getUser() && $d->getUser()->getAvatar() ? $d->getUser()->getAvatar() : $uploadFileService->getImage(Doctor::class, $d->getId(), '223x200'),
+            'avatar' => $d->getUser() && $d->getUser()->getAvatar() ? $d->getUser()->getAvatar() : $uploadFileService->getImage(Doctor::class, $d->getId(), '223x200'),
         ], $hospital->getDoctors()->toArray());
 
         return $this->json($data);
