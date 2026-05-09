@@ -737,7 +737,7 @@ class ApiController extends AbstractController
     private function generateUserQrCode(User $user, EntityManagerInterface $entityManager): string
     {
         try {
-            $qrContent = 'USER_ID:' . $user->getId() . '|EMAIL:' . $user->getEmail();
+            $qrContent = $this->generateUrl('app_patient_profile_view_no_locale', ['id' => $user->getId()], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL);
             $qrCode = QrCode::create($qrContent)
                 ->setSize(300)
                 ->setMargin(10);
